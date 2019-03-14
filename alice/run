@@ -1,0 +1,18 @@
+#!/bin/bash
+set -ex
+
+b1="bitcoin-cli -datadir=/config"
+
+function clean {
+  $b1 stop
+}
+
+trap clean SIGINT
+
+bitcoind -datadir=/config &
+liquidd  -datadir=/config
+
+sleep 10
+
+$b1 generate 200
+wait $!

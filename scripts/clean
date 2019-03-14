@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -ex
+
+PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+
+pushd $PARENT_PATH
+
+docker-compose down && \
+docker volume rm nigiri_daemon-config && \
+docker rmi nigiri_electrs nigiri_alice
+
+popd

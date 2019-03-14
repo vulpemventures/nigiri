@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+function clean {
+  kill -9 $(pidof electrs)
+}
+trap clean SIGINT
+
+/build/electrs -vvvv --network regtest --daemon-dir /config --daemon-rpc-addr="10.10.0.10:19001" --cookie="admin1:123" --http-addr="0.0.0.0:3002" &
+wait $!
