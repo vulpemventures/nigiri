@@ -1,4 +1,4 @@
-# Nigiri Bitcoin
+# 🍣 Nigiri Bitcoin
 
 A dockerized environment hosting a bitcoin and liquid daemons in regtest network with an electrum server that indexes and keeps track of all UTXOs.
 
