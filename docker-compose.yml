@@ -4,8 +4,6 @@ services:
     build: 
       context: .
       dockerfile: bitcoin/Dockerfile
-    ports:
-      - 19001:19001
     networks:
       local:
         ipv4_address: 10.10.0.10
@@ -15,8 +13,6 @@ services:
     build: 
       context: .
       dockerfile: liquid/Dockerfile
-    ports:
-      - 18884:18884
     networks:
       local:
         ipv4_address: 10.10.0.11
@@ -26,8 +22,6 @@ services:
     build:
       context: .
       dockerfile: electrs/Dockerfile
-    ports:
-      - 3002:3002
     networks:
       local:
         ipv4_address: 10.10.0.12
