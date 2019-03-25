@@ -34,6 +34,15 @@ services:
     volumes:
       - bitcoin-config:/config
       - liquid-config:/liquidconfig
+  chopsticks:
+    build:
+      context: .
+      dockerfile: chopsticks/Dockerfile
+    ports:
+      - 3000:3000
+    networks:
+      local:
+        ipv4_address: 10.10.0.13
 
 networks:
   local:
