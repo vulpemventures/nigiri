@@ -1,17 +1,27 @@
 version: '3'
 services:
-  alice:
+  bitcoin:
     build: 
       context: .
-      dockerfile: alice/Dockerfile
+      dockerfile: bitcoin/Dockerfile
     ports:
       - 19001:19001
-      - 18884:18884
     networks:
       local:
         ipv4_address: 10.10.0.10
     volumes:
-      - daemon-config:/config
+      - bitcoin-config:/config
+  liquid:
+    build: 
+      context: .
+      dockerfile: liquid/Dockerfile
+    ports:
+      - 18884:18884
+    networks:
+      local:
+        ipv4_address: 10.10.0.11
+    volumes:
+      - liquid-config:/config
   electrs:
     build:
       context: .
@@ -20,9 +30,10 @@ services:
       - 3002:3002
     networks:
       local:
-        ipv4_address: 10.10.0.11
+        ipv4_address: 10.10.0.12
     volumes:
-      - daemon-config:/config
+      - bitcoin-config:/config
+      - liquid-config:/liquidconfig
 
 networks:
   local:
@@ -32,4 +43,5 @@ networks:
         - subnet: 10.10.0.0/24
 
 volumes:
-  daemon-config:
+  bitcoin-config:
+  liquid-config:
