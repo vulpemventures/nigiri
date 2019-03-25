@@ -41,7 +41,7 @@ This will start 3 containers that run the following services respectevely:
 
 * bitcoin and liquid daemons (regtest)
 * electrs REST server
-* faucet REST server & router (TODO)
+* API passthrough with optional faucet and mining capabilities ([nigiri-chopsticks](https://github.com/vulpemventures/nigiri-chopsticks))
 
 Stop nigiri:
 
@@ -67,8 +67,8 @@ If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, chec
 
 ## Roadmap
 
-- [ ] router
+- [x] router
 - [x] electrum server
 - [x] bitcoin daemon
 - [x] liquid daemon
-- [ ] faucet
+- [x] faucet
