@@ -1,0 +1,10 @@
+#!/bin/bash
+set -ex
+
+PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+
+pushd $PARENT_PATH
+dep ensure -v
+
+go generate ./...
+popd

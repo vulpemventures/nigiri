@@ -15,53 +15,65 @@ A dockerized environment hosting a bitcoin and liquid daemons in regtest network
 
 ## Directions
 
-| Preparation Time: 20 min  | Cooking Difficulty: Easy |
+| Preparation Time: 5 min  | Cooking Difficulty: Easy |
 | --- | --- |
 
 Clone the repo:
 
 ```bash
-$ git clone https://github.com/vulpemventures/nigiri.git && cd nigiri
+$ git clone https://github.com/vulpemventures/nigiri.git
 ```
 
-Create and start nigiri (only the first time or after cleaning):
+Enter project directory and install dependencies:
 
 ```bash
-$ bash scripts/create
+nigiri $ bash scripts/install
+```
+
+Build binary (Mac version):
+```
+nigiri $ bash scripts/build darwin amd64
 ```
 
 At the moment bitcoind, liquidd and electrs are started on *regtest* network.
 
-Start nigiri:
+Initialize nigiri:
 
 ```bash
-$ bash scripts/start
+nigiri/build $ nigiri-linux-amd64 init
 ```
 
-This will start 4 containers that run the following services respectevely:
+Initialize nigiri configuation file at at path `~/.nigiri/nigiri.config.json`.
 
-* bitcoin daemon (regtest)
-* liquid daemon
+Create and run nigiri environment:
+
+```bash
+nigiri/build $ nigiri-linux-amd64 create
+```
+
+This will start 3 containers for `regtest` bitcoin network that run the following services respectevely:
+
+* bitcoin daemon
 * electrs REST server
 * API passthrough with optional faucet and mining capabilities (nigiri-chopsticks)
 
-Stop nigiri:
+After command has finished, nigiri start listening at `http://localhost:3000/`.
+
+Start/Stop nigiri:
 
 ```bash
-$ bash scripts/stop
+nigiri/build $ nigiri-linux-amd64 start|stop
 ```
 
-Stop and uninstall nigiri:
+Stop and delete nigiri environment:
 
 ```bash
-$ bash scripts/clean
+nigiri/build $ nigiri-linux-amd64 delete
 ```
-
-When setup is completed, you can call any endpoint at `http://localhost:3000/`.
 
 ## Nutrition Facts
 
-The [list](https://github.com/blockstream/esplora/blob/master/API.md) of all available endpoints has been extended with one more `POST /send` which expects a body `{ "address": <receiving_address> }`
+The [list](https://github.com/blockstream/esplora/blob/master/API.md) of all available endpoints can be extended with one more `POST /faucet` which expects a body `{ "address": <receiving_address> }` by enabling faucet.
 
 ## Footnotes
 
