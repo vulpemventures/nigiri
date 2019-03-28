@@ -11,6 +11,7 @@ A dockerized environment hosting a bitcoin and liquid daemons in regtest network
 * [Bitcoin daemon](https://bitcoin.org/en/bitcoin-core/)
 * [Liquid daemon](https://blockstream.com/liquid/)
 * [Electrum server](https://github.com/Blockstream/electrs)
+* [Chopsticks](https://github.com/vulpemventures/nigiri-chopsticks)
 
 ## Directions
 
@@ -37,11 +38,12 @@ Start nigiri:
 $ bash scripts/start
 ```
 
-This will start 3 containers that run the following services respectevely:
+This will start 4 containers that run the following services respectevely:
 
-* bitcoin and liquid daemons (regtest)
+* bitcoin daemon (regtest)
+* liquid daemon
 * electrs REST server
-* faucet REST server & router (TODO)
+* API passthrough with optional faucet and mining capabilities (nigiri-chopsticks)
 
 Stop nigiri:
 
@@ -67,8 +69,8 @@ If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, chec
 
 ## Roadmap
 
-- [ ] router
+- [x] router
 - [x] electrum server
 - [x] bitcoin daemon
 - [x] liquid daemon
-- [ ] faucet
+- [x] faucet

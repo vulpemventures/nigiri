@@ -10,7 +10,6 @@ function clean {
 trap clean SIGINT
 
 bitcoind -datadir=/config &
-liquidd  -datadir=/config
 
 sleep 10
 

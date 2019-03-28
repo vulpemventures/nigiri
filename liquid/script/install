@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+LATEST_VERSION=$(curl --silent "https://api.github.com/repos/blockstream/liquid/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+VERSION_NAME=$(echo $LATEST_VERSION | sed '1,/\./s/\./\-/')
+
+wget -qO- https://github.com/Blockstream/liquid/releases/download/$LATEST_VERSION/$VERSION_NAME-x86_64-linux-gnu.tar.gz | tar xvz -C /tmp
+
+mv /tmp/$VERSION_NAME/bin/liquidd /usr/bin/liquidd
+mv /tmp/$VERSION_NAME/bin/liquid-cli /usr/bin/liquid-cli
+mv /tmp/$VERSION_NAME/bin/liquid-tx /usr/bin/liquid-tx
+
+rm -rf /tmp
