@@ -34,6 +34,7 @@ func init() {
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
 	RootCmd.AddCommand(DeleteCmd)
+	RootCmd.AddCommand(VersionCmd)
 
 	viper := config.Viper()
 	viper.BindPFlag(config.Network, RootCmd.PersistentFlags().Lookup("network"))
