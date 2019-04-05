@@ -8,14 +8,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/vulpemventures/nigiri/cli/builder"
 	"github.com/vulpemventures/nigiri/cli/config"
-	"github.com/vulpemventures/nigiri/cli/helpers"
 )
-
-var composeBuilder = map[string]func(path string) builder.ComposeBuilder{
-	"regtest": helpers.NewRegtestBuilder,
-}
 
 var CreateCmd = &cobra.Command{
 	Use:    "create",
