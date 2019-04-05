@@ -1,6 +1,6 @@
 # 🍣 Nigiri Bitcoin
 
-A dockerized environment hosting a bitcoin and liquid daemons in regtest network with an electrum server that indexes and keeps track of all UTXOs.
+Nigiri provides a fully dockerized ready-to-use bitcoin environment thats supports different networks and chains.
 
 ## Utensils
 
@@ -15,53 +15,63 @@ A dockerized environment hosting a bitcoin and liquid daemons in regtest network
 
 ## Directions
 
-| Preparation Time: 20 min  | Cooking Difficulty: Easy |
+| Preparation Time: 5 min  | Cooking Difficulty: Easy |
 | --- | --- |
 
 Clone the repo:
 
 ```bash
-$ git clone https://github.com/vulpemventures/nigiri.git && cd nigiri
+$ git clone https://github.com/vulpemventures/nigiri.git
 ```
 
-Create and start nigiri (only the first time or after cleaning):
+Enter project directory and install dependencies:
 
 ```bash
-$ bash scripts/create
+nigiri $ bash scripts/install
+```
+
+Build binary (Mac version):
+```
+nigiri $ bash scripts/build darwin amd64
 ```
 
 At the moment bitcoind, liquidd and electrs are started on *regtest* network.
 
-Start nigiri:
+Create nigiri environment:
 
 ```bash
-$ bash scripts/start
+nigiri/build $ nigiri-linux-amd64 create
 ```
 
-This will start 4 containers that run the following services respectevely:
+Nigiri uses the default directory `~/.nigiri` to store the configuration file and docker stuff.
+To set a custom directory use the `--datadir` flag, but do not forget to always pass this flag to other commands, just as you do with your `bitcoind`.  
 
-* bitcoin daemon (regtest)
-* liquid daemon
+The environment will start with 3 containers for `regtest` bitcoin network that run the following services respectevely:
+
+* bitcoin daemon
 * electrs REST server
 * API passthrough with optional faucet and mining capabilities (nigiri-chopsticks)
 
-Stop nigiri:
+Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer
+are also started when passing this flag.
+
+Start/Stop nigiri:
 
 ```bash
-$ bash scripts/stop
+nigiri/build $ nigiri-linux-amd64 start|stop
 ```
 
-Stop and uninstall nigiri:
+Stop and delete nigiri environment:
 
 ```bash
-$ bash scripts/clean
+nigiri/build $ nigiri-linux-amd64 delete
 ```
 
-When setup is completed, you can call any endpoint at `http://localhost:3000/`.
+This command stops and deletes any active contained and deletes the configuration file and all the Docker-generated files and directories.
 
 ## Nutrition Facts
 
-The [list](https://github.com/blockstream/esplora/blob/master/API.md) of all available endpoints has been extended with one more `POST /send` which expects a body `{ "address": <receiving_address> }`
+The [list](https://github.com/blockstream/esplora/blob/master/API.md) of all available endpoints can be extended with one more `POST /faucet` which expects a body `{ "address": <receiving_address> }` by enabling faucet.
 
 ## Footnotes
 
