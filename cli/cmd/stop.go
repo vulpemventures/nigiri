@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -17,12 +16,13 @@ var StopCmd = &cobra.Command{
 }
 
 func stop(cmd *cobra.Command, args []string) {
-	composePath := filepath.Join(getComposePath(), "docker-compose.yml")
-	cmdStart := exec.Command("docker-compose", "-f", composePath, "stop")
-	cmdStart.Stdout = os.Stdout
-	cmdStart.Stderr = os.Stderr
+	composePath := getComposePath()
 
-	if err := cmdStart.Run(); err != nil {
+	bashCmd := exec.Command("docker-compose", "-f", composePath, "stop")
+	bashCmd.Stdout = os.Stdout
+	bashCmd.Stderr = os.Stderr
+
+	if err := bashCmd.Run(); err != nil {
 		log.WithError(err).Fatal("Error while stopping Docker containers:")
 	}
 }

@@ -11,25 +11,24 @@ import (
 )
 
 var (
-	flagNetwork string
-	flagDatadir string
-	flagConfig  string
+	flagDatadir      string
+	flagNetwork      string
+	flagAttachLiquid bool
 )
 
 var RootCmd = &cobra.Command{
 	Use:   "nigiri",
 	Short: "Nigiri lets you manage a full dockerized bitcoin environment",
-	Long:  "A dockerized environment with a bitcoin and liquid node + block explorer powered by an electrum server",
+	Long:  "Nigiri lets you create your dockerized environment with a bitcoin and optionally a liquid node + block explorer powered by an electrum server",
 }
 
 func init() {
-	home, _ := homedir.Expand("~")
-	defaultDir := filepath.Join(home, ".nigiri")
+	defaultDir := getDefaultDir()
 
-	RootCmd.PersistentFlags().StringVar(&flagNetwork, "network", "regtest", "Set bitcoin network for containers' services - regtest only for now")
-	InitCmd.PersistentFlags().StringVar(&flagDatadir, "datadir", defaultDir, "Set directory for docker containers")
+	RootCmd.PersistentFlags().StringVar(&flagDatadir, "datadir", defaultDir, "Set directory for config file and docker stuff")
+	CreateCmd.PersistentFlags().StringVar(&flagNetwork, "network", "regtest", "Set network for containers' services - regtest only for now")
+	CreateCmd.PersistentFlags().BoolVar(&flagAttachLiquid, "liquid", false, "Add liquid sidechain to bitcoin environment")
 
-	RootCmd.AddCommand(InitCmd)
 	RootCmd.AddCommand(CreateCmd)
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
@@ -37,11 +36,17 @@ func init() {
 	RootCmd.AddCommand(VersionCmd)
 
 	viper := config.Viper()
-	viper.BindPFlag(config.Network, RootCmd.PersistentFlags().Lookup("network"))
-	viper.BindPFlag(config.Datadir, InitCmd.PersistentFlags().Lookup("datadir"))
+	viper.BindPFlag(config.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
+	viper.BindPFlag(config.Network, CreateCmd.PersistentFlags().Lookup("network"))
+	viper.BindPFlag(config.AttachLiquid, CreateCmd.PersistentFlags().Lookup("liquid"))
 
 	cobra.OnInitialize(func() {
 		log.SetOutput(os.Stdout)
 		log.SetLevel(log.InfoLevel)
 	})
+}
+
+func getDefaultDir() string {
+	home, _ := homedir.Expand("~")
+	return filepath.Join(home, ".nigiri")
 }

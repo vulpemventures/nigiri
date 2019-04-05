@@ -18,7 +18,8 @@ var VersionCmd = &cobra.Command{
 		os.Exit(0)
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if err := config.ReadFromFile(); err != nil {
+		datadir, _ := cmd.Flags().GetString("datadir")
+		if err := config.ReadFromFile(datadir); err != nil {
 			log.Fatal(err)
 		}
 	},

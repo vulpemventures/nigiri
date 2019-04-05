@@ -3,14 +3,16 @@ package config
 import (
 	"path/filepath"
 
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 const (
-	Datadir  = "datadir"
-	Network  = "network"
-	Filename = "nigiri.config.json"
+	Datadir      = "datadir"
+	Network      = "network"
+	Filename     = "nigiri.config.json"
+	AttachLiquid = "attachLiquid"
+	Version      = "version"
 )
 
 var vip *viper.Viper
@@ -24,16 +26,29 @@ func init() {
 	defaults := viper.New()
 	newDefaultConfig(defaults)
 	setConfigFromDefaults(vip, defaults)
-	vip.SetConfigFile(GetFullPath())
+	// vip.SetConfigFile(GetFullPath())
 }
 
 func Viper() *viper.Viper {
 	return vip
 }
 
-func ReadFromFile() error {
-	vip.AddConfigPath(GetFullPath())
+func ReadFromFile(path string) error {
+	vip.SetConfigFile(filepath.Join(path, Filename))
 	return vip.ReadInConfig()
+}
+
+func WriteConfig(path string) error {
+	vip.SetConfigFile(path)
+	return vip.WriteConfig()
+}
+
+func GetString(str string) string {
+	return vip.GetString(str)
+}
+
+func GetBool(str string) bool {
+	return vip.GetBool(str)
 }
 
 func GetPath() string {
@@ -41,15 +56,11 @@ func GetPath() string {
 	return filepath.Join(home, ".nigiri")
 }
 
-func GetFullPath() string {
-	home, _ := homedir.Expand("~")
-	return filepath.Join(home, ".nigiri", Filename)
-}
-
 func newDefaultConfig(v *viper.Viper) {
-	v.SetDefault("datadir", GetPath())
-	v.SetDefault("network", "regtest")
-	v.SetDefault("version", "0.1.0")
+	v.SetDefault(Datadir, GetPath())
+	v.SetDefault(Network, "regtest")
+	v.SetDefault(AttachLiquid, false)
+	v.SetDefault(Version, "0.1.0")
 }
 
 func setConfigFromDefaults(v *viper.Viper, d *viper.Viper) {

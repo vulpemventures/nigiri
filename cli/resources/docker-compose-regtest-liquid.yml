@@ -1,0 +1,78 @@
+version: '3'
+services:
+  bitcoin:
+    image: vulpemventures/bitcoin:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.10
+    volumes:
+      - ./volumes/liquidregtest/config/:/config
+  liquid:
+    image: vulpemventures/liquid:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.11
+    volumes:
+      - ./volumes/liquidregtest/liquid-config/:/config
+  electrs:
+    image: vulpemventures/electrs:latest
+    entrypoint:
+      - /build/electrs
+    command:
+      - -vvvv
+      - --network
+      - regtest
+      - --daemon-dir
+      - /config
+      - --daemon-rpc-addr
+      - 10.10.0.10:19001
+      - --cookie
+      - admin1:123
+      - --http-addr
+      - 0.0.0.0:3002
+    networks:
+      local:
+        ipv4_address: 10.10.0.12
+    ports:
+      - 3002:3002
+    volumes:
+      - ./volumes/liquidregtest/config/:/config
+  electrs-liquid:
+    image: vulpemventures/electrs-liquid:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.13
+    entrypoint:
+      - /build/electrs
+    command:
+      - -vvvv
+      - --network
+      - liquidregtest
+      - --daemon-dir
+      - /config
+      - --daemon-rpc-addr
+      - 10.10.0.11:18884
+      - --cookie
+      - admin1:123
+      - --http-addr
+      - 0.0.0.0:3002
+    volumes:
+      - ./volumes/liquidregtest/liquid-config/:/config
+    ports:
+      - 3022:3002
+  # chopsticks:
+  # 	build:
+  # 		context: chopsticks/
+  #		dockerfile: Dockerfile
+  # 	ports:
+  # 		- 3000:3000
+  # 	networks:
+  # 		local:
+  # 			ipv4_address: 10.10.0.13
+
+networks:
+  local:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.0.0/24
