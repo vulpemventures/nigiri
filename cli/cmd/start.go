@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -78,13 +77,13 @@ func start(cmd *cobra.Command, args []string) error {
 	return bashCmd.Run()
 }
 
-var images = []string{
-	"vulpemventures/electrs-liquid:latest",
-	"vulpemventures/electrs:latest",
-	"vulpemventures/esplora:latest",
-	"vulpemventures/liquid:latest",
-	"vulpemventures/bitcoin:latest",
-	"vulpemventures/esplora-liquid:latest",
+var images = map[string]bool{
+	"vulpemventures/electrs-liquid:latest": true,
+	"vulpemventures/electrs:latest":        true,
+	"vulpemventures/esplora:latest":        true,
+	"vulpemventures/liquid:latest":         true,
+	"vulpemventures/bitcoin:latest":        true,
+	"vulpemventures/esplora-liquid:latest": true,
 }
 
 func nigiriExists(listAll bool) (bool, error) {
@@ -98,10 +97,8 @@ func nigiriExists(listAll bool) (bool, error) {
 		return false, err
 	}
 
-	sort.Strings(images)
 	for _, container := range containers {
-		i := sort.SearchStrings(images, container.Image)
-		if i < len(images) {
+		if images[container.Image] {
 			return true, nil
 		}
 	}
