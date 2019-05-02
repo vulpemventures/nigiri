@@ -27,10 +27,14 @@ services:
       - admin1:123
       - --http-addr
       - 0.0.0.0:3002
+      - --cors
+      - "*"
     networks:
       local:
-        ipv4_address: 10.10.0.12
+        ipv4_address: 10.10.0.11
     links:
+      - bitcoin
+    depends_on:
       - bitcoin
     ports:
       - 3002:3002
@@ -41,18 +45,38 @@ services:
     image: vulpemventures/esplora:latest
     networks:
       local:
-        ipv4_address: 10.10.0.13
+        ipv4_address: 10.10.0.12
+    links:
+      - electrs
+    depends_on:
+      - electrs
     ports:
       - 5000:5000
-  # chopsticks:
-  # 	build:
-  # 		context: chopsticks/
-  #		dockerfile: Dockerfile
-  # 	ports:
-  # 		- 3000:3000
-  # 	networks:
-  # 		local:
-  # 			ipv4_address: 10.10.0.13
+  # Chopsticks
+  chopsticks:
+    image: vulpemventures/nigiri-chopsticks
+    entrypoint:
+      - /build/chopsticks
+    command:
+      - --use-faucet
+      - --use-mining
+      - --use-logger
+      - --rpc-addr
+      - 10.10.0.10:19001
+      - --electrs-addr
+      - 10.10.0.11:3002
+      - --addr
+      - 0.0.0.0:3000
+    networks:
+      local:
+        ipv4_address: 10.10.0.13
+    links:
+      - bitcoin
+      - electrs
+    depends_on:
+      - electrs
+    ports:
+      - 3000:3000
 
 networks:
   local:

@@ -42,7 +42,9 @@ services:
       local:
         ipv4_address: 10.10.0.12
     links:
-     - bitcoin
+      - bitcoin
+    depends_on:
+      - bitcoin
     ports:
       - 3002:3002
     volumes:
@@ -70,6 +72,8 @@ services:
         ipv4_address: 10.10.0.13
     links:
       - liquid
+    depends_on:
+      - liquid
     ports:
       - 3022:3002
     volumes:
@@ -80,6 +84,10 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.14
+    links:
+      - electrs
+    depends_on:
+      - electrs
     ports:
       - 5000:5000
   esplora-liquid:
@@ -87,17 +95,63 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.15
+    links:
+      - electrs-liquid
+    depends_on:
+      - electrs-liquid
     ports:
       - 5001:5000
-  # chopsticks:
-  # 	build:
-  # 		context: chopsticks/
-  #		dockerfile: Dockerfile
-  # 	ports:
-  # 		- 3000:3000
-  # 	networks:
-  # 		local:
-  # 			ipv4_address: 10.10.0.13
+  # Chopsticks
+  chopsticks:
+    image: vulpemventures/nigiri-chopsticks
+    entrypoint:
+      - /build/chopsticks
+    command:
+      - --use-faucet
+      - --use-mining
+      - --use-logger
+      - --rpc-addr
+      - 10.10.0.10:19001
+      - --electrs-addr
+      - 10.10.0.12:3002
+      - --addr
+      - 0.0.0.0:3000
+    links:
+      - electrs
+      - bitcoin
+    depends_on:
+      - electrs
+    ports:
+      - 3000:3000
+    networks:
+      local:
+        ipv4_address: 10.10.0.16
+  chopsticks-liquid:
+    image: vulpemventures/nigiri-chopsticks
+    entrypoint:
+      - /build/chopsticks
+    command:
+      - --use-faucet
+      - --use-mining
+      - --use-logger
+      - --rpc-addr
+      - 10.10.0.11:18884
+      - --electrs-addr
+      - 10.10.0.13:3002
+      - --addr
+      - 0.0.0.0:3000
+      - --chain
+      - liquid
+    links:
+      - electrs-liquid
+      - liquid
+    depends_on:
+      - electrs-liquid
+    ports:
+      - 3001:3000
+    networks:
+      local:
+        ipv4_address: 10.10.0.17
 
 networks:
   local:
