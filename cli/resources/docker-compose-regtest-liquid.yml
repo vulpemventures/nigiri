@@ -1,10 +1,13 @@
 version: '3'
 services:
+  # RPC daemons
   bitcoin:
     image: vulpemventures/bitcoin:latest
     networks:
       local:
         ipv4_address: 10.10.0.10
+    ports:
+      - 19001:19001
     volumes:
       - ./volumes/liquidregtest/config/:/config
   liquid:
@@ -12,8 +15,11 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.11
+    ports:
+      - 18884:18884
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
+  # Block explorer REST servers
   electrs:
     image: vulpemventures/electrs:latest
     entrypoint:
@@ -30,18 +36,19 @@ services:
       - admin1:123
       - --http-addr
       - 0.0.0.0:3002
+      - --cors
+      - "*"
     networks:
       local:
         ipv4_address: 10.10.0.12
+    links:
+     - bitcoin
     ports:
       - 3002:3002
     volumes:
       - ./volumes/liquidregtest/config/:/config
   electrs-liquid:
     image: vulpemventures/electrs-liquid:latest
-    networks:
-      local:
-        ipv4_address: 10.10.0.13
     entrypoint:
       - /build/electrs
     command:
@@ -56,10 +63,32 @@ services:
       - admin1:123
       - --http-addr
       - 0.0.0.0:3002
-    volumes:
-      - ./volumes/liquidregtest/liquid-config/:/config
+      - --cors
+      - "*"
+    networks:
+      local:
+        ipv4_address: 10.10.0.13
+    links:
+      - liquid
     ports:
       - 3022:3002
+    volumes:
+      - ./volumes/liquidregtest/liquid-config/:/config
+  # Block explorer frontends
+  esplora:
+    image: vulpemventures/esplora:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.14
+    ports:
+      - 5000:5000
+  esplora-liquid:
+    image: vulpemventures/esplora-liquid:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.15
+    ports:
+      - 5001:5000
   # chopsticks:
   # 	build:
   # 		context: chopsticks/

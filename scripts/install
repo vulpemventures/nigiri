@@ -7,4 +7,7 @@ pushd $PARENT_PATH
 dep ensure -v
 
 go generate ./...
+
+mkdir -p $HOME/.nigiri
+cp -R cli/resources $HOME/.nigiri
 popd

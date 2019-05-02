@@ -60,7 +60,6 @@ func newDefaultConfig(v *viper.Viper) {
 	v.SetDefault(Datadir, GetPath())
 	v.SetDefault(Network, "regtest")
 	v.SetDefault(AttachLiquid, false)
-	v.SetDefault(Version, "0.1.0")
 }
 
 func setConfigFromDefaults(v *viper.Viper, d *viper.Viper) {

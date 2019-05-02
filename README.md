@@ -30,6 +30,8 @@ Enter project directory and install dependencies:
 nigiri $ bash scripts/install
 ```
 
+This will create `~/.nigiri` copying there the `cli/resources/` directory.
+
 Build binary (Mac version):
 ```
 nigiri $ bash scripts/build darwin amd64
@@ -37,10 +39,10 @@ nigiri $ bash scripts/build darwin amd64
 
 At the moment bitcoind, liquidd and electrs are started on *regtest* network.
 
-Create nigiri environment:
+Start nigiri:
 
 ```bash
-nigiri/build $ nigiri-linux-amd64 create
+nigiri/build $ nigiri-linux-amd64 start
 ```
 
 Nigiri uses the default directory `~/.nigiri` to store the configuration file and docker stuff.
@@ -55,19 +57,13 @@ The environment will start with 3 containers for `regtest` bitcoin network that 
 Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer
 are also started when passing this flag.
 
-Start/Stop nigiri:
+Stop nigiri:
 
 ```bash
-nigiri/build $ nigiri-linux-amd64 start|stop
+nigiri/build $ nigiri-linux-amd64 stop
 ```
 
-Stop and delete nigiri environment:
-
-```bash
-nigiri/build $ nigiri-linux-amd64 delete
-```
-
-This command stops and deletes any active contained and deletes the configuration file and all the Docker-generated files and directories.
+Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
 
 ## Nutrition Facts
 
@@ -83,4 +79,5 @@ If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, chec
 - [x] electrum server
 - [x] bitcoin daemon
 - [x] liquid daemon
-- [x] faucet
+- [x] block explorer UI
+- [] regtest faucet

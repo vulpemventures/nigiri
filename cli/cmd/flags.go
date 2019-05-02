@@ -13,32 +13,32 @@ import (
 var (
 	flagDatadir      string
 	flagNetwork      string
+	flagDelete       bool
 	flagAttachLiquid bool
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "nigiri",
-	Short: "Nigiri lets you manage a full dockerized bitcoin environment",
-	Long:  "Nigiri lets you create your dockerized environment with a bitcoin and optionally a liquid node + block explorer powered by an electrum server",
+	Use:     "nigiri",
+	Short:   "Nigiri lets you manage a full dockerized bitcoin environment",
+	Long:    "Nigiri lets you create your dockerized environment with a bitcoin and optionally a liquid node + block explorer powered by an electrum server for every network",
+	Version: "0.1.0",
 }
 
 func init() {
 	defaultDir := getDefaultDir()
 
-	RootCmd.PersistentFlags().StringVar(&flagDatadir, "datadir", defaultDir, "Set directory for config file and docker stuff")
-	CreateCmd.PersistentFlags().StringVar(&flagNetwork, "network", "regtest", "Set network for containers' services - regtest only for now")
-	CreateCmd.PersistentFlags().BoolVar(&flagAttachLiquid, "liquid", false, "Add liquid sidechain to bitcoin environment")
+	RootCmd.PersistentFlags().StringVar(&flagDatadir, "datadir", defaultDir, "Set nigiri default directory")
+	StartCmd.PersistentFlags().StringVar(&flagNetwork, "network", "regtest", "Set bitcoin network - regtest only for now")
+	StartCmd.PersistentFlags().BoolVar(&flagAttachLiquid, "liquid", false, "Enable liquid sidechain")
+	StopCmd.PersistentFlags().BoolVar(&flagDelete, "delete", false, "Stop and delete nigiri")
 
-	RootCmd.AddCommand(CreateCmd)
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
-	RootCmd.AddCommand(DeleteCmd)
-	RootCmd.AddCommand(VersionCmd)
 
 	viper := config.Viper()
 	viper.BindPFlag(config.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
-	viper.BindPFlag(config.Network, CreateCmd.PersistentFlags().Lookup("network"))
-	viper.BindPFlag(config.AttachLiquid, CreateCmd.PersistentFlags().Lookup("liquid"))
+	viper.BindPFlag(config.Network, StartCmd.PersistentFlags().Lookup("network"))
+	viper.BindPFlag(config.AttachLiquid, StartCmd.PersistentFlags().Lookup("liquid"))
 
 	cobra.OnInitialize(func() {
 		log.SetOutput(os.Stdout)
