@@ -1,6 +1,6 @@
 # 🍣 Nigiri Bitcoin
 
-Nigiri provides a fully dockerized ready-to-use bitcoin environment thats supports different networks and chains.
+Nigiri provides a selection of `docker-compose` batteries included to have ready-to-use bitcoin environment thats supports different networks and sidechains.
 
 ## Utensils
 
