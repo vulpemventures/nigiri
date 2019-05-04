@@ -27,22 +27,24 @@ $ git clone https://github.com/vulpemventures/nigiri.git
 Enter project directory and install dependencies:
 
 ```bash
-nigiri $ bash scripts/install
+$ bash scripts/install
 ```
 
 This will create `~/.nigiri` copying there the `cli/resources/` directory.
 
 Build binary (Mac version):
 ```
-nigiri $ bash scripts/build darwin amd64
+$ bash scripts/build darwin amd64
 ```
 
-At the moment bitcoind, liquidd and electrs are started on *regtest* network.
+## Tasting
 
-Start nigiri:
+At the moment bitcoind, liquidd and electrs are started on *regtest* network. *testnet* and *mainnet* compose files will be released soon.
+
+* Start nigiri:
 
 ```bash
-nigiri/build $ nigiri-linux-amd64 start
+$ nigiri start
 ```
 
 Nigiri uses the default directory `~/.nigiri` to store the configuration file and docker stuff.
@@ -60,7 +62,7 @@ are also started when passing this flag.
 Stop nigiri:
 
 ```bash
-nigiri/build $ nigiri-linux-amd64 stop
+$ nigiri stop
 ```
 
 Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
