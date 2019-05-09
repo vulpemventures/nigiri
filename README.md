@@ -2,6 +2,12 @@
 
 Nigiri provides a selection of `docker-compose` batteries included to have ready-to-use bitcoin environment thats supports different networks and sidechains.
 
+No time to make a Nigiri yourself?
+
+```
+curl getnigiri.vulpem.com | bash
+``` 
+
 ## Utensils
 
 * [Docker (compose)](https://docs.docker.com/compose/)
