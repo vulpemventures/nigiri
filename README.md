@@ -5,7 +5,7 @@ Nigiri provides a selection of `docker-compose` batteries included to have ready
 No time to make a Nigiri yourself?
 
 ```
-curl getnigiri.vulpem.com | bash
+$ curl getnigiri.vulpem.com | bash
 ``` 
 
 ## Utensils
@@ -17,7 +17,7 @@ curl getnigiri.vulpem.com | bash
 * [Bitcoin daemon](https://bitcoin.org/en/bitcoin-core/)
 * [Liquid daemon](https://blockstream.com/liquid/)
 * [Electrum server](https://github.com/Blockstream/electrs)
-* [Chopsticks](https://github.com/vulpemventures/nigiri-chopsticks)
+* [Nigiri Chopsticks](https://github.com/vulpemventures/nigiri-chopsticks)
 
 ## Directions
 
@@ -47,31 +47,27 @@ $ bash scripts/build darwin amd64
 
 At the moment bitcoind, liquidd and electrs are started on *regtest* network. *testnet* and *mainnet* compose files will be released soon.
 
+
 * Start nigiri:
 
 ```bash
 $ nigiri start
 ```
 
-Nigiri uses the default directory `~/.nigiri` to store the configuration file and docker stuff.
-To set a custom directory use the `--datadir` flag, but do not forget to always pass this flag to other commands, just as you do with your `bitcoind`.  
-
-The environment will start with 3 containers for `regtest` bitcoin network that run the following services respectevely:
-
-* bitcoin daemon
-* electrs REST server
-* API passthrough with optional faucet and mining capabilities (nigiri-chopsticks)
-
 Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer
 are also started when passing this flag.
 
-Stop nigiri:
+* Stop nigiri:
 
 ```bash
 $ nigiri stop
 ```
 
 Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
+
+
+Nigiri uses the default directory `~/.nigiri` to store configuration files and docker-compose files.
+To set a custom directory use the `--datadir` flag.
 
 ## Nutrition Facts
 
