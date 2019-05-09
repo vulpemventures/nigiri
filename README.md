@@ -8,7 +8,7 @@ No time to make a Nigiri yourself?
 * Download and install `nigiri` command line interface
 
 ```
-$ curl getnigiri.vulpem.com | bash
+$ curl https://getnigiri.vulpem.com | bash
 ```
 
 * Lauch Docker daemon (Mac OSX)
