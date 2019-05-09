@@ -4,9 +4,24 @@ Nigiri provides a selection of `docker-compose` batteries included to have ready
 
 No time to make a Nigiri yourself?
 
+
+* Download and install `nigiri` command line interface
+
 ```
 $ curl getnigiri.vulpem.com | bash
+```
+
+* Lauch Docker Daeomn (Mac OSX)
+
+```
+$ open -a Docker
 ``` 
+
+* Start Bitcoin + Liquid
+
+```
+$ nigiri start
+```
 
 ## Utensils
 
@@ -17,6 +32,7 @@ $ curl getnigiri.vulpem.com | bash
 * [Bitcoin daemon](https://bitcoin.org/en/bitcoin-core/)
 * [Liquid daemon](https://blockstream.com/liquid/)
 * [Electrum server](https://github.com/Blockstream/electrs)
+* [Esplora](https://github.com/Blockstream/esplora)
 * [Nigiri Chopsticks](https://github.com/vulpemventures/nigiri-chopsticks)
 
 ## Directions
@@ -84,4 +100,4 @@ If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, chec
 - [x] bitcoin daemon
 - [x] liquid daemon
 - [x] block explorer UI
-- [] regtest faucet
+- [x] [regtest] faucet
