@@ -11,7 +11,7 @@ No time to make a Nigiri yourself?
 $ curl getnigiri.vulpem.com | bash
 ```
 
-* Lauch Docker Daeomn (Mac OSX)
+* Lauch Docker daemon (Mac OSX)
 
 ```
 $ open -a Docker
@@ -99,5 +99,6 @@ If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, chec
 - [x] electrum server
 - [x] bitcoin daemon
 - [x] liquid daemon
-- [x] block explorer UI
+- [x] esplora UI
 - [x] [regtest] faucet
+- [x] [regtest] auto-mining
