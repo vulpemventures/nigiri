@@ -9,6 +9,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/vulpemventures/nigiri/cli/config"
 )
@@ -38,6 +39,14 @@ func startChecks(cmd *cobra.Command, args []string) error {
 	// scratch datadir if not exists
 	if err := os.MkdirAll(datadir, 0755); err != nil {
 		return err
+	}
+
+	// if datadir is set we must copy the resources directory from ~/.nigiri
+	// to the new one
+	if datadir != getDefaultDir() {
+		if err := copyResources(datadir); err != nil {
+			return err
+		}
 	}
 
 	// if nigiri is already running return error
@@ -74,16 +83,48 @@ func start(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return bashCmd.Run()
+	err = bashCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	log.WithFields(log.Fields{
+		"node":         "localhost:19001",
+		"electrm_RPC":  "localhost:60401",
+		"electrum_API": "localhost:3002",
+		"esplora":      "localhost:5000",
+		"chopsticks":   "localhost:3000",
+	}).Info("Bitcoin services:")
+
+	viper := config.Viper()
+	if viper.GetBool(config.AttachLiquid) {
+		log.WithFields(log.Fields{
+			"node":         "localhost:18884",
+			"electrum_RPC": "localhost:60411",
+			"electrum_API": "localhost:3022",
+			"esplora":      "localhost:5001",
+			"chopsticks":   "localhost:3001",
+		}).Info("Liquid services:")
+	}
+
+	return nil
 }
 
 var images = map[string]bool{
-	"vulpemventures/electrs-liquid:latest": true,
-	"vulpemventures/electrs:latest":        true,
-	"vulpemventures/esplora:latest":        true,
-	"vulpemventures/liquid:latest":         true,
-	"vulpemventures/bitcoin:latest":        true,
-	"vulpemventures/esplora-liquid:latest": true,
+	"vulpemventures/bitcoin:latest":           true,
+	"vulpemventures/liquid:latest":            true,
+	"vulpemventures/electrs:latest":           true,
+	"vulpemventures/electrs-liquid:latest":    true,
+	"vulpemventures/esplora:latest":           true,
+	"vulpemventures/esplora-liquid:latest":    true,
+	"vulpemventures/nigiri-chopsticks:latest": true,
+}
+
+func copyResources(datadir string) error {
+	defaultDatadir := getDefaultDir()
+	cmd := exec.Command("cp", "-R", filepath.Join(defaultDatadir, "resources"), datadir)
+	return cmd.Run()
+
 }
 
 func nigiriExists(listAll bool) (bool, error) {

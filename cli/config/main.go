@@ -26,7 +26,6 @@ func init() {
 	defaults := viper.New()
 	newDefaultConfig(defaults)
 	setConfigFromDefaults(vip, defaults)
-	// vip.SetConfigFile(GetFullPath())
 }
 
 func Viper() *viper.Viper {
