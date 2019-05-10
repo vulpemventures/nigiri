@@ -9,5 +9,5 @@ dep ensure -v
 go generate ./...
 
 mkdir -p $HOME/.nigiri
-cp -R cli/resources $HOME/.nigiri
+cp -R resources $HOME/.nigiri
 popd

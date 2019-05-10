@@ -10,7 +10,7 @@ services:
       - 19001:19001
     volumes:
       - ./volumes/regtest/config/:/config
-  # Block explorer REST server
+  # Block explorer server
   electrs:
     image: vulpemventures/electrs:latest
     entrypoint:
@@ -27,6 +27,8 @@ services:
       - admin1:123
       - --http-addr
       - 0.0.0.0:3002
+      - --electrum-rpc-addr
+      - 0.0.0.0:60401
       - --cors
       - "*"
     networks:
@@ -37,6 +39,7 @@ services:
     depends_on:
       - bitcoin
     ports:
+      - 60401:60401
       - 3002:3002
     volumes:
       - ./volumes/regtest/config/:/config
