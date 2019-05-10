@@ -36,6 +36,8 @@ services:
       - admin1:123
       - --http-addr
       - 0.0.0.0:3002
+      - --electrum-rpc-addr
+      - 0.0.0.0:60401
       - --cors
       - "*"
     networks:
@@ -46,6 +48,7 @@ services:
     depends_on:
       - bitcoin
     ports:
+      - 60401:60401
       - 3002:3002
     volumes:
       - ./volumes/liquidregtest/config/:/config
@@ -65,6 +68,8 @@ services:
       - admin1:123
       - --http-addr
       - 0.0.0.0:3002
+      - --electrum-rpc-addr
+      - 0.0.0.0:60401
       - --cors
       - "*"
     networks:
@@ -75,6 +80,7 @@ services:
     depends_on:
       - liquid
     ports:
+      - 60411:60401
       - 3022:3002
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
