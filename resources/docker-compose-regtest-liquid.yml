@@ -7,7 +7,7 @@ services:
       local:
         ipv4_address: 10.10.0.10
     ports:
-      - 19001:19001
+      - ${BITCOIN_NODE_PORT}:19001
     volumes:
       - ./volumes/liquidregtest/config/:/config
   liquid:
@@ -16,7 +16,7 @@ services:
       local:
         ipv4_address: 10.10.0.11
     ports:
-      - 18884:18884
+      - ${LIQUID_NODE_PORT}:18884
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
   # Block explorer REST servers
@@ -48,7 +48,7 @@ services:
     depends_on:
       - bitcoin
     ports:
-      - 60401:60401
+      - ${BITCOIN_ELECTRS_RPC_PORT}:60401
       - 3002:3002
     volumes:
       - ./volumes/liquidregtest/config/:/config
@@ -80,7 +80,7 @@ services:
     depends_on:
       - liquid
     ports:
-      - 60411:60401
+      - ${LIQUID_ELECTRS_RPC_PORT}:60401
       - 3022:3002
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
@@ -95,7 +95,7 @@ services:
     depends_on:
       - electrs
     ports:
-      - 5000:5000
+      - ${BITCOIN_ESPLORA_PORT}:5000
   esplora-liquid:
     image: vulpemventures/esplora-liquid:latest
     networks:
@@ -106,7 +106,7 @@ services:
     depends_on:
       - electrs-liquid
     ports:
-      - 5001:5000
+      - ${LIQUID_ESPLORA_PORT}:5000
   # Chopsticks
   chopsticks:
     image: vulpemventures/nigiri-chopsticks
@@ -128,7 +128,7 @@ services:
     depends_on:
       - electrs
     ports:
-      - 3000:3000
+      - ${BITCOIN_CHOPSTICKS_PORT}:3000
     networks:
       local:
         ipv4_address: 10.10.0.16
@@ -137,7 +137,7 @@ services:
     entrypoint:
       - /build/chopsticks
     command:
-      - --use-faucet
+      # - --use-faucet
       - --use-mining
       - --use-logger
       - --rpc-addr
@@ -154,7 +154,7 @@ services:
     depends_on:
       - electrs-liquid
     ports:
-      - 3001:3000
+      - ${LIQUID_CHOPSTICKS_PORT}:3000
     networks:
       local:
         ipv4_address: 10.10.0.17

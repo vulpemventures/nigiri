@@ -1,17 +1,21 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 
+	"github.com/vulpemventures/nigiri/cli/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/vulpemventures/nigiri/cli/config"
 )
 
 const listAll = true
@@ -26,6 +30,7 @@ var StartCmd = &cobra.Command{
 func startChecks(cmd *cobra.Command, args []string) error {
 	network, _ := cmd.Flags().GetString("network")
 	datadir, _ := cmd.Flags().GetString("datadir")
+	ports, _ := cmd.Flags().GetString("ports")
 
 	// check flags
 	if !isNetworkOk(network) {
@@ -34,6 +39,18 @@ func startChecks(cmd *cobra.Command, args []string) error {
 
 	if !isDatadirOk(datadir) {
 		return fmt.Errorf("Invalid datadir, it must be an absolute path: %s", datadir)
+	}
+	if !isEnvOk(ports) {
+		return fmt.Errorf("Invalid env JSON, it must contain a \"bitcoin\" object with at least one service specified. It can optionally contain a \"liquid\" object with at least one service specified.\nGot: %s", ports)
+	}
+
+	// if nigiri is already running return error
+	isRunning, err := nigiriIsRunning()
+	if err != nil {
+		return err
+	}
+	if isRunning {
+		return fmt.Errorf("Nigiri is already running, please stop it first")
 	}
 
 	// scratch datadir if not exists
@@ -49,15 +66,6 @@ func startChecks(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// if nigiri is already running return error
-	isRunning, err := nigiriIsRunning()
-	if err != nil {
-		return err
-	}
-	if isRunning {
-		return fmt.Errorf("Nigiri is already running, please stop it first")
-	}
-
 	// if nigiri not exists, we need to write the configuration file and then
 	// read from it to get viper updated, otherwise we just read from it.
 	exists, err := nigiriExistsAndNotRunning()
@@ -67,6 +75,12 @@ func startChecks(cmd *cobra.Command, args []string) error {
 	if !exists {
 		filedir := filepath.Join(datadir, "nigiri.config.json")
 		if err := config.WriteConfig(filedir); err != nil {
+			return err
+		}
+		// .env must be in the directory where docker-compose is run from, not where YAML files are placed
+		// https://docs.docker.com/compose/env-file/
+		filedir = filepath.Join(".", ".env")
+		if err := writeComposeEnvFile(filedir, ports); err != nil {
 			return err
 		}
 	}
@@ -88,23 +102,17 @@ func start(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"node":         "localhost:19001",
-		"electrm_RPC":  "localhost:60401",
-		"electrum_API": "localhost:3002",
-		"esplora":      "localhost:5000",
-		"chopsticks":   "localhost:3000",
-	}).Info("Bitcoin services:")
+	path := filepath.Join(".", ".env")
+	ports, err := readComposeEnvFile(path)
+	if err != nil {
+		return err
+	}
 
-	viper := config.Viper()
-	if viper.GetBool(config.AttachLiquid) {
-		log.WithFields(log.Fields{
-			"node":         "localhost:18884",
-			"electrum_RPC": "localhost:60411",
-			"electrum_API": "localhost:3022",
-			"esplora":      "localhost:5001",
-			"chopsticks":   "localhost:3001",
-		}).Info("Liquid services:")
+	for chain, services := range ports {
+		fmt.Printf("%s services:\n", chain)
+		for name, port := range services {
+			fmt.Printf("\t%s:   localhost:%d\n", name, port)
+		}
 	}
 
 	return nil
@@ -162,6 +170,37 @@ func isDatadirOk(datadir string) bool {
 	return filepath.IsAbs(datadir)
 }
 
+func isEnvOk(stringifiedJSON string) bool {
+	var parsedJSON map[string]map[string]int
+	err := json.Unmarshal([]byte(stringifiedJSON), &parsedJSON)
+	if err != nil {
+		return false
+	}
+
+	if len(parsedJSON) <= 0 {
+		return false
+	}
+	if len(parsedJSON["bitcoin"]) <= 0 {
+		return false
+	}
+	if parsedJSON["bitcoin"]["node"] <= 0 &&
+		parsedJSON["bitcoin"]["electrs"] <= 0 &&
+		parsedJSON["bitcoin"]["esplora"] <= 0 &&
+		parsedJSON["bitcoin"]["chopsticks"] <= 0 {
+		return false
+	}
+
+	if len(parsedJSON["liquid"]) > 0 &&
+		parsedJSON["liquid"]["node"] <= 0 &&
+		parsedJSON["liquid"]["electrs"] <= 0 &&
+		parsedJSON["liquid"]["esplora"] <= 0 &&
+		parsedJSON["liquid"]["chopsticks"] <= 0 {
+		return false
+	}
+
+	return true
+}
+
 func getComposePath() string {
 	viper := config.Viper()
 	datadir := viper.GetString("datadir")
@@ -198,4 +237,78 @@ func getStartBashCmd() (*exec.Cmd, error) {
 	bashCmd.Stderr = os.Stderr
 
 	return bashCmd, nil
+}
+
+func writeComposeEnvFile(path string, stringifiedJSON string) error {
+	defaultJSON, _ := json.Marshal(defaultPorts)
+	env := map[string]map[string]int{}
+	json.Unmarshal([]byte(stringifiedJSON), &env)
+
+	if stringifiedJSON != string(defaultJSON) {
+		env = mergeComposeEnvFiles([]byte(stringifiedJSON))
+	}
+
+	fileContent := ""
+	for chain, services := range env {
+		for k, v := range services {
+			fileContent += fmt.Sprintf("%s_%s_PORT=%d\n", strings.ToUpper(chain), strings.ToUpper(k), v)
+		}
+	}
+
+	return ioutil.WriteFile(path, []byte(fileContent), os.ModePerm)
+}
+
+func readComposeEnvFile(path string) (map[string]map[string]int, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+
+	ports := map[string]map[string]int{
+		"bitcoin": map[string]int{},
+		"liquid":  map[string]int{},
+	}
+	// Each line is in the format PREFIX_SERVICE_NAME_SUFFIX=value
+	// PREFIX is either 'BITCOIN' or 'LIQUID', while SUFFIX is always 'PORT'
+	for scanner.Scan() {
+		line := scanner.Text()
+		splitLine := strings.Split(line, "=")
+		key := splitLine[0]
+		value, _ := strconv.Atoi(splitLine[1])
+		chain := "bitcoin"
+		if strings.HasPrefix(key, strings.ToUpper("liquid")) {
+			chain = "liquid"
+		}
+
+		suffix := "_PORT"
+		prefix := strings.ToUpper(fmt.Sprintf("%s_", chain))
+		trimmedKey := strings.ToLower(strings.TrimSuffix(strings.TrimPrefix(key, prefix), suffix))
+		ports[chain][trimmedKey] = value
+	}
+
+	return ports, nil
+}
+
+func mergeComposeEnvFiles(rawJSON []byte) map[string]map[string]int {
+	newPorts := map[string]map[string]int{}
+	json.Unmarshal(rawJSON, &newPorts)
+
+	mergedPorts := map[string]map[string]int{}
+	for chain, services := range defaultPorts {
+		mergedPorts[chain] = make(map[string]int)
+		for name, port := range services {
+			newPort := newPorts[chain][name]
+			if newPort > 0 && newPort != port {
+				mergedPorts[chain][name] = newPort
+			} else {
+				mergedPorts[chain][name] = port
+			}
+		}
+	}
+
+	return mergedPorts
 }
