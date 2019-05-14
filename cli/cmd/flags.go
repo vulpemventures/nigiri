@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 
+	"github.com/altafan/nigiri/cli/config"
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/altafan/nigiri/cli/config"
 )
 
 var (
@@ -15,6 +16,21 @@ var (
 	flagNetwork      string
 	flagDelete       bool
 	flagAttachLiquid bool
+	flagEnv          string
+	defaultPorts     = map[string]map[string]int{
+		"bitcoin": {
+			"node":        18443,
+			"electrs_rpc": 60401,
+			"chopsticks":  3000,
+			"esplora":     5000,
+		},
+		"liquid": {
+			"node":        7041,
+			"electrs_rpc": 51401,
+			"chopsticks":  3001,
+			"esplora":     5001,
+		},
+	}
 )
 
 var RootCmd = &cobra.Command{
@@ -26,10 +42,12 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	defaultDir := getDefaultDir()
+	ports, _ := json.Marshal(defaultPorts)
 
 	RootCmd.PersistentFlags().StringVar(&flagDatadir, "datadir", defaultDir, "Set nigiri default directory")
 	StartCmd.PersistentFlags().StringVar(&flagNetwork, "network", "regtest", "Set bitcoin network - regtest only for now")
 	StartCmd.PersistentFlags().BoolVar(&flagAttachLiquid, "liquid", false, "Enable liquid sidechain")
+	StartCmd.PersistentFlags().StringVar(&flagEnv, "ports", string(ports), "Set services ports in JSON format")
 	StopCmd.PersistentFlags().BoolVar(&flagDelete, "delete", false, "Stop and delete nigiri")
 
 	RootCmd.AddCommand(StartCmd)

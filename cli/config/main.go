@@ -19,11 +19,8 @@ var vip *viper.Viper
 
 func init() {
 	vip = viper.New()
-	vip.SetEnvPrefix("NIGIRI")
-	vip.AutomaticEnv()
-	vip.BindEnv("config")
-
 	defaults := viper.New()
+
 	newDefaultConfig(defaults)
 	setConfigFromDefaults(vip, defaults)
 }
