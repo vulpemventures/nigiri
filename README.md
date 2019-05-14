@@ -70,8 +70,7 @@ At the moment bitcoind, liquidd and electrs are started on *regtest* network. *t
 $ nigiri start
 ```
 
-Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer
-are also started when passing this flag.
+Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
 
 * Stop nigiri:
 
@@ -85,6 +84,8 @@ Use the `--delete` flag to not just stop Docker containers but also to remove th
 Nigiri uses the default directory `~/.nigiri` to store configuration files and docker-compose files.
 To set a custom directory use the `--datadir` flag.
 
+Run the `help` command to see the full list of available flags.
+
 ## Nutrition Facts
 
 The [list](https://github.com/blockstream/esplora/blob/master/API.md) of all available endpoints can be extended with one more `POST /faucet` which expects a body `{ "address": <receiving_address> }` by enabling faucet.
@@ -92,13 +93,3 @@ The [list](https://github.com/blockstream/esplora/blob/master/API.md) of all ava
 ## Footnotes
 
 If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, check the real [recipe](https://www.allrecipes.com/recipe/228952/nigiri-sushi/) out and enjoy your own, delicious, hand made nigiri sushi.
-
-## Roadmap
-
-- [x] router
-- [x] electrum server
-- [x] bitcoin daemon
-- [x] liquid daemon
-- [x] esplora UI
-- [x] [regtest] faucet
-- [x] [regtest] auto-mining
