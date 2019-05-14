@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/vulpemventures/nigiri/cli/config"
+	"github.com/altafan/nigiri/cli/config"
 )
 
 const listAll = true
