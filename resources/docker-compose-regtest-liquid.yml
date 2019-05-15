@@ -137,7 +137,7 @@ services:
     entrypoint:
       - /build/chopsticks
     command:
-      # - --use-faucet
+      - --use-faucet
       - --use-mining
       - --use-logger
       - --rpc-addr
