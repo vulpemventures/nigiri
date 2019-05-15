@@ -40,13 +40,13 @@ $ nigiri start
 | Preparation Time: 5 min  | Cooking Difficulty: Easy |
 | --- | --- |
 
-Clone the repo:
+* Clone the repo:
 
 ```bash
 $ git clone https://github.com/vulpemventures/nigiri.git
 ```
 
-Enter project directory and install dependencies:
+* Enter project directory and install dependencies:
 
 ```bash
 $ bash scripts/install
@@ -54,17 +54,39 @@ $ bash scripts/install
 
 This will create `~/.nigiri` copying there the `cli/resources/` directory.
 
-Build binary (Mac version):
+* Build binary 
 ```
+# MacOSX
 $ bash scripts/build darwin amd64
+# Linux 
+$ bash scripts/build linux amd64
 ```
+
+* Go in `build` folder, rename and move the binary and give permissions to it  
+```
+$ cd build
+
+# MacOSX
+$ mv nigiri-darwin-amd64 /usr/local/bin/nigiri
+$ chmod +x /usr/local/bin/nigiri
+
+
+# Linux 
+$ mv nigiri-linux-amd64 /usr/bin/nigiri
+$ chmod +x /usr/bin/nigiri
+```
+
+
+
+
+
 
 ## Tasting
 
 At the moment bitcoind, liquidd and electrs are started on *regtest* network. *testnet* and *mainnet* compose files will be released soon.
 
 
-* Start nigiri:
+*  Start nigiri:
 
 ```bash
 $ nigiri start
