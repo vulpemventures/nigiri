@@ -73,13 +73,13 @@ func startChecks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if !exists {
-		filedir := filepath.Join(datadir, "nigiri.config.json")
+		filedir := getPath(datadir, "config")
 		if err := config.WriteConfig(filedir); err != nil {
 			return err
 		}
 		// .env must be in the directory where docker-compose is run from, not where YAML files are placed
 		// https://docs.docker.com/compose/env-file/
-		filedir = filepath.Join(".", ".env")
+		filedir = getPath(datadir, "env")
 		if err := writeComposeEnvFile(filedir, ports); err != nil {
 			return err
 		}
@@ -92,17 +92,18 @@ func startChecks(cmd *cobra.Command, args []string) error {
 }
 
 func start(cmd *cobra.Command, args []string) error {
-	bashCmd, err := getStartBashCmd()
+	datadir, _ := cmd.Flags().GetString("datadir")
+
+	bashCmd, err := getStartBashCmd(datadir)
 	if err != nil {
 		return err
 	}
 
-	err = bashCmd.Run()
-	if err != nil {
+	if err := bashCmd.Run(); err != nil {
 		return err
 	}
 
-	path := filepath.Join(".", ".env")
+	path := getPath(datadir, "env")
 	ports, err := readComposeEnvFile(path)
 	if err != nil {
 		return err
@@ -111,7 +112,8 @@ func start(cmd *cobra.Command, args []string) error {
 	for chain, services := range ports {
 		fmt.Printf("%s services:\n", chain)
 		for name, port := range services {
-			fmt.Printf("\t%s:   localhost:%d\n", name, port)
+			formatName := fmt.Sprintf("%s:", name)
+			fmt.Printf("   %-14s localhost:%d\n", formatName, port)
 		}
 	}
 
@@ -201,16 +203,27 @@ func isEnvOk(stringifiedJSON string) bool {
 	return true
 }
 
-func getComposePath() string {
+func getPath(datadir, t string) string {
 	viper := config.Viper()
-	datadir := viper.GetString("datadir")
-	network := viper.GetString("network")
-	attachLiquid := viper.GetBool("attachLiquid")
-	if attachLiquid {
-		network += "-liquid"
+
+	if t == "compose" {
+		network := viper.GetString("network")
+		attachLiquid := viper.GetBool("attachLiquid")
+		if attachLiquid {
+			network += "-liquid"
+		}
+		return filepath.Join(datadir, "resources", fmt.Sprintf("docker-compose-%s.yml", network))
 	}
 
-	return filepath.Join(datadir, "resources", fmt.Sprintf("docker-compose-%s.yml", network))
+	if t == "env" {
+		return filepath.Join(datadir, "resources", ".env")
+	}
+
+	if t == "config" {
+		return filepath.Join(datadir, "nigiri.config.json")
+	}
+
+	return ""
 }
 
 func nigiriIsRunning() (bool, error) {
@@ -222,16 +235,18 @@ func nigiriExistsAndNotRunning() (bool, error) {
 	return nigiriExists(listAll)
 }
 
-func getStartBashCmd() (*exec.Cmd, error) {
-	composePath := getComposePath()
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d")
+func getStartBashCmd(datadir string) (*exec.Cmd, error) {
+	composePath := getPath(datadir, "compose")
+	envPath := getPath(datadir, "env")
+
+	bashCmd := exec.Command("docker-compose", "-f", composePath, "--project-directory", envPath, "up", "-d")
 
 	isStopped, err := nigiriExistsAndNotRunning()
 	if err != nil {
 		return nil, err
 	}
 	if isStopped {
-		bashCmd = exec.Command("docker-compose", "-f", composePath, "start")
+		bashCmd = exec.Command("docker-compose", "-f", composePath, "--project-directory", envPath, "start")
 	}
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr

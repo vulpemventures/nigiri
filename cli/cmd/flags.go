@@ -37,7 +37,7 @@ var RootCmd = &cobra.Command{
 	Use:     "nigiri",
 	Short:   "Nigiri lets you manage a full dockerized bitcoin environment",
 	Long:    "Nigiri lets you create your dockerized environment with a bitcoin and optionally a liquid node + block explorer powered by an electrum server for every network",
-	Version: "0.1.0",
+	Version: "0.0.2",
 }
 
 func init() {

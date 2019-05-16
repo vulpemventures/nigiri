@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
 	"github.com/altafan/nigiri/cli/config"
+	"github.com/spf13/cobra"
 )
 
 var StopCmd = &cobra.Command{
@@ -45,30 +45,54 @@ func stopChecks(cmd *cobra.Command, args []string) error {
 
 func stop(cmd *cobra.Command, args []string) error {
 	delete, _ := cmd.Flags().GetBool("delete")
+	datadir, _ := cmd.Flags().GetString("datadir")
 
-	bashCmd := getStopBashCmd(delete)
+	bashCmd := getStopBashCmd(datadir, delete)
 	if err := bashCmd.Run(); err != nil {
 		return err
 	}
 
 	if delete {
-		fmt.Println("Removing volume(s) data")
-		if err := cleanVolumes(); err != nil {
+		fmt.Println("Removing data from volumes...")
+		if err := cleanVolumes(datadir); err != nil {
 			return err
 		}
-		fmt.Println("Removing configuration file")
-		if err := deleteConfig(); err != nil {
+
+		configFile := getPath(datadir, "config")
+		envFile := getPath(datadir, "env")
+
+		fmt.Println("Removing configuration file...")
+		if err := os.Remove(configFile); err != nil {
+			return err
+		}
+
+		fmt.Println("Removing environmet file...")
+		if err := os.Remove(envFile); err != nil {
 			return err
 		}
 	}
 
+	fmt.Println("Nigiri has been cleaned up successfully.")
+
 	return nil
+}
+
+func getStopBashCmd(datadir string, delete bool) *exec.Cmd {
+	composePath := getPath(datadir, "compose")
+	envPath := getPath(datadir, ".env")
+	bashCmd := exec.Command("docker-compose", "--project-directory", envPath, "-f", composePath, "stop")
+	if delete {
+		bashCmd = exec.Command("docker-compose", "--project-directory", envPath, "-f", composePath, "down")
+	}
+	bashCmd.Stdout = os.Stdout
+	bashCmd.Stderr = os.Stderr
+
+	return bashCmd
 }
 
 // cleanVolumes navigates into <datadir>/resources/volumes/<network>
 // and deletes all files and directories but the *.conf config files.
-func cleanVolumes() error {
-	datadir := config.GetString(config.Datadir)
+func cleanVolumes(datadir string) error {
 	network := config.GetString(config.Network)
 	attachLiquid := config.GetBool(config.AttachLiquid)
 	if attachLiquid {
@@ -94,22 +118,4 @@ func cleanVolumes() error {
 	}
 
 	return nil
-}
-
-func deleteConfig() error {
-	datadir := config.GetString(config.Datadir)
-	configFile := filepath.Join(datadir, config.Filename)
-	return os.Remove(configFile)
-}
-
-func getStopBashCmd(delete bool) *exec.Cmd {
-	composePath := getComposePath()
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "stop")
-	if delete {
-		bashCmd = exec.Command("docker-compose", "-f", composePath, "down")
-	}
-	bashCmd.Stdout = os.Stdout
-	bashCmd.Stderr = os.Stderr
-
-	return bashCmd
 }
