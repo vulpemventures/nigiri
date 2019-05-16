@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -ex
+
+PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+
+pushd $PARENT_PATH
+
+case $OSTYPE in
+  darwin*) OS="darwin";;
+  linux-gnu*) OS="linux";;
+  *) echo "OS $OS not supported"; exit 1;;
+esac
+
+case $(uname -m) in
+  amd64) ARCH="amd64";;
+  x86_64) ARCH="amd64";;
+  *) echo "Architecture $ARCH not supported"; exit 1;;
+esac
+
+./build/nigiri-$OS-$ARCH stop --delete &>/dev/null
+rm -rf build vendor ~/.nigiri
+
+popd
