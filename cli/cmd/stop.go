@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/vulpemventures/nigiri/cli/config"
+	"github.com/altafan/nigiri/cli/config"
 )
 
 var StopCmd = &cobra.Command{
