@@ -62,24 +62,12 @@ $ bash scripts/build darwin amd64
 $ bash scripts/build linux amd64
 ```
 
-* Go in `build` folder, rename and move the binary and give permissions to it  
+* Remove nigiri
 ```
-$ cd build
-
-# MacOSX
-$ mv nigiri-darwin-amd64 /usr/local/bin/nigiri
-$ chmod +x /usr/local/bin/nigiri
-
-
-# Linux 
-$ mv nigiri-linux-amd64 /usr/bin/nigiri
-$ chmod +x /usr/bin/nigiri
+$ bash scripts/clean
 ```
 
-
-
-
-
+Note: Remeber to always `clean` Nigiri before running `install`.
 
 ## Tasting
 
