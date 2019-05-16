@@ -216,7 +216,7 @@ func getPath(datadir, t string) string {
 	}
 
 	if t == "env" {
-		return filepath.Join(datadir, "resources", ".env")
+		return filepath.Join(datadir, ".env")
 	}
 
 	if t == "config" {
@@ -238,18 +238,20 @@ func nigiriExistsAndNotRunning() (bool, error) {
 func getStartBashCmd(datadir string) (*exec.Cmd, error) {
 	composePath := getPath(datadir, "compose")
 	envPath := getPath(datadir, "env")
+	env := loadEnv(envPath)
 
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "--project-directory", envPath, "up", "-d")
+	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d")
 
 	isStopped, err := nigiriExistsAndNotRunning()
 	if err != nil {
 		return nil, err
 	}
 	if isStopped {
-		bashCmd = exec.Command("docker-compose", "-f", composePath, "--project-directory", envPath, "start")
+		bashCmd = exec.Command("docker-compose", "-f", composePath, "start")
 	}
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
+	bashCmd.Env = env
 
 	return bashCmd, nil
 }
@@ -326,4 +328,21 @@ func mergeComposeEnvFiles(rawJSON []byte) map[string]map[string]int {
 	}
 
 	return mergedPorts
+}
+
+// loadEnv is used as workaround to load datadir/.env in compose since
+// the flag --project-directory does not seem to work, but if running
+// docker-compose directly from terminal
+// https://forums.docker.com/t/running-docker-compose-from-golang/75006
+func loadEnv(path string) []string {
+	content, _ := ioutil.ReadFile(path)
+	lines := strings.Split(string(content), "\n")
+	env := os.Environ()
+	for _, line := range lines {
+		if line != "" {
+			env = append(env, line)
+		}
+	}
+
+	return env
 }

@@ -80,12 +80,15 @@ func stop(cmd *cobra.Command, args []string) error {
 func getStopBashCmd(datadir string, delete bool) *exec.Cmd {
 	composePath := getPath(datadir, "compose")
 	envPath := getPath(datadir, ".env")
-	bashCmd := exec.Command("docker-compose", "--project-directory", envPath, "-f", composePath, "stop")
+	env := loadEnv(envPath)
+
+	bashCmd := exec.Command("docker-compose", "-f", composePath, "stop")
 	if delete {
-		bashCmd = exec.Command("docker-compose", "--project-directory", envPath, "-f", composePath, "down")
+		bashCmd = exec.Command("docker-compose", "-f", composePath, "down")
 	}
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
+	bashCmd.Env = env
 
 	return bashCmd
 }
