@@ -52,7 +52,7 @@ $ git clone https://github.com/vulpemventures/nigiri.git
 $ bash scripts/install
 ```
 
-This will create `~/.nigiri` copying there the `cli/resources/` directory.
+This will create `~/.nigiri` copying there the `resources/` directory.
 
 * Build binary 
 ```
@@ -67,7 +67,7 @@ $ bash scripts/build linux amd64
 $ bash scripts/clean
 ```
 
-Note: Remeber to always `clean` Nigiri before running `install`.
+Note: Remeber to always `clean` Nigiri before running `install` after a pull.
 
 ## Tasting
 
@@ -77,7 +77,7 @@ At the moment bitcoind, liquidd and electrs are started on *regtest* network. *t
 *  Start nigiri:
 
 ```bash
-$ nigiri start
+$ ./nigiri start
 ```
 
 Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
@@ -85,7 +85,7 @@ Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A l
 * Stop nigiri:
 
 ```bash
-$ nigiri stop
+$ ./nigiri stop
 ```
 
 Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
