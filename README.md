@@ -65,21 +65,9 @@ $ bash scripts/build linux amd64
 * Go in `build` folder, rename and move the binary and give permissions to it  
 ```
 $ cd build
-
-# MacOSX
-$ mv nigiri-darwin-amd64 /usr/local/bin/nigiri
-$ chmod +x /usr/local/bin/nigiri
-
-
-# Linux 
-$ mv nigiri-linux-amd64 /usr/bin/nigiri
-$ chmod +x /usr/bin/nigiri
+$ mv nigiri-darwin-amd64 nigiri
+$ chmod +x nigiri
 ```
-
-
-
-
-
 
 ## Tasting
 
@@ -89,7 +77,7 @@ At the moment bitcoind, liquidd and electrs are started on *regtest* network. *t
 *  Start nigiri:
 
 ```bash
-$ nigiri start
+$ ./nigiri start
 ```
 
 Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
@@ -97,7 +85,7 @@ Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A l
 * Stop nigiri:
 
 ```bash
-$ nigiri stop
+$ ./nigiri stop
 ```
 
 Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
