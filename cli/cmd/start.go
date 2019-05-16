@@ -330,10 +330,6 @@ func mergeComposeEnvFiles(rawJSON []byte) map[string]map[string]int {
 	return mergedPorts
 }
 
-// loadEnv is used as workaround to load datadir/.env in compose since
-// the flag --project-directory does not seem to work, but if running
-// docker-compose directly from terminal
-// https://forums.docker.com/t/running-docker-compose-from-golang/75006
 func loadEnv(path string) []string {
 	content, _ := ioutil.ReadFile(path)
 	lines := strings.Split(string(content), "\n")
