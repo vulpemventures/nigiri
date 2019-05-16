@@ -52,7 +52,7 @@ $ git clone https://github.com/vulpemventures/nigiri.git
 $ bash scripts/install
 ```
 
-This will create `~/.nigiri` copying there the `cli/resources/` directory.
+This will create `~/.nigiri` copying there the `resources/` directory.
 
 * Build binary 
 ```
@@ -62,12 +62,12 @@ $ bash scripts/build darwin amd64
 $ bash scripts/build linux amd64
 ```
 
-* Go in `build` folder, rename and move the binary and give permissions to it  
+* Remove nigiri
 ```
-$ cd build
-$ mv nigiri-darwin-amd64 nigiri
-$ chmod +x nigiri
+$ bash scripts/clean
 ```
+
+Note: Remeber to always `clean` Nigiri before running `install` after a pull.
 
 ## Tasting
 
