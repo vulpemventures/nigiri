@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/altafan/nigiri/cli/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+	"github.com/vulpemventures/nigiri/cli/config"
 )
 
 const listAll = true
