@@ -20,7 +20,7 @@ $ open -a Docker
 * Start Bitcoin + Liquid
 
 ```
-$ nigiri start
+$ nigiri start --liquid
 ```
 
 ## Utensils
