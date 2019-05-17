@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/vulpemventures/nigiri/cli/config"
+	"github.com/altafan/nigiri/cli/config"
 	"github.com/spf13/cobra"
 )
 
