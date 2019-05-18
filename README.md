@@ -2,6 +2,8 @@
 
 Nigiri provides a selection of `docker-compose` batteries included to have ready-to-use bitcoin environment thats supports different networks and sidechains.
 
+
+## Pre-built binary
 No time to make a Nigiri yourself?
 
 
@@ -10,6 +12,9 @@ No time to make a Nigiri yourself?
 ```
 $ curl https://getnigiri.vulpem.com | bash
 ```
+
+This will create a directory `~/.nigiri` copying there `{bitcoin|liquid}.conf` you can modify.
+
 
 * Lauch Docker daemon (Mac OSX)
 
@@ -22,6 +27,7 @@ $ open -a Docker
 ```
 $ nigiri start --liquid
 ```
+
 
 ## Utensils
 
@@ -52,7 +58,7 @@ $ git clone https://github.com/vulpemventures/nigiri.git
 $ bash scripts/install
 ```
 
-This will create `~/.nigiri` copying there the `resources/` directory.
+This will create `~/.nigiri` copying there the `{bitcoin|liquid}.conf` you can modify.
 
 * Build binary 
 ```
