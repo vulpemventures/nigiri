@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vulpemventures/nigiri/cli/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
-	"github.com/vulpemventures/nigiri/cli/config"
 )
 
 const listAll = true
@@ -93,6 +93,7 @@ func startChecks(cmd *cobra.Command, args []string) error {
 
 func start(cmd *cobra.Command, args []string) error {
 	datadir, _ := cmd.Flags().GetString("datadir")
+	liquidEnabled, _ := cmd.Flags().GetBool("liquid")
 
 	bashCmd, err := getStartBashCmd(datadir)
 	if err != nil {
@@ -109,11 +110,19 @@ func start(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	for chain, services := range ports {
+	prettyPrintServices := func(chain string, services map[string]int) {
 		fmt.Printf("%s services:\n", chain)
 		for name, port := range services {
 			formatName := fmt.Sprintf("%s:", name)
 			fmt.Printf("   %-14s localhost:%d\n", formatName, port)
+		}
+	}
+
+	for chain, services := range ports {
+		if chain == "bitcoin" {
+			prettyPrintServices(chain, services)
+		} else if liquidEnabled {
+			prettyPrintServices(chain, services)
 		}
 	}
 

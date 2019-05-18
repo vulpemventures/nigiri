@@ -70,9 +70,9 @@ func stop(cmd *cobra.Command, args []string) error {
 		if err := os.Remove(envFile); err != nil {
 			return err
 		}
-	}
 
-	fmt.Println("Nigiri has been cleaned up successfully.")
+		fmt.Println("Nigiri has been cleaned up successfully.")
+	}
 
 	return nil
 }
