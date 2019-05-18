@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"reflect"
 
-	"github.com/altafan/nigiri/cli/config"
+	"github.com/vulpemventures/nigiri/cli/config"
 
 	"github.com/spf13/cobra"
 )
