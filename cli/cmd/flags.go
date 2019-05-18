@@ -12,12 +12,14 @@ import (
 )
 
 var (
-	flagDatadir      string
-	flagNetwork      string
-	flagDelete       bool
-	flagAttachLiquid bool
-	flagEnv          string
-	defaultPorts     = map[string]map[string]int{
+	flagDatadir       string
+	flagNetwork       string
+	flagDelete        bool
+	flagAttachLiquid  bool
+	flagLiquidService bool
+	flagEnv           string
+
+	defaultPorts = map[string]map[string]int{
 		"bitcoin": {
 			"node":        18443,
 			"electrs_rpc": 60401,
@@ -49,9 +51,11 @@ func init() {
 	StartCmd.PersistentFlags().BoolVar(&flagAttachLiquid, "liquid", false, "Enable liquid sidechain")
 	StartCmd.PersistentFlags().StringVar(&flagEnv, "ports", string(ports), "Set services ports in JSON format")
 	StopCmd.PersistentFlags().BoolVar(&flagDelete, "delete", false, "Stop and delete nigiri")
+	LogsCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
+	RootCmd.AddCommand(LogsCmd)
 
 	viper := config.Viper()
 	viper.BindPFlag(config.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
