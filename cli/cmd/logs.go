@@ -87,7 +87,7 @@ func getServiceName(name string, liquid bool) string {
 		service = "bitcoin"
 	}
 	if liquid {
-		if service == "node" {
+		if service == "bitcoin" {
 			service = "liquid"
 		} else {
 			service = fmt.Sprintf("%s-liquid", service)
