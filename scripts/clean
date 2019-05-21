@@ -6,9 +6,9 @@ PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
 
 pushd $PARENT_PATH
 
-case $OSTYPE in
-  darwin*) OS="darwin";;
-  linux-gnu*) OS="linux";;
+case $(uname -s) in
+  Darwin) OS="darwin";;
+  Linux) OS="linux";;
   *) echo "OS $OS not supported"; exit 1;;
 esac
 
