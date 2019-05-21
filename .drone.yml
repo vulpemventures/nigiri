@@ -9,7 +9,7 @@ pipeline:
     environment:
       - DOCKER_HOST=tcp://docker:2375
     commands:
-      - apk update && apk add --no-cache git openssh curl wget bash make build-base
+      - apk update && apk add --no-cache git curl wget bash make build-base
       - mkdir -p /root/go/bin /root/go/pkg
       # Install Go
       - wget -q https://dl.google.com/go/go1.11.linux-amd64.tar.gz
