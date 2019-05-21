@@ -78,6 +78,10 @@ func TestStartAfterStartShouldFail(t *testing.T) {
 	if err.Error() != expectedError {
 		t.Fatalf("Expected error: %s, got: %s", expectedError, err)
 	}
+
+	if err := testCommand("stop", "", delete); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testStart(t *testing.T, flag bool) {
