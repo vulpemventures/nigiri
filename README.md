@@ -32,6 +32,7 @@ $ nigiri start --liquid
 ## Utensils
 
 * [Docker (compose)](https://docs.docker.com/compose/)
+* Go
 
 ## Ingredients
 
