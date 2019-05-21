@@ -22,7 +22,6 @@ pipeline:
       # Test Nigiri
       - bash scripts/install
       - go test -v ./...
-      - bash scripts/clean
 
 services:
   docker:
