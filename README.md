@@ -1,6 +1,8 @@
-# 🍣 Nigiri Bitcoin
+# 🍣 Nigiri Bitcoin 
+<img alt="Drone (self-hosted)" src="https://img.shields.io/drone/build/vulpemventures/nigiri.svg?server=http%3A%2F%2Fdrone.vulpem.com&style=popout">
 
 Nigiri provides a selection of `docker-compose` batteries included to have ready-to-use bitcoin environment thats supports different networks and sidechains.
+
 
 
 ## Pre-built binary
