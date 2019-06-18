@@ -10,6 +10,7 @@ services:
       - ${BITCOIN_NODE_PORT}:19001
     volumes:
       - ./volumes/regtest/config/:/config
+    restart: unless-stopped
   # Block explorer server
   electrs:
     image: vulpemventures/electrs:latest
@@ -43,6 +44,7 @@ services:
       - 3002:3002
     volumes:
       - ./volumes/regtest/config/:/config
+    restart: unless-stopped
   # Block explorer frontend
   esplora:
     image: vulpemventures/esplora:latest
@@ -55,9 +57,10 @@ services:
       - electrs
     ports:
       - ${BITCOIN_ESPLORA_PORT}:5000
+    restart: unless-stopped
   # Chopsticks
   chopsticks:
-    image: vulpemventures/nigiri-chopsticks
+    image: vulpemventures/nigiri-chopsticks:latest
     entrypoint:
       - /build/chopsticks
     command:
@@ -80,6 +83,7 @@ services:
       - electrs
     ports:
       - ${BITCOIN_CHOPSTICKS_PORT}:3000
+    restart: unless-stopped
 
 networks:
   local:
