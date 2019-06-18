@@ -10,6 +10,7 @@ services:
       - ${BITCOIN_NODE_PORT}:19001
     volumes:
       - ./volumes/liquidregtest/config/:/config
+    restart: unless-stopped
   liquid:
     image: vulpemventures/liquid:latest
     networks:
@@ -17,8 +18,10 @@ services:
         ipv4_address: 10.10.0.11
     ports:
       - ${LIQUID_NODE_PORT}:18884
+      - 18886:18886
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
+    restart: unless-stopped
   # Block explorer REST servers
   electrs:
     image: vulpemventures/electrs:latest
@@ -52,6 +55,7 @@ services:
       - 3002:3002
     volumes:
       - ./volumes/liquidregtest/config/:/config
+    restart: unless-stopped
   electrs-liquid:
     image: vulpemventures/electrs-liquid:latest
     entrypoint:
@@ -84,6 +88,7 @@ services:
       - 3022:3002
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
+    restart: unless-stopped
   # Block explorer frontends
   esplora:
     image: vulpemventures/esplora:latest
@@ -96,6 +101,7 @@ services:
       - electrs
     ports:
       - ${BITCOIN_ESPLORA_PORT}:5000
+    restart: unless-stopped
   esplora-liquid:
     image: vulpemventures/esplora-liquid:latest
     networks:
@@ -107,9 +113,10 @@ services:
       - electrs-liquid
     ports:
       - ${LIQUID_ESPLORA_PORT}:5000
+    restart: unless-stopped
   # Chopsticks
   chopsticks:
-    image: vulpemventures/nigiri-chopsticks
+    image: vulpemventures/nigiri-chopsticks:latest
     entrypoint:
       - /build/chopsticks
     command:
@@ -132,8 +139,9 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.16
+    restart: unless-stopped
   chopsticks-liquid:
-    image: vulpemventures/nigiri-chopsticks
+    image: vulpemventures/nigiri-chopsticks:latest
     entrypoint:
       - /build/chopsticks
     command:
@@ -158,6 +166,7 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.17
+    restart: unless-stopped
 
 networks:
   local:

@@ -4,7 +4,7 @@ workspace:
 
 
 pipeline:
-  setup:
+  test:
     image: docker/compose:1.24.0
     environment:
       - DOCKER_HOST=tcp://docker:2375
@@ -27,8 +27,7 @@ services:
   docker:
     image: docker:dind
     privileged: true
-    detach: true
+
   compose:
     image: docker/compose:1.24.0
     privileged: true
-    detach: true
