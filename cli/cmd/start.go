@@ -139,6 +139,11 @@ var images = map[string]bool{
 	"vulpemventures/nigiri-chopsticks:latest": true,
 }
 
+var composeServices = map[string]string{
+	"bitcoin": "bitcoin electrs esplora chopsticks",
+	"liquid": "electrs-liquid esplora-liquid chopsticks-liquid",
+}
+
 func copyResources(datadir string) error {
 	defaultDatadir := getDefaultDir()
 	cmd := exec.Command("cp", "-R", filepath.Join(defaultDatadir, "resources"), datadir)
@@ -216,12 +221,7 @@ func getPath(datadir, t string) string {
 	viper := config.Viper()
 
 	if t == "compose" {
-		network := viper.GetString("network")
-		attachLiquid := viper.GetBool("attachLiquid")
-		if attachLiquid {
-			network += "-liquid"
-		}
-		return filepath.Join(datadir, "resources", fmt.Sprintf("docker-compose-%s.yml", network))
+		return filepath.Join(datadir, "resources", "docker-compose.yml")
 	}
 
 	if t == "env" {
@@ -246,23 +246,34 @@ func nigiriExistsAndNotRunning() (bool, error) {
 
 func getStartBashCmd(datadir string) (*exec.Cmd, error) {
 	composePath := getPath(datadir, "compose")
+	composeServices := getComposeServices()
 	envPath := getPath(datadir, "env")
 	env := loadEnv(envPath)
 
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d")
+	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d", composeServices)
 
 	isStopped, err := nigiriExistsAndNotRunning()
 	if err != nil {
 		return nil, err
 	}
 	if isStopped {
-		bashCmd = exec.Command("docker-compose", "-f", composePath, "start")
+		bashCmd = exec.Command("docker-compose", "-f", composePath, "start", composeServices)
 	}
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 	bashCmd.Env = env
 
 	return bashCmd, nil
+}
+
+func getComposeServices() (string, error) {
+	viper := config.Viper()
+
+	services := composeServices["bitcoin"]
+
+	if viper.GetBool("attachLiquid") {
+		services += " " + composeServices["liquid"]
+	}
 }
 
 func writeComposeEnvFile(path string, stringifiedJSON string) error {
