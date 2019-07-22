@@ -218,8 +218,6 @@ func isEnvOk(stringifiedJSON string) bool {
 }
 
 func getPath(datadir, t string) string {
-	viper := config.Viper()
-
 	if t == "compose" {
 		return filepath.Join(datadir, "resources", "docker-compose.yml")
 	}
