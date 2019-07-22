@@ -141,7 +141,7 @@ var images = map[string]bool{
 
 var composeServices = map[string]string{
 	"bitcoin": "bitcoin electrs esplora chopsticks",
-	"liquid": "electrs-liquid esplora-liquid chopsticks-liquid",
+	"liquid": "liquid electrs-liquid esplora-liquid chopsticks-liquid",
 }
 
 func copyResources(datadir string) error {
@@ -266,7 +266,7 @@ func getStartBashCmd(datadir string) (*exec.Cmd, error) {
 	return bashCmd, nil
 }
 
-func getComposeServices() (string, error) {
+func getComposeServices() (string) {
 	viper := config.Viper()
 
 	services := composeServices["bitcoin"]
@@ -274,6 +274,8 @@ func getComposeServices() (string, error) {
 	if viper.GetBool("attachLiquid") {
 		services += " " + composeServices["liquid"]
 	}
+
+	return services
 }
 
 func writeComposeEnvFile(path string, stringifiedJSON string) error {
