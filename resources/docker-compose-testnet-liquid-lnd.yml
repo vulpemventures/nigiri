@@ -1,0 +1,203 @@
+version: '3'
+services:
+  # RPC daemons
+  bitcoin:
+    image: vulpemventures/bitcoin:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.10
+    ports:
+      - ${BITCOIN_NODE_PORT}:19001
+    volumes:
+      - ./volumes/liquidregtest/config/:/config
+    restart: unless-stopped
+  liquid:
+    image: vulpemventures/liquid:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.11
+    ports:
+      - ${LIQUID_NODE_PORT}:18884
+      - 18886:18886
+    volumes:
+      - ./volumes/liquidregtest/liquid-config/:/config
+    restart: unless-stopped
+  # Block explorer REST servers
+  electrs:
+    image: vulpemventures/electrs:latest
+    entrypoint:
+      - /build/electrs
+    command:
+      - -vvvv
+      - --network
+      - regtest
+      - --daemon-dir
+      - /config
+      - --daemon-rpc-addr
+      - 10.10.0.10:19001
+      - --cookie
+      - admin1:123
+      - --http-addr
+      - 0.0.0.0:3002
+      - --electrum-rpc-addr
+      - 0.0.0.0:60401
+      - --cors
+      - "*"
+    networks:
+      local:
+        ipv4_address: 10.10.0.12
+    links:
+      - bitcoin
+    depends_on:
+      - bitcoin
+    ports:
+      - ${BITCOIN_ELECTRS_RPC_PORT}:60401
+      - 3002:3002
+    volumes:
+      - ./volumes/liquidregtest/config/:/config
+    restart: unless-stopped
+  electrs-liquid:
+    image: vulpemventures/electrs-liquid:latest
+    entrypoint:
+      - /build/electrs
+    command:
+      - -vvvv
+      - --network
+      - liquidregtest
+      - --daemon-dir
+      - /config
+      - --daemon-rpc-addr
+      - 10.10.0.11:18884
+      - --cookie
+      - admin1:123
+      - --http-addr
+      - 0.0.0.0:3002
+      - --electrum-rpc-addr
+      - 0.0.0.0:60401
+      - --cors
+      - "*"
+    networks:
+      local:
+        ipv4_address: 10.10.0.13
+    links:
+      - liquid
+    depends_on:
+      - liquid
+    ports:
+      - ${LIQUID_ELECTRS_RPC_PORT}:60401
+      - 3022:3002
+    volumes:
+      - ./volumes/liquidregtest/liquid-config/:/config
+    restart: unless-stopped
+  # Block explorer frontends
+  esplora:
+    image: vulpemventures/esplora:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.14
+    links:
+      - electrs
+    depends_on:
+      - electrs
+    ports:
+      - ${BITCOIN_ESPLORA_PORT}:5000
+    restart: unless-stopped
+  esplora-liquid:
+    image: vulpemventures/esplora-liquid:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.15
+    links:
+      - electrs-liquid
+    depends_on:
+      - electrs-liquid
+    ports:
+      - ${LIQUID_ESPLORA_PORT}:5000
+    restart: unless-stopped
+  # Chopsticks
+  chopsticks:
+    image: vulpemventures/nigiri-chopsticks:latest
+    entrypoint:
+      - /build/chopsticks
+    command:
+      - --use-faucet
+      - --use-mining
+      - --use-logger
+      - --rpc-addr
+      - 10.10.0.10:19001
+      - --electrs-addr
+      - 10.10.0.12:3002
+      - --addr
+      - 0.0.0.0:3000
+    links:
+      - electrs
+      - bitcoin
+    depends_on:
+      - electrs
+    ports:
+      - ${BITCOIN_CHOPSTICKS_PORT}:3000
+    networks:
+      local:
+        ipv4_address: 10.10.0.16
+    restart: unless-stopped
+  chopsticks-liquid:
+    image: vulpemventures/nigiri-chopsticks:latest
+    entrypoint:
+      - /build/chopsticks
+    command:
+      - --use-faucet
+      - --use-mining
+      - --use-logger
+      - --rpc-addr
+      - 10.10.0.11:18884
+      - --electrs-addr
+      - 10.10.0.13:3002
+      - --addr
+      - 0.0.0.0:3000
+      - --chain
+      - liquid
+    links:
+      - electrs-liquid
+      - liquid
+    depends_on:
+      - electrs-liquid
+    ports:
+      - ${LIQUID_CHOPSTICKS_PORT}:3000
+    networks:
+      local:
+        ipv4_address: 10.10.0.17
+    restart: unless-stopped
+  # LND Testnet
+  lnd:
+    volumes:
+      - 'lnd-data:/lnd'
+    container_name: lnd-node
+    ports:
+      - '9735:9735'
+      - '10009:10009'
+    image: 'lnzap/lnd:latest'
+    command:
+      - --bitcoin.active
+      - --bitcoin.testnet
+      - --debuglevel=info
+      - --bitcoin.node=neutrino
+      - --neutrino.connect=testnet1-btcd.zaphq.io
+      - --neutrino.connect=testnet2-btcd.zaphq.io
+      - --neutrino.connect=faucet.lightning.community
+      - --autopilot.active
+      - --rpclisten=0.0.0.0:10009
+    networks:
+      local:
+        ipv4_address: 10.10.0.18
+    restart: unless-stopped
+
+volumes:
+  lnd-data:
+    external: false
+    
+networks:
+  local:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.0.0/24
