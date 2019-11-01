@@ -2,9 +2,8 @@ workspace:
   base: /root
   path: go/src/github.com/vulpemventures/nigiri
 
-
 pipeline:
-  setup:
+  test:
     image: docker/compose:1.24.0
     environment:
       - DOCKER_HOST=tcp://docker:2375
@@ -12,14 +11,14 @@ pipeline:
       - apk update && apk add --no-cache git curl wget bash make build-base
       - mkdir -p /root/go/bin /root/go/pkg
       # Install Go
-      - wget -q https://dl.google.com/go/go1.11.linux-amd64.tar.gz
-      - tar -xf go1.11.linux-amd64.tar.gz -C /usr/local && rm -rf go*
+      - wget -q https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
+      - tar -xf go1.13.4.linux-amd64.tar.gz -C /usr/local && rm -rf go*
       - export GOROOT=/usr/local/go
       - export GOPATH=$HOME/go
       - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-      # Install Dep
-      - curl -s https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      # Test Nigiri
+      # Test
+      - export GO111MODULE=on
+      - go mod init
       - bash scripts/install
       - go test -v ./...
 
@@ -27,8 +26,7 @@ services:
   docker:
     image: docker:dind
     privileged: true
-    detach: true
+
   compose:
     image: docker/compose:1.24.0
     privileged: true
-    detach: true

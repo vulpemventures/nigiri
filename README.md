@@ -25,12 +25,13 @@ This will create a directory `~/.nigiri` copying there `{bitcoin|liquid}.conf` y
 $ open -a Docker
 ``` 
 
-* Start Bitcoin + Liquid
+* Close and reopen your terminal, then start Bitcoin and Liquid
 
 ```
 $ nigiri start --liquid
 ```
-
+That's it.
+Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http://localhost:5001 for Liquid.
 
 ## Utensils
 
