@@ -1,5 +1,6 @@
 .DS_Store
 .env
+resources/volumes/regtest/config/regtest
 
 vendor/
 build/

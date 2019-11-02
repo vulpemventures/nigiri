@@ -1,0 +1,156 @@
+version: '3'
+services:
+  # RPC daemon
+  bitcoin:
+    image: vulpemventures/bitcoin:latest
+    container_name: bitcoin-node
+    networks:
+      local:
+        ipv4_address: 10.10.0.10
+    ports:
+      - ${BITCOIN_NODE_PORT}:19001
+      - 28332:28332
+      - 28333:28333
+    volumes:
+      - ./volumes/regtest/config/:/config
+    restart: unless-stopped
+  # Block explorer server
+  electrs:
+    image: vulpemventures/electrs:latest
+    entrypoint:
+      - /build/electrs
+    command:
+      - -vvvv
+      - --network
+      - regtest
+      - --daemon-dir
+      - /config
+      - --daemon-rpc-addr
+      - 10.10.0.10:19001
+      - --cookie
+      - admin1:123
+      - --http-addr
+      - 0.0.0.0:3002
+      - --electrum-rpc-addr
+      - 0.0.0.0:60401
+      - --cors
+      - "*"
+    networks:
+      local:
+        ipv4_address: 10.10.0.11
+    links:
+      - bitcoin
+    depends_on:
+      - bitcoin
+    ports:
+      - ${BITCOIN_ELECTRS_RPC_PORT}:60401
+      - 3002:3002
+    volumes:
+      - ./volumes/regtest/config/:/config
+    restart: unless-stopped
+  # Block explorer frontend
+  esplora:
+    image: vulpemventures/esplora:latest
+    networks:
+      local:
+        ipv4_address: 10.10.0.12
+    links:
+      - electrs
+    depends_on:
+      - electrs
+    ports:
+      - ${BITCOIN_ESPLORA_PORT}:5000
+    restart: unless-stopped
+  # Chopsticks
+  chopsticks:
+    image: vulpemventures/nigiri-chopsticks:latest
+    entrypoint:
+      - /build/chopsticks
+    command:
+      - --use-faucet
+      - --use-mining
+      - --use-logger
+      - --rpc-addr
+      - 10.10.0.10:19001
+      - --electrs-addr
+      - 10.10.0.11:3002
+      - --addr
+      - 0.0.0.0:3000
+    networks:
+      local:
+        ipv4_address: 10.10.0.13
+    links:
+      - bitcoin
+      - electrs
+    depends_on:
+      - electrs
+    ports:
+      - ${BITCOIN_CHOPSTICKS_PORT}:3000
+    restart: unless-stopped
+  # LND 
+  lnd:
+    volumes:
+      - 'lnd-data:/lnd'
+    container_name: lnd-node
+    ports:
+      - '0.0.0.0:9735:9735'
+      - '10009:10009'
+    image: 'lnzap/lnd:latest'
+    depends_on: 
+      - bitcoin
+    command:
+      - --bitcoin.active
+      - --bitcoin.regtest
+      - --debuglevel=info
+      - --bitcoin.node=bitcoind
+      - --autopilot.active
+      - --bitcoind.rpchost=10.10.0.10:19001
+      - --bitcoind.rpcuser=admin1
+      - --bitcoind.rpcpass=123 
+      - --bitcoind.zmqpubrawblock=tcp://10.10.0.10:28332 
+      - --bitcoind.zmqpubrawtx=tcp://10.10.0.10:28333
+      - --rpclisten=0.0.0.0:10009
+    networks:
+      local:
+        ipv4_address: 10.10.0.14
+    restart: unless-stopped
+  # LND 
+  lnd2doc:
+    volumes:
+      - 'lnd2-data:/lnd'
+    container_name: lnd2-node
+    ports:
+      - '0.0.0.0:19735:9735'
+      - '20009:10009'
+    image: 'lnzap/lnd:latest'
+    depends_on: 
+      - bitcoin
+    command:
+      - --bitcoin.active
+      - --bitcoin.regtest
+      - --debuglevel=info
+      - --bitcoin.node=bitcoind
+      - --autopilot.active
+      - --bitcoind.rpchost=10.10.0.10:19001
+      - --bitcoind.rpcuser=admin1
+      - --bitcoind.rpcpass=123 
+      - --bitcoind.zmqpubrawblock=tcp://10.10.0.10:28332 
+      - --bitcoind.zmqpubrawtx=tcp://10.10.0.10:28333
+      - --rpclisten=0.0.0.0:10009
+    networks:
+      local:
+        ipv4_address: 10.10.0.15
+    restart: unless-stopped
+
+volumes:
+  lnd2-data:
+    external: false
+  lnd-data:
+    external: false
+
+networks:
+  local:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.0.0/24
