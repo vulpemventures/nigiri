@@ -96,21 +96,25 @@ services:
       local:
         ipv4_address: 10.10.0.14
     links:
-      - electrs
+      - chopsticks
     depends_on:
-      - electrs
+      - chopsticks
+    environment:
+      API_URL: http://localhost:${BITCOIN_CHOPSTICKS_PORT}
     ports:
       - ${BITCOIN_ESPLORA_PORT}:5000
     restart: unless-stopped
   esplora-liquid:
-    image: vulpemventures/esplora-liquid:latest
+    image: vulpemventures/esplora:latest
     networks:
       local:
         ipv4_address: 10.10.0.15
     links:
-      - electrs-liquid
+      - chopsticks-liquid
     depends_on:
-      - electrs-liquid
+      - chopsticks-liquid
+    environment:
+      API_URL: http://localhost:${LIQUID_CHOPSTICKS_PORT}
     ports:
       - ${LIQUID_ESPLORA_PORT}:5000
     restart: unless-stopped

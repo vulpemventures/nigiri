@@ -52,9 +52,11 @@ services:
       local:
         ipv4_address: 10.10.0.12
     links:
-      - electrs
+      - chopsticks
     depends_on:
-      - electrs
+      - chopsticks
+    environment:
+      API_URL: http://localhost:${BITCOIN_CHOPSTICKS_PORT}
     ports:
       - ${BITCOIN_ESPLORA_PORT}:5000
     restart: unless-stopped
