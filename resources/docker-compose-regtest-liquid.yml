@@ -52,7 +52,7 @@ services:
       - bitcoin
     ports:
       - ${BITCOIN_ELECTRS_RPC_PORT}:60401
-      - 3002:3002
+      - ${BITCOIN_ELECTRS_PORT}:3002
     volumes:
       - ./volumes/liquidregtest/config/:/config
     restart: unless-stopped
@@ -85,7 +85,7 @@ services:
       - liquid
     ports:
       - ${LIQUID_ELECTRS_RPC_PORT}:60401
-      - 3022:3002
+      - ${LIQUID_ELECTRS_PORT}:3002
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
     restart: unless-stopped
@@ -100,7 +100,7 @@ services:
     depends_on:
       - chopsticks
     environment:
-      API_URL: http://localhost:${BITCOIN_CHOPSTICKS_PORT}
+      API_URL: ${BITCOIN_ESPLORA_URL}
     ports:
       - ${BITCOIN_ESPLORA_PORT}:5000
     restart: unless-stopped
@@ -114,7 +114,7 @@ services:
     depends_on:
       - chopsticks-liquid
     environment:
-      API_URL: http://localhost:${LIQUID_CHOPSTICKS_PORT}
+      API_URL: ${LIQUID_ESPLORA_URL}
     ports:
       - ${LIQUID_ESPLORA_PORT}:5000
     restart: unless-stopped
