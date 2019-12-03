@@ -5,14 +5,7 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
-)
-
-const (
-	Datadir      = "datadir"
-	Network      = "network"
-	Filename     = "nigiri.config.json"
-	AttachLiquid = "attachLiquid"
-	Version      = "version"
+	"github.com/vulpemventures/nigiri/cli/constants"
 )
 
 var vip *viper.Viper
@@ -25,37 +18,43 @@ func init() {
 	setConfigFromDefaults(vip, defaults)
 }
 
-func Viper() *viper.Viper {
+type Config struct{}
+
+func (c *Config) Viper() *viper.Viper {
 	return vip
 }
 
-func ReadFromFile(path string) error {
-	vip.SetConfigFile(filepath.Join(path, Filename))
+func (c *Config) ReadFromFile(path string) error {
+	vip.SetConfigFile(filepath.Join(path, constants.Filename))
 	return vip.ReadInConfig()
 }
 
-func WriteConfig(path string) error {
+func (c *Config) WriteConfig(path string) error {
 	vip.SetConfigFile(path)
 	return vip.WriteConfig()
 }
 
-func GetString(str string) string {
+func (c *Config) GetString(str string) string {
 	return vip.GetString(str)
 }
 
-func GetBool(str string) bool {
+func (c *Config) GetBool(str string) bool {
 	return vip.GetBool(str)
 }
 
-func GetPath() string {
+func (c *Config) GetPath() string {
+	return getPath()
+}
+
+func getPath() string {
 	home, _ := homedir.Expand("~")
 	return filepath.Join(home, ".nigiri")
 }
 
 func newDefaultConfig(v *viper.Viper) {
-	v.SetDefault(Datadir, GetPath())
-	v.SetDefault(Network, "regtest")
-	v.SetDefault(AttachLiquid, false)
+	v.SetDefault(constants.Datadir, getPath())
+	v.SetDefault(constants.Network, "regtest")
+	v.SetDefault(constants.AttachLiquid, false)
 }
 
 func setConfigFromDefaults(v *viper.Viper, d *viper.Viper) {
