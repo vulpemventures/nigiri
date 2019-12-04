@@ -3,6 +3,9 @@ package cmd
 import (
 	"fmt"
 	"testing"
+
+	"github.com/vulpemventures/nigiri/cli/constants"
+	"github.com/vulpemventures/nigiri/cli/controller"
 )
 
 const (
@@ -37,7 +40,7 @@ func TestStartStopBitcoin(t *testing.T) {
 }
 
 func TestStopBeforeStartShouldFail(t *testing.T) {
-	expectedError := "Nigiri is neither running nor stopped, please create it first"
+	expectedError := constants.ErrNigiriNotRunning.Error()
 
 	err := testCommand("stop", "", !delete)
 	if err == nil {
@@ -47,6 +50,7 @@ func TestStopBeforeStartShouldFail(t *testing.T) {
 		t.Fatalf("Expected error: %s, got: %s", expectedError, err)
 	}
 
+	expectedError = constants.ErrNigiriNotExisting.Error()
 	err = testCommand("stop", "", delete)
 	if err == nil {
 		t.Fatal("Should return error when trying to delete before starting")
@@ -57,7 +61,7 @@ func TestStopBeforeStartShouldFail(t *testing.T) {
 }
 
 func TestStartAfterStartShouldFail(t *testing.T) {
-	expectedError := "Nigiri is already running, please stop it first"
+	expectedError := constants.ErrNigiriAlreadyRunning.Error()
 
 	if err := testCommand("start", "", bitcoin); err != nil {
 		t.Fatal(err)
@@ -85,30 +89,48 @@ func TestStartAfterStartShouldFail(t *testing.T) {
 }
 
 func testStart(t *testing.T, flag bool) {
+	ctl, err := controller.NewController()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := testCommand("start", "", flag); err != nil {
 		t.Fatal(err)
 	}
-	if isRunning, _ := nigiriIsRunning(); !isRunning {
-		t.Fatal("Nigiri should be started but services have not been found among running containers")
+	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
+		t.Fatal(err)
+	} else if !isRunning {
+		t.Fatal("Nigiri should have been started but services have not been found among running containers")
 	}
 }
 
 func testStop(t *testing.T) {
-	fmt.Println(!delete)
+	ctl, err := controller.NewController()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := testCommand("stop", "", !delete); err != nil {
 		t.Fatal(err)
 	}
-	if isStopped, _ := nigiriExistsAndNotRunning(); !isStopped {
-		t.Fatal("Nigiri should be stopped but services have not been found among stopped containers")
+	if isStopped, err := ctl.IsNigiriStopped(); err != nil {
+		t.Fatal(err)
+	} else if !isStopped {
+		t.Fatal("Nigiri should have been stopped but services have not been found among stopped containers")
 	}
 }
 
 func testDelete(t *testing.T) {
+	ctl, err := controller.NewController()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if err := testCommand("stop", "", delete); err != nil {
 		t.Fatal(err)
 	}
-	if isStopped, _ := nigiriExistsAndNotRunning(); isStopped {
-		t.Fatal("Nigiri should be terminated at this point but services have found among stopped containers")
+	if isStopped, err := ctl.IsNigiriStopped(); err != nil {
+		t.Fatal(err)
+	} else if isStopped {
+		t.Fatal("Nigiri should have been terminated at this point but services have been found among stopped containers")
 	}
 }
 
