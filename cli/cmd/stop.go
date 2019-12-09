@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
 
-	"github.com/vulpemventures/nigiri/cli/config"
 	"github.com/spf13/cobra"
+	"github.com/vulpemventures/nigiri/cli/constants"
+	"github.com/vulpemventures/nigiri/cli/controller"
 )
 
 var StopCmd = &cobra.Command{
@@ -20,24 +19,36 @@ var StopCmd = &cobra.Command{
 
 func stopChecks(cmd *cobra.Command, args []string) error {
 	datadir, _ := cmd.Flags().GetString("datadir")
+	delete, _ := cmd.Flags().GetBool("delete")
 
-	if !isDatadirOk(datadir) {
-		return fmt.Errorf("Invalid datadir, it must be an absolute path: %s", datadir)
-	}
-
-	if _, err := os.Stat(datadir); os.IsNotExist(err) {
-		return fmt.Errorf("Datadir do not exists: %s", datadir)
-	}
-
-	nigiriExists, err := nigiriExistsAndNotRunning()
+	ctl, err := controller.NewController()
 	if err != nil {
 		return err
 	}
-	if !nigiriExists {
-		return fmt.Errorf("Nigiri is neither running nor stopped, please create it first")
+
+	if err := ctl.ParseDatadir(datadir); err != nil {
+		return err
 	}
 
-	if err := config.ReadFromFile(datadir); err != nil {
+	if _, err := os.Stat(datadir); os.IsNotExist(err) {
+		return constants.ErrDatadirNotExisting
+	}
+
+	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
+		return err
+	} else if !isRunning {
+		if delete {
+			if isStopped, err := ctl.IsNigiriStopped(); err != nil {
+				return err
+			} else if !isStopped {
+				return constants.ErrNigiriNotExisting
+			}
+		} else {
+			return constants.ErrNigiriNotRunning
+		}
+	}
+
+	if err := ctl.ReadConfigFile(datadir); err != nil {
 		return err
 	}
 	return nil
@@ -47,40 +58,15 @@ func stop(cmd *cobra.Command, args []string) error {
 	delete, _ := cmd.Flags().GetBool("delete")
 	datadir, _ := cmd.Flags().GetString("datadir")
 
-	bashCmd := getStopBashCmd(datadir, delete)
-	if err := bashCmd.Run(); err != nil {
+	ctl, err := controller.NewController()
+	if err != nil {
 		return err
 	}
 
-	if delete {
-		fmt.Println("Removing data from volumes...")
-		if err := cleanVolumes(datadir); err != nil {
-			return err
-		}
-
-		configFile := getPath(datadir, "config")
-		envFile := getPath(datadir, "env")
-
-		fmt.Println("Removing configuration file...")
-		if err := os.Remove(configFile); err != nil {
-			return err
-		}
-
-		fmt.Println("Removing environmet file...")
-		if err := os.Remove(envFile); err != nil {
-			return err
-		}
-
-		fmt.Println("Nigiri has been cleaned up successfully.")
-	}
-
-	return nil
-}
-
-func getStopBashCmd(datadir string, delete bool) *exec.Cmd {
-	composePath := getPath(datadir, "compose")
-	envPath := getPath(datadir, "env")
-	env := loadEnv(envPath)
+	composePath := ctl.GetResourcePath(datadir, "compose")
+	configPath := ctl.GetResourcePath(datadir, "config")
+	envPath := ctl.GetResourcePath(datadir, "env")
+	env := ctl.LoadComposeEnvironment(envPath)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "stop")
 	if delete {
@@ -90,34 +76,27 @@ func getStopBashCmd(datadir string, delete bool) *exec.Cmd {
 	bashCmd.Stderr = os.Stderr
 	bashCmd.Env = env
 
-	return bashCmd
-}
-
-// cleanVolumes navigates into <datadir>/resources/volumes/<network>
-// and deletes all files and directories but the *.conf config files.
-func cleanVolumes(datadir string) error {
-	network := config.GetString(config.Network)
-	attachLiquid := config.GetBool(config.AttachLiquid)
-	if attachLiquid {
-		network = fmt.Sprintf("liquid%s", network)
-	}
-	volumedir := filepath.Join(datadir, "resources", "volumes", network)
-
-	subdirs, err := ioutil.ReadDir(volumedir)
-	if err != nil {
+	if err := bashCmd.Run(); err != nil {
 		return err
 	}
 
-	for _, d := range subdirs {
-		volumedir := filepath.Join(volumedir, d.Name())
-		subsubdirs, _ := ioutil.ReadDir(volumedir)
-		for _, sd := range subsubdirs {
-			if sd.IsDir() {
-				if err := os.RemoveAll(filepath.Join(volumedir, sd.Name())); err != nil {
-					return err
-				}
-			}
+	if delete {
+		fmt.Println("Removing data from volumes...")
+		if err := ctl.CleanResourceVolumes(datadir); err != nil {
+			return err
 		}
+
+		fmt.Println("Removing configuration file...")
+		if err := os.Remove(configPath); err != nil {
+			return err
+		}
+
+		fmt.Println("Removing environmet file...")
+		if err := os.Remove(envPath); err != nil {
+			return err
+		}
+
+		fmt.Println("Nigiri has been cleaned up successfully.")
 	}
 
 	return nil

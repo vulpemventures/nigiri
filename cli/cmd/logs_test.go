@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/vulpemventures/nigiri/cli/constants"
 )
 
 var (
@@ -41,7 +43,7 @@ func TestLogLiquidServices(t *testing.T) {
 }
 
 func TestLogShouldFail(t *testing.T) {
-	expectedError := "Nigiri is not running"
+	expectedError := constants.ErrNigiriNotRunning.Error()
 
 	err := testCommand("logs", serviceList[0], bitcoin)
 	if err == nil {
@@ -65,7 +67,7 @@ func TestStartBitcoinAndLogNigiriServicesShouldFail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedError := "Nigiri has been started with no Liquid sidechain.\nPlease stop and restart it using the --liquid flag"
+	expectedError := constants.ErrNigiriLiquidNotEnabled.Error()
 
 	err := testCommand("logs", serviceList[0], liquid)
 	if err == nil {

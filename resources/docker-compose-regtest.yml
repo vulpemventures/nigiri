@@ -41,7 +41,7 @@ services:
       - bitcoin
     ports:
       - ${BITCOIN_ELECTRS_RPC_PORT}:60401
-      - 3002:3002
+      - ${BITCOIN_ELECTRS_PORT}:3002
     volumes:
       - ./volumes/regtest/config/:/config
     restart: unless-stopped
@@ -52,9 +52,11 @@ services:
       local:
         ipv4_address: 10.10.0.12
     links:
-      - electrs
+      - chopsticks
     depends_on:
-      - electrs
+      - chopsticks
+    environment:
+      API_URL: ${BITCOIN_ESPLORA_URL}
     ports:
       - ${BITCOIN_ESPLORA_PORT}:5000
     restart: unless-stopped

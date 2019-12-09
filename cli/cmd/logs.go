@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
-	"reflect"
 
-	"github.com/vulpemventures/nigiri/cli/config"
+	"github.com/vulpemventures/nigiri/cli/constants"
+	"github.com/vulpemventures/nigiri/cli/controller"
 
 	"github.com/spf13/cobra"
 )
@@ -18,42 +17,39 @@ var LogsCmd = &cobra.Command{
 	PreRunE: logsChecks,
 }
 
-var services = map[string]bool{
-	"node":       true,
-	"electrs":    true,
-	"esplora":    true,
-	"chopsticks": true,
-}
-
 func logsChecks(cmd *cobra.Command, args []string) error {
 	datadir, _ := cmd.Flags().GetString("datadir")
 	isLiquidService, _ := cmd.Flags().GetBool("liquid")
 
-	if !isDatadirOk(datadir) {
-		return fmt.Errorf("Invalid datadir, it must be an absolute path: %s", datadir)
-	}
-	if len(args) != 1 {
-		return fmt.Errorf("Invalid number of args, expected 1, got: %d", len(args))
-	}
-
-	service := args[0]
-	if !services[service] {
-		return fmt.Errorf("Invalid service, must be one of %s. Got: %s", reflect.ValueOf(services).MapKeys(), service)
-	}
-	isRunning, err := nigiriIsRunning()
+	ctl, err := controller.NewController()
 	if err != nil {
 		return err
 	}
-	if !isRunning {
-		return fmt.Errorf("Nigiri is not running")
+
+	if err := ctl.ParseDatadir(datadir); err != nil {
+		return err
+	}
+	if len(args) != 1 {
+		return constants.ErrInvalidArgs
 	}
 
-	if err := config.ReadFromFile(datadir); err != nil {
+	service := args[0]
+	if err := ctl.ParseServiceName(service); err != nil {
 		return err
 	}
 
-	if isLiquidService && isLiquidService != config.GetBool(config.AttachLiquid) {
-		return fmt.Errorf("Nigiri has been started with no Liquid sidechain.\nPlease stop and restart it using the --liquid flag")
+	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
+		return err
+	} else if !isRunning {
+		return constants.ErrNigiriNotRunning
+	}
+
+	if err := ctl.ReadConfigFile(datadir); err != nil {
+		return err
+	}
+
+	if isLiquidService && isLiquidService != ctl.GetConfigBoolField(constants.AttachLiquid) {
+		return constants.ErrNigiriLiquidNotEnabled
 	}
 
 	return nil
@@ -64,10 +60,15 @@ func logs(cmd *cobra.Command, args []string) error {
 	datadir, _ := cmd.Flags().GetString("datadir")
 	isLiquidService, _ := cmd.Flags().GetBool("liquid")
 
-	serviceName := getServiceName(service, isLiquidService)
-	composePath := getPath(datadir, "compose")
-	envPath := getPath(datadir, "env")
-	env := loadEnv(envPath)
+	ctl, err := controller.NewController()
+	if err != nil {
+		return err
+	}
+
+	serviceName := ctl.GetServiceName(service, isLiquidService)
+	composePath := ctl.GetResourcePath(datadir, "compose")
+	envPath := ctl.GetResourcePath(datadir, "env")
+	env := ctl.LoadComposeEnvironment(envPath)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "logs", serviceName)
 	bashCmd.Stdout = os.Stdout
@@ -79,20 +80,4 @@ func logs(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func getServiceName(name string, liquid bool) string {
-	service := name
-	if service == "node" {
-		service = "bitcoin"
-	}
-	if liquid {
-		if service == "bitcoin" {
-			service = "liquid"
-		} else {
-			service = fmt.Sprintf("%s-liquid", service)
-		}
-	}
-
-	return service
 }
