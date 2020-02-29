@@ -63,8 +63,6 @@ services:
   # Chopsticks
   chopsticks:
     image: vulpemventures/nigiri-chopsticks:latest
-    entrypoint:
-      - /build/chopsticks
     command:
       - --use-faucet
       - --use-mining
