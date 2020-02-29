@@ -16,7 +16,7 @@ No time to make a Nigiri yourself?
 $ curl https://getnigiri.vulpem.com | bash
 ```
 
-This will create a directory `~/.nigiri` copying there `{bitcoin|liquid}.conf` you can modify.
+This will create a directory `~/.nigiri` copying there `{bitcoin|elements}.conf` you can modify.
 
 
 * Lauch Docker daemon (Mac OSX)
@@ -63,7 +63,7 @@ $ git clone https://github.com/vulpemventures/nigiri.git
 $ bash scripts/install
 ```
 
-This will create `~/.nigiri` copying there the `{bitcoin|liquid}.conf` you can modify.
+This will create `~/.nigiri` copying there the `{bitcoin|elements}.conf` you can modify.
 
 * Build binary 
 ```
