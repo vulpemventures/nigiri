@@ -62,6 +62,8 @@ services:
       - /build/electrs
     command:
       - -vvvv
+      - --parent-network
+      - regtest
       - --network
       - liquidregtest
       - --daemon-dir
