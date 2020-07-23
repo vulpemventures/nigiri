@@ -136,8 +136,8 @@ Run the `help` command to see the full list of available flags.
 
 ### Bitcoin & Liquid
 
-`POST /faucet` which expects a body `{ "address": <receiving_address> }` 
-`POST /tx` has been extended to automatically mine a block when is called.
+- `POST /faucet` which expects a body `{ "address": <receiving_address> }` 
+- `POST /tx` has been extended to automatically mine a block when is called.
 
 ### Liquid only
 
