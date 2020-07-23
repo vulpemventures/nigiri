@@ -131,7 +131,7 @@ Run the `help` command to see the full list of available flags.
 
 ## Nutrition Facts
 
-`Chopsticks` exposes all [Esplora's available endpoints](https://github.com/blockstream/esplora/blob/master/API.md) and extends them with the following:
+`Chopsticks` service exposes on port `3000` (and on `3001` if started with `--liquid` flag) all [Esplora's available endpoints](https://github.com/blockstream/esplora/blob/master/API.md) and extends them with the following:
 
 
 ### Bitcoin & Liquid
