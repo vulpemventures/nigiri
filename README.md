@@ -84,25 +84,45 @@ Note: Remeber to always `clean` Nigiri before running `install` after a pull.
 
 ## Tasting
 
-At the moment bitcoind, liquidd and electrs are started on *regtest* network. *testnet* and *mainnet* compose files will be released soon.
+At the moment bitcoind, elements and electrs are started on *regtest* network.
 
 
 *  Start nigiri:
 
 ```bash
-$ ./nigiri start
+$ nigiri start
 ```
-
 Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
 
 * Stop nigiri:
 
 ```bash
-$ ./nigiri stop
+$ nigiri stop
 ```
-
 Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
 
+
+* Check the logs of Bitcoin services
+
+```bash
+# Bitcoind
+$ nigiri logs node
+# Electrs
+$ nigiri logs electrs
+# Chopsticks
+$ nigiri logs chopsticks
+```
+
+* Check the logs of Liquid services
+
+```bash
+# Elementsd
+$ nigiri logs node --liquid
+# Electrs Liquid
+$ nigiri logs electrs --liquid
+# Chopsticks Liquid
+$ nigiri logs chopsticks --liquid
+```
 
 Nigiri uses the default directory `~/.nigiri` to store configuration files and docker-compose files.
 To set a custom directory use the `--datadir` flag.
@@ -111,7 +131,19 @@ Run the `help` command to see the full list of available flags.
 
 ## Nutrition Facts
 
-The [list](https://github.com/blockstream/esplora/blob/master/API.md) of all available endpoints can be extended with one more `POST /faucet` which expects a body `{ "address": <receiving_address> }` by enabling faucet.
+`Chopsticks` service exposes on port `3000` (and on `3001` if started with `--liquid` flag) all [Esplora's available endpoints](https://github.com/blockstream/esplora/blob/master/API.md) and extends them with the following:
+
+
+### Bitcoin & Liquid
+
+- `POST /faucet` which expects a body `{ "address": <receiving_address> }` 
+- `POST /tx` has been extended to automatically mine a block when is called.
+
+### Liquid only
+
+- `POST /mint` which expects a body `{"address": "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq", "quantity": 1000, "name":"VULPEM", "ticker":"VLP"}` 
+- `POST /registry` to get extra info about one or more assets like `name` and `ticker` which expects a body with an array of assets `{"assets": ["2dcf5a8834645654911964ec3602426fd3b9b4017554d3f9c19403e7fc1411d3"]}`
+
 
 ## Footnotes
 
