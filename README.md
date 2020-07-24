@@ -75,12 +75,18 @@ $ bash scripts/build darwin amd64
 $ bash scripts/build linux amd64
 ```
 
-* Remove nigiri
+Done! You should be able to find the binary in the local `./build` folder. Give it permission to execute and move/rename into your PATH.
+
+
+* Clean
+
+Remeber to always `clean` Nigiri before running `install` to upgrade to a new version.
+
 ```
 $ bash scripts/clean
 ```
 
-Note: Remeber to always `clean` Nigiri before running `install` after a pull.
+
 
 ## Tasting
 
