@@ -7,6 +7,7 @@ services:
       local:
         ipv4_address: 10.10.0.10
     ports:
+      - ${BITCOIN_PEER_PORT}:19000
       - ${BITCOIN_NODE_PORT}:19001
     volumes:
       - ./volumes/regtest/config/:/config
