@@ -6,5 +6,6 @@ services:
 
 script:
   - bash scripts/install
+  - mkdir -p $HOME/.nigiri/config $HOME/.nigiri/liquid-config
   - chmod -R 777 $HOME/.nigiri
   - go test -v ./...
