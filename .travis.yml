@@ -1,8 +1,9 @@
 language: go
+go:
+  - 1.14.x
 services:
   - docker
 
 script:
-  - export GO111MODULE=on
   - bash scripts/install
   - go test -v ./...
