@@ -1,11 +1,8 @@
+language: go
 services:
   - docker
 
 script:
-  # Install Go
-  - wget -q https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
-  - tar -xf go1.13.4.linux-amd64.tar.gz -C /usr/local && rm -rf go*
-  - chmod a+x /usr/local/go
   - export GO111MODULE=on
   - bash scripts/install
   - go test -v ./...
