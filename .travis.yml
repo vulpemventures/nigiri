@@ -6,4 +6,5 @@ services:
 
 script:
   - bash scripts/install
+  - chmod -R 777 $HOME/.nigiri
   - go test -v ./...
