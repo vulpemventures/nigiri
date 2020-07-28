@@ -7,5 +7,5 @@ services:
 
 script:
   - bash scripts/install
-  - sudo chmod -R 777 $HOME/.nigiri/resources/volumes
+  - sudo chmod -R 777 .
   - go test -v ./...
