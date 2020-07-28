@@ -1,0 +1,12 @@
+sudo: true
+language: go
+go:
+  - 1.14.x
+services:
+  - docker
+
+script:
+  - if [ -n "$(gofmt -l .)" ]; then echo "Go code is not formatted"; exit 1; fi
+  - bash scripts/install
+  - sudo chmod -R 777 .
+  - go test -v ./...
