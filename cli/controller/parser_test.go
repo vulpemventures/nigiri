@@ -84,7 +84,7 @@ var testJSONs = []map[string]interface{}{
 		},
 		"ports": map[string]map[string]int{
 			"bitcoin": map[string]int{
-			    "peer":       1111,
+				"peer":       1111,
 				"node":       2222,
 				"esplora":    3333,
 				"electrs":    4444,
@@ -101,10 +101,10 @@ var testJSONs = []map[string]interface{}{
 		"ports": map[string]map[string]int{
 			"bitcoin": map[string]int{
 				"peer":       1111,
-                "node":       2222,
-                "esplora":    3333,
-                "electrs":    4444,
-                "chopsticks": 5555,
+				"node":       2222,
+				"esplora":    3333,
+				"electrs":    4444,
+				"chopsticks": 5555,
 			},
 			"liquid": map[string]int{
 				"peer":       6666,

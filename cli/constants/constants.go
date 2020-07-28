@@ -38,7 +38,7 @@ var (
 				"chopsticks":  3000,
 			},
 			"liquid": map[string]int{
-			    "peer":        7040,
+				"peer":        7040,
 				"node":        7041,
 				"esplora":     5001,
 				"electrs":     3012,
