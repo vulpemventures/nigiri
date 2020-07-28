@@ -19,7 +19,7 @@ services:
         ipv4_address: 10.10.0.11
     ports:
       - ${LIQUID_NODE_PORT}:18884
-      - 18886:18886
+      - ${LIQUID_PEER_PORT}:18886
     volumes:
       - ./volumes/liquidregtest/liquid-config/:/config
     restart: unless-stopped
