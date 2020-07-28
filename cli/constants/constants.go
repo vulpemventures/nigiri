@@ -30,6 +30,7 @@ var (
 	DefaultEnv = map[string]interface{}{
 		"ports": map[string]map[string]int{
 			"bitcoin": map[string]int{
+				"peer":        18432,
 				"node":        18433,
 				"esplora":     5000,
 				"electrs":     3002,
@@ -37,6 +38,7 @@ var (
 				"chopsticks":  3000,
 			},
 			"liquid": map[string]int{
+				"peer":        7040,
 				"node":        7041,
 				"esplora":     5001,
 				"electrs":     3012,

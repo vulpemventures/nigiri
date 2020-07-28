@@ -96,6 +96,7 @@ func (e *Env) load(path string) []string {
 }
 
 type envPortsData struct {
+	Peer       int `json:"peer,omitempty"`
 	Node       int `json:"node,omitempty"`
 	Esplora    int `json:"esplora,omitempty"`
 	Electrs    int `json:"electrs,omitempty"`
