@@ -7,9 +7,8 @@ It offers a [JSON HTTP proxy passtrough](https://github.com/vulpemventures/nigir
 You can have Elements too with the `--liquid` flag.
 
 
-
+# No time to make a Nigiri yourself?
 ## Pre-built binary
-No time to make a Nigiri yourself?
 
 
 * Download and install `nigiri` command line interface
@@ -35,6 +34,21 @@ $ nigiri start --liquid
 That's it.
 Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http://localhost:5001 for Liquid.
 
+* Use the Bitcoin CLI inside the box
+
+```
+$ alias bcli='docker exec -it resources_bitcoin_1 bitcoin-cli -datadir=config'
+$ bcli getblockchaininfo
+```
+
+* Use the Elements CLI inside the box
+
+```
+$ alias ecli='docker exec -it resources_liquid_1 elements-cli -datadir=config'
+$ ecli getblockchaininfo
+```
+
+# Make from scratch
 ## Utensils
 
 * [Docker (compose)](https://docs.docker.com/compose/)
@@ -128,6 +142,20 @@ $ nigiri logs node --liquid
 $ nigiri logs electrs --liquid
 # Chopsticks Liquid
 $ nigiri logs chopsticks --liquid
+```
+
+* Use the Bitcoin CLI inside the box
+
+```
+$ alias bcli='docker exec -it resources_bitcoin_1 bitcoin-cli -datadir=config'
+$ bcli getblockchaininfo
+```
+
+* Use the Elements CLI inside the box
+
+```
+$ alias ecli='docker exec -it resources_liquid_1 elements-cli -datadir=config'
+$ ecli getblockchaininfo
 ```
 
 Nigiri uses the default directory `~/.nigiri` to store configuration files and docker-compose files.
