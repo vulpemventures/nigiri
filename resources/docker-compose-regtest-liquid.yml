@@ -50,8 +50,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.12
-    links:
-      - bitcoin
     depends_on:
       - bitcoin
     ports:
@@ -86,8 +84,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.13
-    links:
-      - liquid
     depends_on:
       - liquid
     ports:
@@ -103,8 +99,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.14
-    links:
-      - chopsticks
     depends_on:
       - chopsticks
     environment:
@@ -118,8 +112,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.15
-    links:
-      - chopsticks-liquid
     depends_on:
       - chopsticks-liquid
     environment:
@@ -141,9 +133,6 @@ services:
       - 10.10.0.12:3002
       - --addr
       - 0.0.0.0:3000
-    links:
-      - electrs
-      - bitcoin
     depends_on:
       - electrs
     ports:
@@ -166,9 +155,6 @@ services:
       - --addr
       - 0.0.0.0:3000
       - --chain
-      - liquid
-    links:
-      - electrs-liquid
       - liquid
     depends_on:
       - electrs-liquid

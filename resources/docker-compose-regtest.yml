@@ -38,8 +38,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.11
-    links:
-      - bitcoin
     depends_on:
       - bitcoin
     ports:
@@ -55,8 +53,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.12
-    links:
-      - chopsticks
     depends_on:
       - chopsticks
     environment:
@@ -81,9 +77,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.13
-    links:
-      - bitcoin
-      - electrs
     depends_on:
       - electrs
     ports:
