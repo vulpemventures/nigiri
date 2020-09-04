@@ -157,6 +157,7 @@ services:
       - --chain
       - liquid
     depends_on:
+      - liquid
       - electrs-liquid
     ports:
       - ${LIQUID_CHOPSTICKS_PORT}:3000

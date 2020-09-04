@@ -78,6 +78,7 @@ services:
       local:
         ipv4_address: 10.10.0.13
     depends_on:
+      - bitcoin
       - electrs
     ports:
       - ${BITCOIN_CHOPSTICKS_PORT}:3000
