@@ -19,7 +19,7 @@ var LogsCmd = &cobra.Command{
 
 var NodeCmd = &cobra.Command{
 	Use:   "node",
-	Short: "Check logs for node",
+	Short: "Check logs for node service",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		logs(cmd, []string{"node"})
 		return nil
