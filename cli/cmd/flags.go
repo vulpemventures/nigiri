@@ -50,6 +50,7 @@ func init() {
 	NodeCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 	ElectrsCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 	ChopsticksCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
+	EsploraCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 
 	viper.BindPFlag(constants.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
 	viper.BindPFlag(constants.Network, StartCmd.PersistentFlags().Lookup("network"))
