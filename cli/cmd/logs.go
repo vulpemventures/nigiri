@@ -11,10 +11,43 @@ import (
 )
 
 var LogsCmd = &cobra.Command{
-	Use:     "logs SERVICE",
+	Use:     "logs [command]",
 	Short:   "Check service logs",
 	RunE:    logs,
 	PreRunE: logsChecks,
+}
+
+var NodeCmd = &cobra.Command{
+	Use:   "node",
+	Short: "Check logs for node",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		logs(cmd, []string{"node"})
+		return nil
+	},
+}
+var ElectrsCmd = &cobra.Command{
+	Use:   "electrs",
+	Short: "Check logs for electrs",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		logs(cmd, []string{"electrs"})
+		return nil
+	},
+}
+var ChopsticksCmd = &cobra.Command{
+	Use:   "chopsticks",
+	Short: "Check logs for chopsticks",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		logs(cmd, []string{"chopsticks"})
+		return nil
+	},
+}
+var EsploraCmd = &cobra.Command{
+	Use:   "esplora",
+	Short: "Check logs for esplora",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		logs(cmd, []string{"esplora"})
+		return nil
+	},
 }
 
 func logsChecks(cmd *cobra.Command, args []string) error {

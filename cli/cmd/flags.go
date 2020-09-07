@@ -37,11 +37,19 @@ func init() {
 	StartCmd.PersistentFlags().BoolVar(&flagAttachLiquid, "liquid", false, "Enable liquid sidechain")
 	StartCmd.PersistentFlags().StringVar(&flagEnv, "env", string(defaultJSON), "Set compose env in JSON format")
 	StopCmd.PersistentFlags().BoolVar(&flagDelete, "delete", false, "Stop and delete nigiri")
-	LogsCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
 	RootCmd.AddCommand(LogsCmd)
+
+	LogsCmd.AddCommand(NodeCmd)
+	LogsCmd.AddCommand(ElectrsCmd)
+	LogsCmd.AddCommand(ChopsticksCmd)
+	LogsCmd.AddCommand(EsploraCmd)
+
+	NodeCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
+	ElectrsCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
+	ChopsticksCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 
 	viper.BindPFlag(constants.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
 	viper.BindPFlag(constants.Network, StartCmd.PersistentFlags().Lookup("network"))
