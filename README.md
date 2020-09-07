@@ -6,6 +6,8 @@ It offers a [JSON HTTP proxy passtrough](https://github.com/vulpemventures/nigir
 
 You can have Elements too with the `--liquid` flag.
 
+Are you looking to spin-up Nigiri in Travis or Github Action? Look [here](https://github.com/vulpemventures/nigiri-travis)
+
 
 # No time to make a Nigiri yourself?
 ## Pre-built binary
