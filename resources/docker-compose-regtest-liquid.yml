@@ -134,6 +134,7 @@ services:
       - --addr
       - 0.0.0.0:3000
     depends_on:
+      - bitcoin
       - electrs
     ports:
       - ${BITCOIN_CHOPSTICKS_PORT}:3000
