@@ -11,7 +11,7 @@ import (
 )
 
 var LogsCmd = &cobra.Command{
-	Use:     "logs",
+	Use:     "logs SERVICE",
 	Short:   "Check service logs",
 	RunE:    logs,
 	PreRunE: logsChecks,
