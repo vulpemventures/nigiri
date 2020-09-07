@@ -6,6 +6,8 @@ It offers a [JSON HTTP proxy passtrough](https://github.com/vulpemventures/nigir
 
 You can have Elements too with the `--liquid` flag.
 
+Are you looking to spin-up Nigiri in Travis or Github Action? Look [here](https://github.com/vulpemventures/nigiri-travis)
+
 
 # No time to make a Nigiri yourself?
 ## Pre-built binary
@@ -37,14 +39,14 @@ Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http:/
 * Use the Bitcoin CLI inside the box
 
 ```
-$ alias bcli='docker exec -it resources_bitcoin_1 bitcoin-cli -datadir=config'
+$ alias bcli='docker exec -it bitcoin bitcoin-cli -datadir=config'
 $ bcli getblockchaininfo
 ```
 
 * Use the Elements CLI inside the box
 
 ```
-$ alias ecli='docker exec -it resources_liquid_1 elements-cli -datadir=config'
+$ alias ecli='docker exec -it liquid elements-cli -datadir=config'
 $ ecli getblockchaininfo
 ```
 
@@ -147,14 +149,14 @@ $ nigiri logs chopsticks --liquid
 * Use the Bitcoin CLI inside the box
 
 ```
-$ alias bcli='docker exec -it resources_bitcoin_1 bitcoin-cli -datadir=config'
+$ alias bcli='docker exec -it bitcoin bitcoin-cli -datadir=config'
 $ bcli getblockchaininfo
 ```
 
 * Use the Elements CLI inside the box
 
 ```
-$ alias ecli='docker exec -it resources_liquid_1 elements-cli -datadir=config'
+$ alias ecli='docker exec -it liquid elements-cli -datadir=config'
 $ ecli getblockchaininfo
 ```
 

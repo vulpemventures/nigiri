@@ -3,6 +3,7 @@ services:
   # RPC daemon
   bitcoin:
     image: vulpemventures/bitcoin:latest
+    container_name: bitcoin
     networks:
       local:
         ipv4_address: 10.10.0.10
@@ -15,6 +16,7 @@ services:
   # Block explorer server
   electrs:
     image: vulpemventures/electrs:latest
+    container_name: electrs
     entrypoint:
       - /build/electrs
     command:
@@ -36,8 +38,6 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.11
-    links:
-      - bitcoin
     depends_on:
       - bitcoin
     ports:
@@ -49,11 +49,10 @@ services:
   # Block explorer frontend
   esplora:
     image: vulpemventures/esplora:latest
+    container_name: esplora
     networks:
       local:
         ipv4_address: 10.10.0.12
-    links:
-      - chopsticks
     depends_on:
       - chopsticks
     environment:
@@ -64,6 +63,7 @@ services:
   # Chopsticks
   chopsticks:
     image: vulpemventures/nigiri-chopsticks:latest
+    container_name: chopsticks
     command:
       - --use-faucet
       - --use-mining
@@ -77,10 +77,8 @@ services:
     networks:
       local:
         ipv4_address: 10.10.0.13
-    links:
-      - bitcoin
-      - electrs
     depends_on:
+      - bitcoin
       - electrs
     ports:
       - ${BITCOIN_CHOPSTICKS_PORT}:3000
