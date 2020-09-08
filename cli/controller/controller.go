@@ -9,7 +9,7 @@ import (
 	"github.com/vulpemventures/nigiri/cli/constants"
 )
 
-var services = map[string]bool{
+var Services = map[string]bool{
 	"node":       true,
 	"esplora":    true,
 	"electrs":    true,
@@ -37,7 +37,7 @@ func NewController() (*Controller, error) {
 		return nil, err
 	}
 	c.env = &Env{}
-	c.parser = newParser(services)
+	c.parser = newParser(Services)
 	c.docker = dockerClient
 	c.config = &config.Config{}
 	return c, nil
