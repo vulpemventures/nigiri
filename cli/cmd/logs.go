@@ -15,8 +15,13 @@ var logsDescription = "Check Service logs. Requires one Service: " + servicesLis
 
 var LogsCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
-		_, found := controller.Services[args[0]]
-		if !found {
+
+		if len(args) == 1 {
+			_, found := controller.Services[args[0]]
+			if !found {
+				return errors.New(logsDescription)
+			}
+		} else {
 			return errors.New(logsDescription)
 		}
 		return nil
