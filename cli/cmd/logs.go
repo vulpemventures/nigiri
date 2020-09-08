@@ -36,9 +36,9 @@ func servicesList() string {
 	var servicesString string
 	for key, _ := range controller.Services {
 		servicesString += key
-		servicesString += " "
+		servicesString += " | "
 	}
-	return servicesString[:len(servicesString)-1]
+	return servicesString[:len(servicesString)-3]
 }
 
 func logsChecks(cmd *cobra.Command, args []string) error {
