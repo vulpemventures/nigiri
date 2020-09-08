@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 
@@ -10,11 +12,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var logsDescription = "Check Service logs. Requires one Service <node,electrs,esplora,chopsticks>"
+
 var LogsCmd = &cobra.Command{
-	Use:     "logs",
-	Short:   "Check service logs",
+	Args: func(cmd *cobra.Command, args []string) error {
+		_, found := controller.Services[args[0]]
+		if !found {
+			argsHelpPrint()
+			return errors.New("Requires one Service <node,electrs,esplora,chopsticks>")
+		}
+		return nil
+	},
+	Use:     "logs <service>",
+	Short:   logsDescription,
+	Long:    logsDescription,
 	RunE:    logs,
 	PreRunE: logsChecks,
+}
+
+func argsHelpPrint() {
+	fmt.Println("Usage:")
+	for key, _ := range controller.Services {
+		fmt.Println("  logs " + key + " [flags]")
+	}
 }
 
 func logsChecks(cmd *cobra.Command, args []string) error {
