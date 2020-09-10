@@ -150,6 +150,10 @@ func testCommand(command, arg string, flag bool) error {
 		logsCmd := []string{command, arg, fmt.Sprintf("--liquid=%t", flag)}
 		cmd.SetArgs(logsCmd)
 	}
+	if command == "faucet" {
+		faucetCmd := []string{command, arg, fmt.Sprintf("--liquid=%t", flag)}
+		cmd.SetArgs(faucetCmd)
+	}
 
 	if err := cmd.Execute(); err != nil {
 		return err

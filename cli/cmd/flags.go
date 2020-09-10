@@ -38,10 +38,12 @@ func init() {
 	StartCmd.PersistentFlags().StringVar(&flagEnv, "env", string(defaultJSON), "Set compose env in JSON format")
 	StopCmd.PersistentFlags().BoolVar(&flagDelete, "delete", false, "Stop and delete nigiri")
 	LogsCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
+	FaucetCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to donate liquid btc")
 
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
 	RootCmd.AddCommand(LogsCmd)
+	RootCmd.AddCommand(FaucetCmd)
 
 	viper.BindPFlag(constants.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
 	viper.BindPFlag(constants.Network, StartCmd.PersistentFlags().Lookup("network"))
