@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/vulpemventures/nigiri/cli/constants"
 	"github.com/vulpemventures/nigiri/cli/controller"
@@ -96,6 +97,8 @@ func testStart(t *testing.T, flag bool) {
 	if err := testCommand("start", "", flag); err != nil {
 		t.Fatal(err)
 	}
+	//Give some time to nigiri to be ready before calling
+	time.Sleep(2 * time.Second)
 	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
 		t.Fatal(err)
 	} else if !isRunning {
@@ -111,6 +114,8 @@ func testStop(t *testing.T) {
 	if err := testCommand("stop", "", !delete); err != nil {
 		t.Fatal(err)
 	}
+	//Give some time to nigiri to be ready before calling
+	time.Sleep(2 * time.Second)
 	if isStopped, err := ctl.IsNigiriStopped(); err != nil {
 		t.Fatal(err)
 	} else if !isStopped {

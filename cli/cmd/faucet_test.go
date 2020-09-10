@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"testing"
-	"time"
 
 	"github.com/vulpemventures/nigiri/cli/constants"
 )
@@ -15,9 +14,6 @@ const (
 func TestFaucetBitcoinServices(t *testing.T) {
 	testStart(t, bitcoin)
 
-	//Give some time to nigiri to be ready before calling
-	time.Sleep(2 * time.Second)
-
 	if err := testCommand("faucet", btcAddress, bitcoin); err != nil {
 		t.Fatal(err)
 	}
@@ -27,9 +23,6 @@ func TestFaucetBitcoinServices(t *testing.T) {
 
 func TestFaucetLiquidServices(t *testing.T) {
 	testStart(t, liquid)
-
-	//Give some time to nigiri to be ready before calling
-	time.Sleep(2 * time.Second)
 
 	if err := testCommand("faucet", liquidAddress, liquid); err != nil {
 		t.Fatal(err)
