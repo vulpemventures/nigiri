@@ -77,14 +77,13 @@ func faucet(cmd *cobra.Command, address []string) error {
 	envPath := ctl.GetResourcePath(datadir, "env")
 	env, _ := ctl.ReadComposeEnvironment(envPath)
 	envPorts := env["ports"].(map[string]map[string]int)
-
 	requestPort := envPorts["bitcoin"]["chopsticks"]
+	if isLiquidService {
+		requestPort = envPorts["liquid"]["chopsticks"]
+	}
 	payload, err := json.Marshal(request)
 	if err != nil {
 		return err
-	}
-	if isLiquidService {
-		requestPort = envPorts["liquid"]["chopsticks"]
 	}
 	req, err := http.Post("http://localhost:"+strconv.Itoa(requestPort)+"/faucet", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
