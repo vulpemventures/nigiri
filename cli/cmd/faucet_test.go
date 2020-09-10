@@ -11,19 +11,6 @@ const (
 	liquidAddress = "CTEsqL1x9ooWWG9HBaHUpvS2DGJJ4haYdkTQPKj9U8CCdwT5vcudhbYUT8oQwwoS11aYtdznobfgT8rj"
 )
 
-func TestFaucetBitcoinServices(t *testing.T) {
-	if err := testCommand("start", "", bitcoin); err != nil {
-		t.Fatal(err)
-	}
-	if err := testCommand("faucet", btcAddress, bitcoin); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := testCommand("stop", "", delete); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestFaucetLiquidServices(t *testing.T) {
 	if err := testCommand("start", "", liquid); err != nil {
 		t.Fatal(err)

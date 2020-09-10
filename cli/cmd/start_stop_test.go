@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os/exec"
 	"testing"
 
 	"github.com/vulpemventures/nigiri/cli/constants"
@@ -36,6 +38,22 @@ func TestStartStopBitcoin(t *testing.T) {
 	testStop(t)
 	// Start/Delete
 	testStart(t, bitcoin)
+	testDelete(t)
+}
+
+func TestFaucetBitcoinServices(t *testing.T) {
+	testStart(t, bitcoin)
+
+	out, err2 := exec.Command("docker", "ps", "-a").Output()
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	fmt.Printf(string(out))
+
+	if err := testCommand("faucet", btcAddress, bitcoin); err != nil {
+		t.Fatal(err)
+	}
+
 	testDelete(t)
 }
 

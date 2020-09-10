@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/vulpemventures/nigiri/cli/constants"
@@ -62,21 +63,30 @@ func faucetChecks(cmd *cobra.Command, args []string) error {
 
 func faucet(cmd *cobra.Command, address []string) error {
 	isLiquidService, err := cmd.Flags().GetBool("liquid")
+	datadir, _ := cmd.Flags().GetString("datadir")
 	if err != nil {
 		return err
 	}
 	request := map[string]string{
 		"address": address[0],
 	}
-	requestPort := "3000"
+	ctl, err := controller.NewController()
+	if err != nil {
+		return err
+	}
+	envPath := ctl.GetResourcePath(datadir, "env")
+	env, _ := ctl.ReadComposeEnvironment(envPath)
+	envPorts := env["ports"].(map[string]map[string]int)
+
+	requestPort := envPorts["bitcoin"]["chopsticks"]
 	payload, err := json.Marshal(request)
 	if err != nil {
 		return err
 	}
 	if isLiquidService {
-		requestPort = "3001"
+		requestPort = envPorts["liquid"]["chopsticks"]
 	}
-	req, err := http.Post("http://localhost:"+requestPort+"/faucet", "application/json", bytes.NewBuffer(payload))
+	req, err := http.Post("http://localhost:"+strconv.Itoa(requestPort)+"/faucet", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
