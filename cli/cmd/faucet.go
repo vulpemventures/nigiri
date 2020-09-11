@@ -85,13 +85,16 @@ func faucet(cmd *cobra.Command, address []string) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.Post("http://localhost:"+strconv.Itoa(requestPort)+"/faucet", "application/json", bytes.NewBuffer(payload))
+	res, err := http.Post("http://localhost:"+strconv.Itoa(requestPort)+"/faucet", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(req.Body)
+	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New(string(data))
 	}
 
 	var dat map[string]string

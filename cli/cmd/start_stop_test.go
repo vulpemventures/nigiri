@@ -98,7 +98,7 @@ func testStart(t *testing.T, flag bool) {
 		t.Fatal(err)
 	}
 	//Give some time to nigiri to be ready before calling
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
 		t.Fatal(err)
 	} else if !isRunning {
@@ -115,7 +115,7 @@ func testStop(t *testing.T) {
 		t.Fatal(err)
 	}
 	//Give some time to nigiri to be ready before calling
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 	if isStopped, err := ctl.IsNigiriStopped(); err != nil {
 		t.Fatal(err)
 	} else if !isStopped {
