@@ -93,7 +93,7 @@ func faucet(cmd *cobra.Command, address []string) error {
 	if err != nil {
 		return err
 	}
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return errors.New(string(data))
 	}
 
