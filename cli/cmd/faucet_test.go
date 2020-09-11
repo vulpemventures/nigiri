@@ -12,6 +12,9 @@ const (
 )
 
 func TestFaucetBitcoinServices(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, bitcoin)
 
 	if err := testCommand("faucet", btcAddress, bitcoin); err != nil {
@@ -22,6 +25,9 @@ func TestFaucetBitcoinServices(t *testing.T) {
 }
 
 func TestFaucetLiquidServices(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, liquid)
 
 	if err := testCommand("faucet", liquidAddress, liquid); err != nil {
@@ -32,6 +38,9 @@ func TestFaucetLiquidServices(t *testing.T) {
 }
 
 func TestFaucetShouldFail(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	expectedError := constants.ErrNigiriNotRunning.Error()
 
 	err := testCommand("faucet", btcAddress, bitcoin)
@@ -52,6 +61,9 @@ func TestFaucetShouldFail(t *testing.T) {
 }
 
 func TestStartBitcoinAndFaucetNigiriServicesShouldFail(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, bitcoin)
 
 	expectedError := constants.ErrNigiriLiquidNotEnabled.Error()
