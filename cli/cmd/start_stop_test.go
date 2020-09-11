@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/vulpemventures/nigiri/cli/constants"
 	"github.com/vulpemventures/nigiri/cli/controller"
@@ -38,22 +37,6 @@ func TestStartStopBitcoin(t *testing.T) {
 	testStop(t)
 	// Start/Delete
 	testStart(t, bitcoin)
-	testDelete(t)
-}
-
-func TestFaucetBitcoinServices(t *testing.T) {
-	testStart(t, bitcoin)
-
-	out, err2 := exec.Command("docker", "ps", "-a").Output()
-	if err2 != nil {
-		log.Fatal(err2)
-	}
-	fmt.Printf(string(out))
-
-	if err := testCommand("faucet", btcAddress, bitcoin); err != nil {
-		t.Fatal(err)
-	}
-
 	testDelete(t)
 }
 
@@ -114,6 +97,8 @@ func testStart(t *testing.T, flag bool) {
 	if err := testCommand("start", "", flag); err != nil {
 		t.Fatal(err)
 	}
+	//Give some time to nigiri to be ready before calling
+	time.Sleep(2 * time.Second)
 	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
 		t.Fatal(err)
 	} else if !isRunning {
@@ -129,6 +114,8 @@ func testStop(t *testing.T) {
 	if err := testCommand("stop", "", !delete); err != nil {
 		t.Fatal(err)
 	}
+	//Give some time to nigiri to be ready before calling
+	time.Sleep(2 * time.Second)
 	if isStopped, err := ctl.IsNigiriStopped(); err != nil {
 		t.Fatal(err)
 	} else if !isStopped {
