@@ -96,7 +96,7 @@ func faucet(cmd *cobra.Command, address []string) error {
 
 	var dat map[string]string
 	if err := json.Unmarshal([]byte(data), &dat); err != nil {
-		return errors.New("Internal error. retry again")
+		return errors.New("Internal error. Try again.")
 	}
 	if dat["txId"] == "" {
 		return errors.New("Not Successful")
