@@ -85,7 +85,7 @@ func faucet(cmd *cobra.Command, address []string) error {
 	if err != nil {
 		return err
 	}
-	res, err := http.Post("http://0.0.0.0:"+strconv.Itoa(requestPort)+"/faucet", "application/json", bytes.NewBuffer(payload))
+	res, err := http.Post("http://127.0.0.1:"+strconv.Itoa(requestPort)+"/faucet", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
