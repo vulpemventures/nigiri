@@ -22,8 +22,8 @@ var FaucetCmd = &cobra.Command{
 		}
 		return nil
 	},
-	Use:     "faucet <bitcoinAddress>",
-	Short:   "calls the chopsticks endpoint /faucet to generate and send BTC",
+	Use:     "faucet <address>",
+	Short:   "Generate and send bitcoin to given address",
 	RunE:    faucet,
 	PreRunE: faucetChecks,
 }
@@ -93,6 +93,9 @@ func faucet(cmd *cobra.Command, address []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(string(data))
+
+	var dat map[string]string
+	json.Unmarshal([]byte(data), &dat)
+	fmt.Println("txId: " + dat["txId"])
 	return nil
 }

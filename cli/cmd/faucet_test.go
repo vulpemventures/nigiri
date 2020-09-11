@@ -52,9 +52,7 @@ func TestFaucetShouldFail(t *testing.T) {
 }
 
 func TestStartBitcoinAndFaucetNigiriServicesShouldFail(t *testing.T) {
-	if err := testCommand("start", "", bitcoin); err != nil {
-		t.Fatal(err)
-	}
+	testStart(t, bitcoin)
 
 	expectedError := constants.ErrNigiriLiquidNotEnabled.Error()
 
@@ -67,7 +65,5 @@ func TestStartBitcoinAndFaucetNigiriServicesShouldFail(t *testing.T) {
 		t.Fatalf("Expected error: %s, got: %s", expectedError, err)
 	}
 
-	if err := testCommand("stop", "", delete); err != nil {
-		t.Fatal(err)
-	}
+	testDelete(t)
 }
