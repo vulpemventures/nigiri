@@ -15,7 +15,7 @@ import (
 )
 
 var MintCmd = &cobra.Command{
-	Use:     "mint <address>",
+	Use:     "mint <address> <ammount>",
 	Short:   "Generate and send a given quantity of an asset",
 	RunE:    mint,
 	PreRunE: mintChecks,
@@ -33,7 +33,7 @@ func mintChecks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if len(args) < 2 {
-		return errors.New("Invalid number of arguments.\nnigiri mint <address> [name] [ticker] [flags]")
+		return errors.New("Invalid number of arguments.\nnigiri mint <address> <ammount> [name] [ticker]")
 	}
 
 	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
