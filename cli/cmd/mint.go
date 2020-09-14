@@ -95,7 +95,9 @@ func mint(cmd *cobra.Command, args []string) error {
 	var dat map[string]string
 
 	var resp string
-	json.Unmarshal([]byte(data), &dat)
+	if err := json.Unmarshal([]byte(data), &dat); err != nil {
+		return errors.New("Internal error. Try again.")
+	}
 	for key, element := range dat {
 		resp += key + ": " + element + " "
 	}

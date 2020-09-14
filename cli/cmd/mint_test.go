@@ -29,7 +29,7 @@ func TestMintTwoArgs(t *testing.T) {
 func TestMintThreeArgs(t *testing.T) {
 	testStart(t, liquid)
 
-	if err := testCommand("mint", "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq 1000 TEST TST", liquid); err != nil {
+	if err := testCommand("mint", "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq 3000 TEST TST", liquid); err != nil {
 		t.Fatal(err)
 	}
 	testDelete(t)
