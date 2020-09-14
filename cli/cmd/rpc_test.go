@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/vulpemventures/nigiri/cli/constants"
@@ -8,6 +10,11 @@ import (
 
 func TestRpcBitcoinCommand(t *testing.T) {
 	testStart(t, bitcoin)
+
+	bashCmd := exec.Command("docker", "ps", "-a")
+	bashCmd.Stdout = os.Stdout
+	bashCmd.Stderr = os.Stderr
+	bashCmd.Run()
 
 	if err := testCommand("rpc", "getblockchaininfo", bitcoin); err != nil {
 		t.Fatal(err)
