@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -32,7 +33,7 @@ func mintChecks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if len(args) < 2 {
-		return constants.ErrInvalidArgs
+		return errors.New("Invalid number of arguments.\nnigiri mint <address> [name] [ticker] [flags]")
 	}
 
 	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
