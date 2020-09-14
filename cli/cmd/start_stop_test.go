@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -158,6 +159,12 @@ func testCommand(command, arg string, flag bool) error {
 	if command == "faucet" {
 		faucetCmd := []string{command, arg, fmt.Sprintf("--liquid=%t", flag)}
 		cmd.SetArgs(faucetCmd)
+	}
+	if command == "rpc" {
+		logsCmd := []string{command, fmt.Sprintf("--liquid=%t", flag)}
+		args := strings.Fields(arg)
+		logsCmd = append(logsCmd, args...)
+		cmd.SetArgs(logsCmd)
 	}
 
 	if err := cmd.Execute(); err != nil {
