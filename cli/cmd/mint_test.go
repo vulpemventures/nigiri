@@ -19,9 +19,6 @@ func TestMintOneArg(t *testing.T) {
 func TestMintTwoArgs(t *testing.T) {
 	testStart(t, liquid)
 
-	if err := testCommand("mint", "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq 1000", liquid); err != nil {
-		t.Fatal(err)
-	}
 	if err := testCommand("mint", "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq 2000 Test", liquid); err != nil {
 		t.Fatal(err)
 	}
@@ -30,15 +27,13 @@ func TestMintTwoArgs(t *testing.T) {
 }
 
 func TestMintThreeArgs(t *testing.T) {
-	expectedError := constants.ErrNigiriNotRunning.Error()
+	testStart(t, liquid)
 
-	err := testCommand("mint", "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq 1000", liquid)
-	if err == nil {
-		t.Fatal("Should return error when Nigiri is stopped")
+	if err := testCommand("mint", "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq 1000 TEST TST", liquid); err != nil {
+		t.Fatal(err)
 	}
-	if err.Error() != expectedError {
-		t.Fatalf("Expected error: %s, got: %s", expectedError, err)
-	}
+	testDelete(t)
+
 }
 
 func TestStartBitcoinAndMintShouldFail(t *testing.T) {
