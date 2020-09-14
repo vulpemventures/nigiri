@@ -11,7 +11,7 @@ import (
 
 var RpcCmd = &cobra.Command{
 	Use:     "rpc <command>",
-	Short:   "Wrapper for accessing the bitcoin-cli and elements-cli",
+	Short:   "Invoke the bitcoin-cli or elements-cli",
 	RunE:    rpc,
 	PreRunE: rpcChecks,
 }

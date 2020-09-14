@@ -1,20 +1,16 @@
 package cmd
 
 import (
-	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/vulpemventures/nigiri/cli/constants"
 )
 
 func TestRpcBitcoinCommand(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, bitcoin)
-
-	bashCmd := exec.Command("docker", "ps", "-a")
-	bashCmd.Stdout = os.Stdout
-	bashCmd.Stderr = os.Stderr
-	bashCmd.Run()
 
 	if err := testCommand("rpc", "getblockchaininfo", bitcoin); err != nil {
 		t.Fatal(err)
@@ -24,6 +20,9 @@ func TestRpcBitcoinCommand(t *testing.T) {
 }
 
 func TestRpcBitcoinTwoCommands(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, bitcoin)
 
 	if err := testCommand("rpc", "getblockhash 0", bitcoin); err != nil {
@@ -34,6 +33,9 @@ func TestRpcBitcoinTwoCommands(t *testing.T) {
 }
 
 func TestRpcLiquidCommand(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, liquid)
 
 	if err := testCommand("rpc", "getblockchaininfo", liquid); err != nil {
@@ -44,6 +46,9 @@ func TestRpcLiquidCommand(t *testing.T) {
 }
 
 func TestRpcLiquidTwoCommands(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, liquid)
 
 	if err := testCommand("rpc", "getblockhash 0", liquid); err != nil {
@@ -54,6 +59,9 @@ func TestRpcLiquidTwoCommands(t *testing.T) {
 }
 
 func TestRpcShouldFail(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	expectedError := constants.ErrNigiriNotRunning.Error()
 
 	err := testCommand("rpc", "getblockchaininfo", bitcoin)
@@ -74,6 +82,9 @@ func TestRpcShouldFail(t *testing.T) {
 }
 
 func TestStartBitcoinAndRpcNigiriServicesShouldFail(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, bitcoin)
 
 	expectedError := constants.ErrNigiriLiquidNotEnabled.Error()
