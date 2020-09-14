@@ -84,7 +84,7 @@ func mint(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.Post("http://localhost:"+strconv.Itoa(requestPort)+"/mint", "application/json", bytes.NewBuffer(payload))
+	req, err := http.Post("http://127.0.0.1:"+strconv.Itoa(requestPort)+"/mint", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
