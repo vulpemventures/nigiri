@@ -39,11 +39,13 @@ func init() {
 	StopCmd.PersistentFlags().BoolVar(&flagDelete, "delete", false, "Stop and delete nigiri")
 	LogsCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 	FaucetCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to donate liquid btc")
+	RpcCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to use liquid node")
 
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
 	RootCmd.AddCommand(LogsCmd)
 	RootCmd.AddCommand(FaucetCmd)
+	RootCmd.AddCommand(RpcCmd)
 
 	viper.BindPFlag(constants.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
 	viper.BindPFlag(constants.Network, StartCmd.PersistentFlags().Lookup("network"))
