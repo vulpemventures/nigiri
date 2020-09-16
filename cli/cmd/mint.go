@@ -84,18 +84,25 @@ func mint(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.Post("http://127.0.0.1:"+strconv.Itoa(requestPort)+"/mint", "application/json", bytes.NewBuffer(payload))
+	res, err := http.Post("http://127.0.0.1:"+strconv.Itoa(requestPort)+"/mint", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(req.Body)
+
+	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return errors.New(string(data))
 	}
 	var dat map[string]interface{}
 	var resp string
 	if err := json.Unmarshal([]byte(data), &dat); err != nil {
 		return errors.New("Internal error. Try again.")
+	}
+	if dat["txId"] == "" {
+		return errors.New("Not Successful")
 	}
 	for key, element := range dat {
 		if key == "issuance_txin" {
