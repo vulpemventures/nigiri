@@ -92,14 +92,22 @@ func mint(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	var dat map[string]string
-
+	var dat map[string]interface{}
 	var resp string
 	if err := json.Unmarshal([]byte(data), &dat); err != nil {
 		return errors.New("Internal error. Try again.")
 	}
 	for key, element := range dat {
-		resp += key + ": " + element + " "
+		if key == "issuance_txin" {
+			myMap := element.(map[string]interface{})
+			resp += key + ":\n"
+			for key2, element2 := range myMap {
+				resp += "  "
+				resp += key2 + ": " + fmt.Sprintf("%v", element2) + "\n"
+			}
+			continue
+		}
+		resp += key + ": " + fmt.Sprintf("%v", element) + "\n"
 	}
 	fmt.Println(resp[:len(resp)-1])
 	return nil
