@@ -166,6 +166,12 @@ func testCommand(command, arg string, flag bool) error {
 		logsCmd = append(logsCmd, args...)
 		cmd.SetArgs(logsCmd)
 	}
+	if command == "mint" {
+		logsCmd := []string{command}
+		args := strings.Fields(arg)
+		logsCmd = append(logsCmd, args...)
+		cmd.SetArgs(logsCmd)
+	}
 
 	if err := cmd.Execute(); err != nil {
 		return err

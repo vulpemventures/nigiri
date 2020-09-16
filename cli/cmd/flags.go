@@ -46,6 +46,7 @@ func init() {
 	RootCmd.AddCommand(LogsCmd)
 	RootCmd.AddCommand(FaucetCmd)
 	RootCmd.AddCommand(RpcCmd)
+	RootCmd.AddCommand(MintCmd)
 
 	viper.BindPFlag(constants.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
 	viper.BindPFlag(constants.Network, StartCmd.PersistentFlags().Lookup("network"))
