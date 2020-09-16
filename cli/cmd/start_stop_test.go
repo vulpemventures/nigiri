@@ -160,6 +160,10 @@ func testCommand(command, arg string, flag bool) error {
 		faucetCmd := []string{command, arg, fmt.Sprintf("--liquid=%t", flag)}
 		cmd.SetArgs(faucetCmd)
 	}
+	if command == "push" {
+		pushCmd := []string{command, arg, fmt.Sprintf("--liquid=%t", flag)}
+		cmd.SetArgs(pushCmd)
+	}
 	if command == "rpc" {
 		logsCmd := []string{command, fmt.Sprintf("--liquid=%t", flag)}
 		args := strings.Fields(arg)
