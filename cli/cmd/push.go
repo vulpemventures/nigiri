@@ -17,7 +17,7 @@ var PushCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 
 		if len(args) != 1 {
-			return errors.New("Insert receiving address")
+			return errors.New("Missing hex encoded transaction")
 		}
 		return nil
 	},
@@ -94,6 +94,6 @@ func push(cmd *cobra.Command, args []string) error {
 	if string(data) == "" {
 		return errors.New("Not Successful")
 	}
-	fmt.Println("txId: " + string(data))
+	fmt.Println("\ntxId: " + string(data))
 	return nil
 }
