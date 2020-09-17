@@ -5,13 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 )
 
 func TestPushBitcoinTransaction(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
 	testStart(t, bitcoin)
-	hex, err := getNewSignTransaction()
+	hex, err := getNewSignedTransaction()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,9 +27,12 @@ func TestPushBitcoinTransaction(t *testing.T) {
 	testDelete(t)
 }
 
-func getNewSignTransaction() (string, error) {
-	txId, address, _ := listUnspent()
-	hex, err := createRawTransaction(txId, address)
+func getNewSignedTransaction() (string, error) {
+	txId, vout, amount, err := listUnspent()
+	if err != nil {
+		return "", err
+	}
+	hex, err := createRawTransaction(txId, vout, amount)
 	if err != nil {
 		return "", err
 	}
@@ -36,27 +43,56 @@ func getNewSignTransaction() (string, error) {
 	return hexFinal, nil
 }
 
-func listUnspent() (string, string, error) {
+func listUnspent() (string, string, string, error) {
 	bashCmd, err := execCommand([]string{"listunspent"}, bitcoin)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 	type unspent map[string]interface{}
 	var unspentList []unspent
 	if err := json.Unmarshal([]byte(bashCmd), &unspentList); err != nil {
-		return "", "", errors.New("Internal error. Try again.")
+		return "", "", "", errors.New("Internal error. Try again.")
 	}
 	txId := fmt.Sprintf("%v", unspentList[0]["txid"])
-	address := fmt.Sprintf("%v", unspentList[0]["address"])
+	vout := fmt.Sprintf("%v", unspentList[0]["vout"])
+	amount := fmt.Sprintf("%v", unspentList[0]["amount"])
 
-	return txId, address, nil
+	return txId, vout, amount, nil
 }
 
-func createRawTransaction(txId string, address string) (string, error) {
-	inputs := `[{"txid" : "` + txId + `", "vout" : 0}]`
-	outputs := `{"` + address + `" : 49.9999}`
+func createRawTransaction(txId string, vout string, amount string) (string, error) {
 
-	bashCmd, err := execCommand([]string{"createrawtransaction", inputs, outputs}, bitcoin)
+	type inputs map[string]interface{}
+	var inputsList [1]inputs
+	inputsList[0] = make(inputs, 2)
+	inputsList[0]["txid"] = txId
+	inputsList[0]["vout"], _ = strconv.Atoi(vout)
+	inputsJson, err := json.Marshal(inputsList)
+	if err != nil {
+		return "", err
+	}
+
+	fee := 0.00001
+	amountInt, err := strconv.ParseFloat(amount, 64)
+	if err != nil {
+		return "", err
+	}
+	amountSend := fmt.Sprintf("%.6f", amountInt-fee)
+	sendAdress, err := execCommand([]string{"getnewaddress"}, bitcoin)
+	if err != nil {
+		return "", err
+	}
+
+	type outputs map[string]interface{}
+	var outputsList [1]outputs
+	outputsList[0] = make(outputs, 1)
+	outputsList[0][string(sendAdress)], _ = strconv.ParseFloat(amountSend, 64)
+	outputsJson, err := json.Marshal(outputsList)
+	if err != nil {
+		return "", err
+	}
+
+	bashCmd, err := execCommand([]string{"createrawtransaction", string(inputsJson), string(outputsJson)}, bitcoin)
 	if err != nil {
 		return "", err
 	}
