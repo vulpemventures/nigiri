@@ -19,11 +19,9 @@ func TestPushBitcoinTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if err := testCommand("push", hex, bitcoin); err != nil {
 		t.Fatal(err)
 	}
-
 	testDelete(t)
 }
 
@@ -36,11 +34,9 @@ func TestPushLiquidTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if err := testCommand("push", hex, liquid); err != nil {
 		t.Fatal(err)
 	}
-
 	testDelete(t)
 }
 
@@ -74,22 +70,24 @@ func listUnspent(isLiquid bool) (string, string, string, string, error) {
 	txId := fmt.Sprintf("%v", unspentList[0]["txid"])
 	vout := fmt.Sprintf("%v", unspentList[0]["vout"])
 	amount := fmt.Sprintf("%v", unspentList[0]["amount"])
-
+	asset := ""
 	if isLiquid {
-		asset := fmt.Sprintf("%v", unspentList[0]["asset"])
-		return txId, vout, amount, asset, nil
+		asset = fmt.Sprintf("%v", unspentList[0]["asset"])
 	}
-
-	return txId, vout, amount, "", nil
+	return txId, vout, amount, asset, nil
 }
 
 func createRawTransaction(txId string, vout string, amount string, asset string, isLiquid bool) (string, error) {
 	var bashCmd []byte
 	type inputs map[string]interface{}
 	var inputsList [1]inputs
+	voutInt, err := strconv.Atoi(vout)
+	if err != nil {
+		return "", err
+	}
 	inputsList[0] = make(inputs, 2)
 	inputsList[0]["txid"] = txId
-	inputsList[0]["vout"], _ = strconv.Atoi(vout)
+	inputsList[0]["vout"] = voutInt
 	inputsJson, err := json.Marshal(inputsList)
 	if err != nil {
 		return "", err
@@ -101,21 +99,11 @@ func createRawTransaction(txId string, vout string, amount string, asset string,
 	}
 	amountSend := fmt.Sprintf("%.6f", amountInt-fee)
 	sendAdress, err := execCommand([]string{"getnewaddress"}, isLiquid)
+	sendAdressString := string(sendAdress)
 	if err != nil {
 		return "", err
 	}
 	outputs := make(map[string]interface{})
-	if !isLiquid {
-		outputs[string(sendAdress)], _ = strconv.ParseFloat(amountSend, 64)
-		outputsJson, err := json.Marshal(outputs)
-		if err != nil {
-			return "", err
-		}
-		bashCmd, err = execCommand([]string{"createrawtransaction", string(inputsJson), string(outputsJson)}, bitcoin)
-		if err != nil {
-			return "", err
-		}
-	}
 	if isLiquid {
 		addressInfoJson, err := execCommand([]string{"getaddressinfo", string(sendAdress)}, isLiquid)
 		if err != nil {
@@ -125,24 +113,31 @@ func createRawTransaction(txId string, vout string, amount string, asset string,
 		if err := json.Unmarshal([]byte(addressInfoJson), &adressInfo); err != nil {
 			return "", errors.New("Internal error. Try again.")
 		}
-		sendAdressUnc := fmt.Sprintf("%v", adressInfo["unconfidential"])
-		outputs[sendAdressUnc], _ = strconv.ParseFloat(amountSend, 64)
+		sendAdressString = fmt.Sprintf("%v", adressInfo["unconfidential"])
 		outputs["fee"] = fee
-		outputsJson, err := json.Marshal(outputs)
-		if err != nil {
-			return "", err
-		}
+	}
+	outputs[sendAdressString], err = strconv.ParseFloat(amountSend, 64)
+	if err != nil {
+		return "", err
+	}
+	outputsJson, err := json.Marshal(outputs)
+	if err != nil {
+		return "", err
+	}
+	commandArgs := []string{"createrawtransaction", string(inputsJson), string(outputsJson)}
+	if isLiquid {
 		output_assets := make(map[string]interface{})
-		output_assets[sendAdressUnc] = asset
+		output_assets[sendAdressString] = asset
 		output_assets["fee"] = asset
 		output_assetsJson, err := json.Marshal(output_assets)
 		if err != nil {
 			return "", err
 		}
-		bashCmd, err = execCommand([]string{"createrawtransaction", string(inputsJson), string(outputsJson), "0", "false", string(output_assetsJson)}, isLiquid)
-		if err != nil {
-			return "", err
-		}
+		commandArgs = append(commandArgs, []string{"0", "false", string(output_assetsJson)}...)
+	}
+	bashCmd, err = execCommand(commandArgs, isLiquid)
+	if err != nil {
+		return "", err
 	}
 	return strings.Fields(string(bashCmd))[0], nil
 }
