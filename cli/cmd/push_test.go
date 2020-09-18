@@ -41,7 +41,6 @@ func TestPushLiquidTransaction(t *testing.T) {
 }
 
 func getNewSignedTransaction(isLiquid bool) (string, error) {
-	var hexFinal string
 	txId, vout, amount, asset, err := listUnspent(isLiquid)
 	if err != nil {
 		return "", err
@@ -50,7 +49,7 @@ func getNewSignedTransaction(isLiquid bool) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	hexFinal, err = signRawTransaction(hex, isLiquid)
+	hexFinal, err := signRawTransaction(hex, isLiquid)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +77,6 @@ func listUnspent(isLiquid bool) (string, string, string, string, error) {
 }
 
 func createRawTransaction(txId string, vout string, amount string, asset string, isLiquid bool) (string, error) {
-	var bashCmd []byte
 	type inputs map[string]interface{}
 	var inputsList [1]inputs
 	voutInt, err := strconv.Atoi(vout)
@@ -135,7 +133,7 @@ func createRawTransaction(txId string, vout string, amount string, asset string,
 		}
 		commandArgs = append(commandArgs, []string{"0", "false", string(output_assetsJson)}...)
 	}
-	bashCmd, err = execCommand(commandArgs, isLiquid)
+	bashCmd, err := execCommand(commandArgs, isLiquid)
 	if err != nil {
 		return "", err
 	}
