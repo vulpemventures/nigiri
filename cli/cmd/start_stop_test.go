@@ -172,6 +172,10 @@ func testCommand(command, arg string, flag bool) error {
 		logsCmd = append(logsCmd, args...)
 		cmd.SetArgs(logsCmd)
 	}
+	if command == "push" {
+		pushCmd := []string{command, arg, fmt.Sprintf("--liquid=%t", flag)}
+		cmd.SetArgs(pushCmd)
+	}
 
 	if err := cmd.Execute(); err != nil {
 		return err
