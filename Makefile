@@ -51,8 +51,8 @@ test: clean install
 	@echo "Testing..."
 	go test -v -count=1 -race ./...
 
-## test-ci: runs travis tests with default values
-test-ci: clean install
+## test-ci: runs travis tests
+test-ci:
 	@echo "Testing..."
 	go test -short -v ./...
 
