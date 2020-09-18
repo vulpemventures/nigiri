@@ -78,7 +78,7 @@ $ git clone https://github.com/vulpemventures/nigiri.git
 * Enter project directory and install dependencies:
 
 ```bash
-$ bash scripts/install
+$ make install
 ```
 
 This will create `~/.nigiri` copying there the `{bitcoin|elements}.conf` you can modify.
@@ -86,9 +86,9 @@ This will create `~/.nigiri` copying there the `{bitcoin|elements}.conf` you can
 * Build binary 
 ```
 # MacOSX
-$ bash scripts/build darwin amd64
+$ make build-mac
 # Linux 
-$ bash scripts/build linux amd64
+$ make build-linux
 ```
 
 Done! You should be able to find the binary in the local `./build` folder. Give it permission to execute and move/rename into your PATH.
@@ -99,7 +99,7 @@ Done! You should be able to find the binary in the local `./build` folder. Give 
 Remeber to always `clean` Nigiri before running `install` to upgrade to a new version.
 
 ```
-$ bash scripts/clean
+$ make clean
 ```
 
 
