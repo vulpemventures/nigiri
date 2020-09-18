@@ -6,7 +6,6 @@ services:
   - docker
 
 script:
-  - if [ -n "$(gofmt -l .)" ]; then echo "Go code is not formatted"; exit 1; fi
-  - bash scripts/install
+  - make fmt
   - sudo chmod -R 777 .
-  - go test -short -v ./...
+  - make test-ci
