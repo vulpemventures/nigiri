@@ -30,3 +30,4 @@ changelog:
       - '^test:'
 archives:
   - format: binary
+  - name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
