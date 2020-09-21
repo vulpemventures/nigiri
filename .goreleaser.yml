@@ -1,6 +1,3 @@
-before:
-  hooks:
-    - make install
 builds:
   - main: ./cli/main.go    
     ldflags:
@@ -12,9 +9,6 @@ builds:
       - darwin
     goarch:
       - amd64
-    hooks:
-      post:
-      - cp ./build/"{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}" ./build/"{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
 checksum:
   name_template: 'checksums.txt'
 snapshot:
