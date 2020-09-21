@@ -3,6 +3,8 @@ before:
     - make install
 builds:
   - main: ./cli/main.go
+    id: ../build/nigiri
+    binary: .
     ldflags:
     - -s -w -X github.com/vulpemventures/nigiri/cli/cmd.version={{.Version}} -X github.com/vulpemventures/nigiri/cli/cmd.commit={{.Commit}} -X github.com/vulpemventures/nigiri/cli/cmd.date={{.Date}}
     env:
