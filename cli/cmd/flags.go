@@ -20,10 +20,9 @@ var (
 )
 
 var RootCmd = &cobra.Command{
-	Use:     "nigiri",
-	Short:   "Nigiri lets you manage a full dockerized bitcoin environment",
-	Long:    "Nigiri lets you create your dockerized environment with a bitcoin and optionally a liquid node + block explorer powered by an electrum server for every network",
-	Version: "0.0.5",
+	Use:   "nigiri",
+	Short: "Nigiri lets you manage a full dockerized bitcoin environment",
+	Long:  "Nigiri lets you create your dockerized environment with a bitcoin and optionally a liquid node + block explorer powered by an electrum server for every network",
 }
 
 func init() {
@@ -49,6 +48,7 @@ func init() {
 	RootCmd.AddCommand(RpcCmd)
 	RootCmd.AddCommand(MintCmd)
 	RootCmd.AddCommand(PushCmd)
+	RootCmd.AddCommand(VersionCmd)
 
 	viper.BindPFlag(constants.Datadir, RootCmd.PersistentFlags().Lookup("datadir"))
 	viper.BindPFlag(constants.Network, StartCmd.PersistentFlags().Lookup("network"))
