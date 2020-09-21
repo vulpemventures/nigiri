@@ -28,3 +28,5 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+archives:
+  - format: binary
