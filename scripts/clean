@@ -18,7 +18,7 @@ case $(uname -m) in
   *) echo "Architecture $ARCH not supported"; exit 1;;
 esac
 
-./build/nigiri-$OS-$ARCH stop --delete &>/dev/null
+./dist/nigiri_$OS""_$ARCH/nigiri stop --delete &>/dev/null
 rm -rf build vendor ~/.nigiri
 
 popd

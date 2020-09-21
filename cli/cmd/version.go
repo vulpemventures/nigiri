@@ -14,7 +14,7 @@ var (
 	date       = "unknown"
 	VersionCmd = &cobra.Command{
 		Use:     "version",
-		Short:   "Will output the current build information",
+		Short:   "Show the current version",
 		RunE:    versionFunc,
 		PreRunE: versionChecks,
 	}

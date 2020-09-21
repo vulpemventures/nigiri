@@ -1,4 +1,4 @@
-.PHONY: install build-arm build-linux build-mac clean cov fmt help vet test
+.PHONY: install build-arm build-linux build-mac release clean cov fmt help vet test
 
 ## install: installs dependencies
 install:
@@ -23,6 +23,9 @@ build-mac:
 	export GO111MODULE=on
 	chmod u+x ./scripts/build
 	./scripts/build darwin amd64
+
+release:
+	goreleaser --snapshot --skip-publish --rm-dist
 
 ## clean: cleans the binary
 clean:
