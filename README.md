@@ -27,6 +27,7 @@ This will create a directory `~/.nigiri` copying there `{bitcoin|elements}.conf`
 ```
 $ open -a Docker
 ``` 
+You may want to [Manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
 
 * Close and reopen your terminal, then start Bitcoin and Liquid
 
