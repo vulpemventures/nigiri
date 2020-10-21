@@ -51,7 +51,7 @@ var (
 		"urls": map[string]string{
 			"bitcoin_esplora": "http://localhost:3000",
 			"liquid_esplora":  "http://localhost:3001",
-			"coach":           "http://localhost:7000",
+			"liquid-coach":    "http://localhost:7000",
 		},
 	}
 
