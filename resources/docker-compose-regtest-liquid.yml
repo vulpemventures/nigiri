@@ -166,6 +166,17 @@ services:
       local:
         ipv4_address: 10.10.0.17
     restart: unless-stopped
+  liquid-coach:
+    image: vulpemventures/liquid-coach:latest
+    container_name: liquid-coach
+    networks:
+      local:
+        ipv4_address: 10.10.0.18  
+    environment:
+      API_URL: ${LIQUID_LIQUID-COACH_URL}
+    ports:
+      - ${LIQUID_LIQUID-COACH_PORT}:7000
+    restart: unless-stopped
 
 networks:
   local:

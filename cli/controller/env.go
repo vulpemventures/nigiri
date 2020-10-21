@@ -102,6 +102,7 @@ type envPortsData struct {
 	Electrs    int `json:"electrs,omitempty"`
 	ElectrsRPC int `json:"electrs_rpc,omitempty"`
 	Chopsticks int `json:"chopsticks,omitempty"`
+	Coach      int `json:"liquid-coach,omitempty"`
 }
 type envPorts struct {
 	Bitcoin *envPortsData `json:"bitcoin,omitempty"`
@@ -110,6 +111,7 @@ type envPorts struct {
 type envUrls struct {
 	BitcoinEsplora string `json:"bitcoin_esplora,omitempty"`
 	LiquidEsplora  string `json:"liquid_esplora,omitempty"`
+	Coach          string `json:"liquid-coach,omitempty"`
 }
 type envJSON struct {
 	Ports *envPorts `json:"ports,omitempty"`

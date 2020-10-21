@@ -26,6 +26,7 @@ var (
 		"vulpemventures/nigiri-chopsticks:latest",
 		"vulpemventures/liquid:latest",
 		"vulpemventures/electrs-liquid:latest",
+		"vulpemventures/liquid-coach:latest",
 	}
 	DefaultEnv = map[string]interface{}{
 		"ports": map[string]map[string]int{
@@ -38,17 +39,19 @@ var (
 				"chopsticks":  3000,
 			},
 			"liquid": map[string]int{
-				"peer":        7040,
-				"node":        7041,
-				"esplora":     5001,
-				"electrs":     3012,
-				"electrs_rpc": 60401,
-				"chopsticks":  3001,
+				"peer":         7040,
+				"node":         7041,
+				"esplora":      5001,
+				"electrs":      3012,
+				"electrs_rpc":  60401,
+				"chopsticks":   3001,
+				"liquid-coach": 7000,
 			},
 		},
 		"urls": map[string]string{
 			"bitcoin_esplora": "http://localhost:3000",
 			"liquid_esplora":  "http://localhost:3001",
+			"coach":           "http://localhost:7000",
 		},
 	}
 

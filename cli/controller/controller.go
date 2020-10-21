@@ -10,10 +10,11 @@ import (
 )
 
 var Services = map[string]bool{
-	"node":       true,
-	"esplora":    true,
-	"electrs":    true,
-	"chopsticks": true,
+	"node":         true,
+	"esplora":      true,
+	"electrs":      true,
+	"chopsticks":   true,
+	"liquid-coach": true,
 }
 
 // Controller implements useful functions to securely parse flags provided at run-time
