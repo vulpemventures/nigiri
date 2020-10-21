@@ -45,13 +45,13 @@ var (
 				"electrs":      3012,
 				"electrs_rpc":  60401,
 				"chopsticks":   3001,
-				"liquid-coach": 7000,
+				"liquid_coach": 7000,
 			},
 		},
 		"urls": map[string]string{
 			"bitcoin_esplora": "http://localhost:3000",
 			"liquid_esplora":  "http://localhost:3001",
-			"liquid-coach":    "http://localhost:7000",
+			"liquid_coach":    "http://localhost:7000",
 		},
 	}
 

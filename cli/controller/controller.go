@@ -14,7 +14,7 @@ var Services = map[string]bool{
 	"esplora":      true,
 	"electrs":      true,
 	"chopsticks":   true,
-	"liquid-coach": true,
+	"liquid_coach": true,
 }
 
 // Controller implements useful functions to securely parse flags provided at run-time
