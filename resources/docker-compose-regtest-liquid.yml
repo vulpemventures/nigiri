@@ -169,12 +169,11 @@ services:
   liquid_coach:
     image: vulpemventures/liquid-coach:latest
     container_name: liquid_coach
-    expose: 7000
     networks:
       local:
         ipv4_address: 10.10.0.18
     ports:
-      - ${LIQUID_COACH_PORT}:7000
+      - ${LIQUID_LIQUID_COACH_PORT}:7000
     restart: unless-stopped
 
 networks:
