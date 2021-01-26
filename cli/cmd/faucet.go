@@ -17,12 +17,12 @@ import (
 var FaucetCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 
-		if len(args) != 1 {
-			return errors.New("Insert receiving address")
+		if len(args) < 1 {
+			return errors.New("missing address")
 		}
 		return nil
 	},
-	Use:     "faucet <address>",
+	Use:     "faucet <address> [amount] [asset]",
 	Short:   "Generate and send bitcoin to given address",
 	RunE:    faucet,
 	PreRunE: faucetChecks,
@@ -40,7 +40,7 @@ func faucetChecks(cmd *cobra.Command, args []string) error {
 	if err := ctl.ParseDatadir(datadir); err != nil {
 		return err
 	}
-	if len(args) != 1 {
+	if len(args) < 1 {
 		return constants.ErrInvalidArgs
 	}
 
@@ -61,15 +61,26 @@ func faucetChecks(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func faucet(cmd *cobra.Command, address []string) error {
+func faucet(cmd *cobra.Command, args []string) error {
 	isLiquidService, err := cmd.Flags().GetBool("liquid")
 	datadir, _ := cmd.Flags().GetString("datadir")
 	if err != nil {
 		return err
 	}
-	request := map[string]string{
-		"address": address[0],
+	request := map[string]interface{}{
+		"address": args[0],
 	}
+	if len(args) >= 2 {
+		amountFloat, err := strconv.ParseFloat(args[1], 64)
+		if err != nil {
+			return fmt.Errorf("invalid amount: %v", err)
+		}
+		request["amount"] = amountFloat
+	}
+	if len(args) == 3 {
+		request["asset"] = args[2]
+	}
+
 	ctl, err := controller.NewController()
 	if err != nil {
 		return err
@@ -99,7 +110,7 @@ func faucet(cmd *cobra.Command, address []string) error {
 
 	var dat map[string]string
 	if err := json.Unmarshal([]byte(data), &dat); err != nil {
-		return errors.New("Internal error. Try again.")
+		return errors.New("internal error, please try again")
 	}
 	if dat["txId"] == "" {
 		return errors.New("Not Successful")

@@ -33,7 +33,7 @@ func mintChecks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if len(args) < 2 {
-		return errors.New("Missing required arguments.")
+		return errors.New("missing required arguments")
 	}
 
 	if isRunning, err := ctl.IsNigiriRunning(); err != nil {
