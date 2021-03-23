@@ -26,13 +26,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Docker Login
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
