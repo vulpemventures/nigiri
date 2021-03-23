@@ -1,4 +1,4 @@
-.PHONY: install build-arm build-linux build-mac release dry-release clean cov fmt help vet test
+.PHONY: install build release dry-release clean cov fmt help vet test
 
 ## install: installs dependencies
 install:
@@ -6,23 +6,11 @@ install:
 	chmod u+x ./scripts/install
 	./scripts/install	
 
-## build-arm: build binary for ARM
-build-arm:
+## build: build binary for ARM
+build:
 	export GO111MODULE=on
 	chmod u+x ./scripts/build
-	./scripts/build linux arm
-
-## build-linux: build binary for Linux
-build-linux:
-	export GO111MODULE=on
-	chmod u+x ./scripts/build
-	./scripts/build linux amd64
-
-## build-mac: build binary for Mac
-build-mac:
-	export GO111MODULE=on
-	chmod u+x ./scripts/build
-	./scripts/build darwin amd64
+	./scripts/build
 
 release:
 	goreleaser

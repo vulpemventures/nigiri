@@ -1,9 +1,16 @@
 #!/bin/bash
-set -ex
 
-PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+set -e
+
+PARENT_PATH=$(dirname $(
+  cd $(dirname $0)
+  pwd -P
+))
+
+OS=$(eval "go env GOOS")
+ARCH=$(eval "go env GOARCH")
 
 pushd $PARENT_PATH
 mkdir -p build
-GOOS=$1 GOARCH=$2 go build -o build/nigiri-$1-$2 ./cli
+GO111MODULE=on CGO_ENABLED=1 go build -ldflags="-s -w" -o build/nigiri-$OS-$ARCH cli/main.go
 popd

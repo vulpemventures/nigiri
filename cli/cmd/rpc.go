@@ -49,6 +49,7 @@ func rpcChecks(cmd *cobra.Command, args []string) error {
 func rpc(cmd *cobra.Command, args []string) error {
 	datadir, _ := cmd.Flags().GetString("datadir")
 	isLiquidService, _ := cmd.Flags().GetBool("liquid")
+	rpcWallet, _ := cmd.Flags().GetString("rpcwallet")
 
 	ctl, err := controller.NewController()
 	if err != nil {
@@ -58,9 +59,9 @@ func rpc(cmd *cobra.Command, args []string) error {
 	envPath := ctl.GetResourcePath(datadir, "env")
 	env := ctl.LoadComposeEnvironment(envPath)
 
-	rpcArgs := []string{"exec", "bitcoin", "bitcoin-cli", "-datadir=config"}
+	rpcArgs := []string{"exec", "bitcoin", "bitcoin-cli", "-datadir=config", "-rpcwallet=" + rpcWallet}
 	if isLiquidService {
-		rpcArgs = []string{"exec", "liquid", "elements-cli", "-datadir=config"}
+		rpcArgs = []string{"exec", "liquid", "elements-cli", "-datadir=config", "-rpcwallet=" + rpcWallet}
 	}
 	cmdArgs := append(rpcArgs, args...)
 	bashCmd := exec.Command("docker", cmdArgs...)

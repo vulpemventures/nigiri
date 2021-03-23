@@ -17,6 +17,7 @@ var (
 	flagAttachLiquid  bool
 	flagLiquidService bool
 	flagEnv           string
+	flagRpcWallet     string
 )
 
 var RootCmd = &cobra.Command{
@@ -38,8 +39,9 @@ func init() {
 	StopCmd.PersistentFlags().BoolVar(&flagDelete, "delete", false, "Stop and delete nigiri")
 	LogsCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to see logs of a liquid service")
 	FaucetCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to donate liquid btc")
-	RpcCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to use liquid node")
 	PushCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to use liquid")
+	RpcCmd.PersistentFlags().BoolVar(&flagLiquidService, "liquid", false, "Set to use liquid node")
+	RpcCmd.PersistentFlags().StringVar(&flagRpcWallet, "rpcwallet", "", "rpcwallet to be used for node JSONRPC commands")
 
 	RootCmd.AddCommand(StartCmd)
 	RootCmd.AddCommand(StopCmd)
