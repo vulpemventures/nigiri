@@ -12,5 +12,5 @@ ARCH=$(eval "go env GOARCH")
 
 pushd $PARENT_PATH
 mkdir -p build
-GO111MODULE=on CGO_ENABLED=1 go build -ldflags="-s -w" -o build/nigiri-$OS-$ARCH cli/main.go
+GO111MODULE=on go build -ldflags="-s -w" -o build/nigiri-$OS-$ARCH cli/main.go
 popd
