@@ -14,7 +14,7 @@ services:
       - ./volumes/liquidregtest/config/:/config
     restart: unless-stopped
   liquid:
-    image: vulpemventures/liquid:latest
+    image: ghcr.io/vulpemventures/elements:latest
     container_name: liquid
     networks:
       local:
@@ -23,7 +23,7 @@ services:
       - ${LIQUID_NODE_PORT}:18884
       - ${LIQUID_PEER_PORT}:18886
     volumes:
-      - ./volumes/liquidregtest/liquid-config/:/config
+      - ./volumes/liquidregtest/liquid-config/:/home/elements/.elements
     restart: unless-stopped
   # Block explorer REST servers
   electrs:
