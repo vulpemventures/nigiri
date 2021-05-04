@@ -16,6 +16,8 @@ services:
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
     container_name: liquid
+    command:
+      - -datadir=config
     networks:
       local:
         ipv4_address: 10.10.0.11
@@ -23,7 +25,7 @@ services:
       - ${LIQUID_NODE_PORT}:18884
       - ${LIQUID_PEER_PORT}:18886
     volumes:
-      - ./volumes/liquidregtest/liquid-config/:/home/elements/.elements
+      - ./volumes/liquidregtest/liquid-config/:/config
     restart: unless-stopped
   # Block explorer REST servers
   electrs:
