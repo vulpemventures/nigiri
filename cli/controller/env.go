@@ -96,12 +96,13 @@ func (e *Env) load(path string) []string {
 }
 
 type envPortsData struct {
-	Peer       int `json:"peer,omitempty"`
-	Node       int `json:"node,omitempty"`
-	Esplora    int `json:"esplora,omitempty"`
-	Electrs    int `json:"electrs,omitempty"`
-	ElectrsRPC int `json:"electrs_rpc,omitempty"`
-	Chopsticks int `json:"chopsticks,omitempty"`
+	Peer        int `json:"peer,omitempty"`
+	Node        int `json:"node,omitempty"`
+	Esplora     int `json:"esplora,omitempty"`
+	Electrs     int `json:"electrs,omitempty"`
+	ElectrsRPC  int `json:"electrs_rpc,omitempty"`
+	Chopsticks  int `json:"chopsticks,omitempty"`
+	LiquidCoach int `json:"liquid_coach,omitempty"`
 }
 type envPorts struct {
 	Bitcoin *envPortsData `json:"bitcoin,omitempty"`
@@ -110,6 +111,7 @@ type envPorts struct {
 type envUrls struct {
 	BitcoinEsplora string `json:"bitcoin_esplora,omitempty"`
 	LiquidEsplora  string `json:"liquid_esplora,omitempty"`
+	LiquidCoach    string `json:"liquid_coach,omitempty"`
 }
 type envJSON struct {
 	Ports *envPorts `json:"ports,omitempty"`
