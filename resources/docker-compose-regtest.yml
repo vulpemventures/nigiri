@@ -4,9 +4,6 @@ services:
   bitcoin:
     image: vulpemventures/bitcoin:latest
     container_name: bitcoin
-    networks:
-      local:
-        ipv4_address: 10.10.0.10
     ports:
       - ${BITCOIN_PEER_PORT}:19000
       - ${BITCOIN_NODE_PORT}:19001
@@ -26,7 +23,7 @@ services:
       - --daemon-dir
       - /config
       - --daemon-rpc-addr
-      - 10.10.0.10:19001
+      - bitcoin:19001
       - --cookie
       - admin1:123
       - --http-addr
@@ -35,9 +32,6 @@ services:
       - 0.0.0.0:60401
       - --cors
       - "*"
-    networks:
-      local:
-        ipv4_address: 10.10.0.11
     depends_on:
       - bitcoin
     ports:
@@ -50,9 +44,6 @@ services:
   esplora:
     image: vulpemventures/esplora:latest
     container_name: esplora
-    networks:
-      local:
-        ipv4_address: 10.10.0.12
     depends_on:
       - chopsticks
     environment:
@@ -69,24 +60,14 @@ services:
       - --use-mining
       - --use-logger
       - --rpc-addr
-      - 10.10.0.10:19001
+      - bitcoin:19001
       - --electrs-addr
-      - 10.10.0.11:3002
+      - electrs:3002
       - --addr
       - 0.0.0.0:3000
-    networks:
-      local:
-        ipv4_address: 10.10.0.13
     depends_on:
       - bitcoin
       - electrs
     ports:
       - ${BITCOIN_CHOPSTICKS_PORT}:3000
     restart: unless-stopped
-
-networks:
-  local:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.10.0.0/24
