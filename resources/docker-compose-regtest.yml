@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
   # RPC daemon
   bitcoin:
@@ -71,3 +71,6 @@ services:
     ports:
       - ${BITCOIN_CHOPSTICKS_PORT}:3000
     restart: unless-stopped
+networks:
+  default:
+    name: nigiri
