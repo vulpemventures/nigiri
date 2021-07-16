@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -47,12 +46,10 @@ func (d *Docker) findNigiriContainers(listAllContainers bool) bool {
 		images = append(images, c.Image)
 	}
 
-	for _, nigiriImage := range constants.NigiriImages {
+	for _, nigiriImage := range constants.NigiriBitcoinImages {
 		// just check if services for bitcoin chain are up and running
-		if !strings.Contains(nigiriImage, "liquid") {
-			if !contains(images, nigiriImage) {
-				return false
-			}
+		if !contains(images, nigiriImage) {
+			return false
 		}
 	}
 	return true

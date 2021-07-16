@@ -2,8 +2,10 @@ version: '3'
 services:
   # RPC daemons
   bitcoin:
-    image: vulpemventures/bitcoin:latest
+    image: ghcr.io/vulpemventures/bitcoin:latest
     container_name: bitcoin
+    command:
+      - -datadir=config
     networks:
       local:
         ipv4_address: 10.10.0.10
@@ -29,7 +31,7 @@ services:
     restart: unless-stopped
   # Block explorer REST servers
   electrs:
-    image: vulpemventures/electrs:latest
+    image: ghcr.io/vulpemventures/electrs:latest
     container_name: electrs
     entrypoint:
       - /build/electrs
@@ -61,7 +63,7 @@ services:
       - ./volumes/liquidregtest/config/:/config
     restart: unless-stopped
   electrs-liquid:
-    image: vulpemventures/electrs-liquid:latest
+    image: ghcr.io/vulpemventures/electrs-liquid:latest
     container_name: electrs-liquid
     entrypoint:
       - /build/electrs
@@ -96,7 +98,7 @@ services:
     restart: unless-stopped
   # Block explorer frontends
   esplora:
-    image: vulpemventures/esplora:latest
+    image: ghcr.io/vulpemventures/esplora:latest
     container_name: esplora
     networks:
       local:
@@ -109,7 +111,7 @@ services:
       - ${BITCOIN_ESPLORA_PORT}:5000
     restart: unless-stopped
   esplora-liquid:
-    image: vulpemventures/esplora:latest
+    image: ghcr.io/vulpemventures/esplora:latest
     container_name: esplora-liquid
     networks:
       local:
@@ -123,7 +125,7 @@ services:
     restart: unless-stopped
   # Chopsticks
   chopsticks:
-    image: vulpemventures/nigiri-chopsticks:latest
+    image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
     container_name: chopsticks
     command:
       - --use-faucet
@@ -145,7 +147,7 @@ services:
         ipv4_address: 10.10.0.16
     restart: unless-stopped
   chopsticks-liquid:
-    image: vulpemventures/nigiri-chopsticks:latest
+    image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
     container_name: chopsticks-liquid
     command:
       - --use-faucet

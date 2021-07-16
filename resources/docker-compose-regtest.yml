@@ -2,8 +2,10 @@ version: '3'
 services:
   # RPC daemon
   bitcoin:
-    image: vulpemventures/bitcoin:latest
+    image: ghcr.io/vulpemventures/bitcoin:latest
     container_name: bitcoin
+    command:
+      - -datadir=config
     networks:
       local:
         ipv4_address: 10.10.0.10
@@ -15,7 +17,7 @@ services:
     restart: unless-stopped
   # Block explorer server
   electrs:
-    image: vulpemventures/electrs:latest
+    image: ghcr.io/vulpemventures/electrs:latest
     container_name: electrs
     entrypoint:
       - /build/electrs
@@ -48,7 +50,7 @@ services:
     restart: unless-stopped
   # Block explorer frontend
   esplora:
-    image: vulpemventures/esplora:latest
+    image: ghcr.io/vulpemventures/esplora:latest
     container_name: esplora
     networks:
       local:
@@ -62,7 +64,7 @@ services:
     restart: unless-stopped
   # Chopsticks
   chopsticks:
-    image: vulpemventures/nigiri-chopsticks:latest
+    image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
     container_name: chopsticks
     command:
       - --use-faucet
