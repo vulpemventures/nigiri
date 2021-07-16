@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestPushBitcoinTransaction(t *testing.T) {
+/* func TestPushBitcoinTransaction(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping testing in short mode")
 	}
@@ -23,7 +23,7 @@ func TestPushBitcoinTransaction(t *testing.T) {
 		t.Fatal(err)
 	}
 	testDelete(t)
-}
+} */
 
 func TestPushLiquidTransaction(t *testing.T) {
 	if testing.Short() {
