@@ -25,5 +25,5 @@ jobs:
         run: |
           make fmt
           make install
-          sudo chmod -R 777 /
+          sudo chmod -R 777 .
           make test-ci
