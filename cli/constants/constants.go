@@ -18,16 +18,19 @@ const (
 )
 
 var (
-	AvaliableNetworks = []string{"regtest"}
-	NigiriImages      = []string{
+	AvaliableNetworks   = []string{"regtest"}
+	NigiriBitcoinImages = []string{
 		"ghcr.io/vulpemventures/bitcoin:latest",
 		"ghcr.io/vulpemventures/electrs:latest",
 		"ghcr.io/vulpemventures/esplora:latest",
 		"ghcr.io/vulpemventures/nigiri-chopsticks:latest",
+	}
+	NigiriLiquidImages = []string{
 		"ghcr.io/vulpemventures/elements:latest",
 		"ghcr.io/vulpemventures/electrs-liquid:latest",
 	}
-	DefaultEnv = map[string]interface{}{
+	NigiriImages = append(NigiriBitcoinImages, NigiriLiquidImages...)
+	DefaultEnv   = map[string]interface{}{
 		"ports": map[string]map[string]int{
 			"bitcoin": {
 				"peer":        18432,
