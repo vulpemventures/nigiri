@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 )
 
 func getState() (map[string]string, error) {
@@ -65,4 +67,22 @@ func merge(maps ...map[string]string) map[string]string {
 		}
 	}
 	return merge
+}
+
+func getBoolFromState(key string) (bool, error) {
+	stateConfig, err := getState()
+	if err != nil {
+		return false, err
+	}
+
+	if _, ok := stateConfig[key]; !ok {
+		return false, errors.New("config: missing key " + key)
+	}
+
+	value, err := strconv.ParseBool(stateConfig[key])
+	if err != nil {
+		return false, err
+	}
+
+	return value, nil
 }

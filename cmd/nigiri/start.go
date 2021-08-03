@@ -1,15 +1,17 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/urfave/cli/v2"
 )
 
 var start = cli.Command{
 	Name:   "start",
-	Usage:  "start nigiri box",
+	Usage:  "start nigiri",
 	Action: startAction,
 	Flags: []cli.Flag{
 		&liquidFlag,
@@ -17,6 +19,15 @@ var start = cli.Command{
 }
 
 func startAction(ctx *cli.Context) error {
+
+	isRunning, err := getBoolFromState("running")
+	if err != nil {
+		return err
+	}
+
+	if isRunning {
+		return errors.New("nigiri is already running, please stop it first")
+	}
 
 	isLiquid := ctx.Bool("liquid")
 	composePath := getCompose(isLiquid)
@@ -26,6 +37,13 @@ func startAction(ctx *cli.Context) error {
 	bashCmd.Stderr = os.Stderr
 
 	if err := bashCmd.Run(); err != nil {
+		return err
+	}
+
+	if err := setState(map[string]string{
+		"attachliquid": strconv.FormatBool(isLiquid),
+		"running":      strconv.FormatBool(true),
+	}); err != nil {
 		return err
 	}
 

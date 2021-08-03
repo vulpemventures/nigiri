@@ -26,6 +26,7 @@ var (
 		"datadir":      defaultDataDir,
 		"network":      "regtest",
 		"ready":        strconv.FormatBool(false),
+		"running":      strconv.FormatBool(false),
 	}
 
 	regtestCompose       = "docker-compose-regtest.yml"
@@ -60,6 +61,7 @@ func main() {
 	app.Commands = append(
 		app.Commands,
 		&start,
+		&stop,
 	)
 
 	// check the datadirectory
@@ -98,16 +100,7 @@ func getCompose(isLiquid bool) string {
 }
 
 func provisionResourcesToDatadir() error {
-	stateConfig, err := getState()
-	if err != nil {
-		return err
-	}
-
-	if _, ok := stateConfig["ready"]; !ok {
-		return errors.New("missing config file in data directory")
-	}
-
-	isReady, err := strconv.ParseBool(stateConfig["ready"])
+	isReady, err := getBoolFromState("ready")
 	if err != nil {
 		return err
 	}
