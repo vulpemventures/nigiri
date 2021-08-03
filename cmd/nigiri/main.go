@@ -43,7 +43,6 @@ var liquidFlag = cli.BoolFlag{
 //go:embed resources/docker-compose-regtest-liquid.yml
 //go:embed resources/bitcoin.conf
 //go:embed resources/elements.conf
-
 var f embed.FS
 
 func init() {
@@ -57,11 +56,12 @@ func main() {
 
 	app.Version = formatVersion()
 	app.Name = "nigiri CLI"
-	app.Usage = "Create your dockerized environment with a bitcoin and liquid node, with a block explorer and developer tools"
+	app.Usage = "create your dockerized environment with a bitcoin and liquid node, with a block explorer and developer tools"
 	app.Commands = append(
 		app.Commands,
 		&start,
 		&stop,
+		&rpc,
 	)
 
 	// check the datadirectory
