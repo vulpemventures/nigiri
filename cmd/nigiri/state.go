@@ -58,7 +58,7 @@ func setState(data map[string]string) error {
 }
 
 func merge(maps ...map[string]string) map[string]string {
-	merge := make(map[string]string, 0)
+	merge := make(map[string]string)
 	for _, m := range maps {
 		for k, v := range m {
 			merge[k] = v

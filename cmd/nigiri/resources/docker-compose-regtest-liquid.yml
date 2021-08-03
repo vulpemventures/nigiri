@@ -1,29 +1,33 @@
 version: '3.5'
 services:
-  # RPC daemons
+  # RPC daemon
   bitcoin:
-    image: vulpemventures/bitcoin:latest
+    image: ghcr.io/vulpemventures/bitcoin:latest
     container_name: bitcoin
+    command:
+      - -datadir=config
     ports:
-      - ${BITCOIN_PEER_PORT}:19000
-      - ${BITCOIN_NODE_PORT}:19001
+      - 18443:18433
+      - 18444:18444
     volumes:
-      - ./volumes/liquidregtest/config/:/config
+      - ./volumes/bitcoin/:/config
     restart: unless-stopped
+  
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
     container_name: liquid
     command:
       - -datadir=config
     ports:
-      - ${LIQUID_NODE_PORT}:18884
-      - ${LIQUID_PEER_PORT}:18886
+      - 18884:18884
+      - 18886:18886
     volumes:
-      - ./volumes/liquidregtest/liquid-config/:/config
+      - ./volumes/elements/:/config
     restart: unless-stopped
-  # Block explorer REST servers
+
+  # Block explorer server
   electrs:
-    image: vulpemventures/electrs:latest
+    image: ghcr.io/vulpemventures/electrs:latest
     container_name: electrs
     entrypoint:
       - /build/electrs
@@ -34,25 +38,26 @@ services:
       - --daemon-dir
       - /config
       - --daemon-rpc-addr
-      - bitcoin:19001
+      - bitcoin:18443
       - --cookie
       - admin1:123
       - --http-addr
-      - 0.0.0.0:3002
+      - 0.0.0.0:30000
       - --electrum-rpc-addr
-      - 0.0.0.0:60401
+      - 0.0.0.0:50000
       - --cors
       - "*"
     depends_on:
       - bitcoin
     ports:
-      - ${BITCOIN_ELECTRS_RPC_PORT}:60401
-      - ${BITCOIN_ELECTRS_PORT}:3002
+      - 50000:50000
+      - 30000:30000
     volumes:
-      - ./volumes/liquidregtest/config/:/config
+      - ./volumes/bitcoin/:/config
     restart: unless-stopped
+
   electrs-liquid:
-    image: vulpemventures/electrs-liquid:latest
+    image: ghcr.io/vulpemventures/electrs-liquid:latest
     container_name: electrs-liquid
     entrypoint:
       - /build/electrs
@@ -69,62 +74,65 @@ services:
       - --cookie
       - admin1:123
       - --http-addr
-      - 0.0.0.0:3002
+      - 0.0.0.0:30001
       - --electrum-rpc-addr
-      - 0.0.0.0:60401
+      - 0.0.0.0:50001
       - --cors
       - "*"
     depends_on:
       - liquid
     ports:
-      - ${LIQUID_ELECTRS_RPC_PORT}:60401
-      - ${LIQUID_ELECTRS_PORT}:3002
+      - 50001:50001
+      - 30001:30001
     volumes:
-      - ./volumes/liquidregtest/liquid-config/:/config
+      - ./volumes/elements/:/config
     restart: unless-stopped
-  # Block explorer frontends
+
+  # Block explorer frontend
   esplora:
-    image: vulpemventures/esplora:latest
+    image: ghcr.io/vulpemventures/esplora:latest
     container_name: esplora
     depends_on:
       - chopsticks
-    environment:
-      API_URL: ${BITCOIN_ESPLORA_URL}
+    environment: 
+        API_URL: http://localhost:3000
     ports:
-      - ${BITCOIN_ESPLORA_PORT}:5000
+      - 5000:5000
     restart: unless-stopped
+
   esplora-liquid:
-    image: vulpemventures/esplora:latest
+    image: ghcr.io/vulpemventures/esplora:latest
     container_name: esplora-liquid
     depends_on:
       - chopsticks-liquid
     environment:
-      API_URL: ${LIQUID_ESPLORA_URL}
+      API_URL: http://localhost:3001
     ports:
-      - ${LIQUID_ESPLORA_PORT}:5000
+      - 5001:5000
     restart: unless-stopped
   # Chopsticks
   chopsticks:
-    image: vulpemventures/nigiri-chopsticks:latest
+    image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
     container_name: chopsticks
     command:
       - --use-faucet
       - --use-mining
       - --use-logger
       - --rpc-addr
-      - bitcoin:19001
+      - bitcoin:18443
       - --electrs-addr
-      - electrs:3002
+      - electrs:30000
       - --addr
       - 0.0.0.0:3000
     depends_on:
       - bitcoin
       - electrs
     ports:
-      - ${BITCOIN_CHOPSTICKS_PORT}:3000
+      - 3000:3000
     restart: unless-stopped
+
   chopsticks-liquid:
-    image: vulpemventures/nigiri-chopsticks:latest
+    image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
     container_name: chopsticks-liquid
     command:
       - --use-faucet
@@ -133,7 +141,7 @@ services:
       - --rpc-addr
       - liquid:18884
       - --electrs-addr
-      - electrs-liquid:3002
+      - electrs-liquid:30001
       - --addr
       - 0.0.0.0:3000
       - --chain
@@ -142,8 +150,9 @@ services:
       - liquid
       - electrs-liquid
     ports:
-      - ${LIQUID_CHOPSTICKS_PORT}:3000
+      - 3001:3000
     restart: unless-stopped
+
 networks:
   default:
     name: nigiri
