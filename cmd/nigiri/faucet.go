@@ -35,7 +35,7 @@ func faucetAction(ctx *cli.Context) error {
 	}
 
 	if ctx.NArg() < 1 || ctx.NArg() > 3 {
-		return errors.New("missing arguments")
+		return errors.New("wrong number of arguments")
 	}
 
 	isLiquid := ctx.Bool("liquid")

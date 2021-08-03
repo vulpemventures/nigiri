@@ -63,6 +63,7 @@ func main() {
 		&stop,
 		&rpc,
 		&logs,
+		&mint,
 		&faucet,
 	)
 
