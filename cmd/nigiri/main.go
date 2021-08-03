@@ -62,6 +62,8 @@ func main() {
 		&start,
 		&stop,
 		&rpc,
+		&logs,
+		&faucet,
 	)
 
 	// check the datadirectory
