@@ -14,6 +14,7 @@ var stop = cli.Command{
 	Usage:  "stop nigiri",
 	Action: stopAction,
 	Flags: []cli.Flag{
+		&liquidFlag,
 		&cli.BoolFlag{
 			Name:  "delete",
 			Usage: "clean node data directories",

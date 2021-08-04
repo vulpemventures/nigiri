@@ -15,6 +15,11 @@ var start = cli.Command{
 	Action: startAction,
 	Flags: []cli.Flag{
 		&liquidFlag,
+		&cli.BoolFlag{
+			Name:  "ci",
+			Usage: "runs in headless mode without esplora for continuous integration environments",
+			Value: false,
+		},
 	},
 }
 
@@ -27,7 +32,17 @@ func startAction(ctx *cli.Context) error {
 	isLiquid := ctx.Bool("liquid")
 	composePath := getCompose(isLiquid)
 
+	// spin up all the services in the compose file
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d")
+	if ctx.Bool("ci") {
+		//this will only run chopsticks and servives it depends on
+		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "chopsticks")
+		if isLiquid {
+			//this will only run chopsticks & chopsticks-liquid and servives they depends on
+			bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "chopsticks", "chopsticks-liquid")
+		}
+	}
+
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 
