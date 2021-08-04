@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -71,30 +70,14 @@ func main() {
 		&faucet,
 	)
 
-	// check the datadirectory
-
 	err := app.Run(os.Args)
 	if err != nil {
 		fatal(err)
 	}
 }
 
-type invalidUsageError struct {
-	ctx     *cli.Context
-	command string
-}
-
-func (e *invalidUsageError) Error() string {
-	return fmt.Sprintf("invalid usage of command %s", e.command)
-}
-
 func fatal(err error) {
-	var e *invalidUsageError
-	if errors.As(err, &e) {
-		_ = cli.ShowCommandHelp(e.ctx, e.command)
-	} else {
-		_, _ = fmt.Fprintf(os.Stderr, "[nigiri] %v\n", err)
-	}
+	_, _ = fmt.Fprintf(os.Stderr, "[nigiri] %v\n", err)
 	os.Exit(1)
 }
 
@@ -106,6 +89,7 @@ func getCompose(isLiquid bool) string {
 	return filepath.Join(defaultDataDir, regtestCompose)
 }
 
+// Provisioning Nigiri reosurces
 func provisionResourcesToDatadir() error {
 
 	isReady, err := nigiriState.GetBool("ready")
