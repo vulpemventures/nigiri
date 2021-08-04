@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/btcsuite/btcutil"
 	"github.com/urfave/cli/v2"
@@ -18,12 +20,13 @@ var (
 	commit  = "none"
 	date    = "unknown"
 
-	defaultDataDir = btcutil.AppDataDir("nigiri-new", false)
+	stateFilename = "nigiri.config.json"
+	nigiriDataDir = btcutil.AppDataDir("nigiri-new", false)
+	statePath     = filepath.Join(nigiriDataDir, stateFilename)
 
-	statePath    = filepath.Join(defaultDataDir, "nigiri.config.json")
 	initialState = map[string]string{
 		"attachliquid": strconv.FormatBool(false),
-		"datadir":      defaultDataDir,
+		"datadir":      nigiriDataDir,
 		"network":      "regtest",
 		"ready":        strconv.FormatBool(false),
 		"running":      strconv.FormatBool(false),
@@ -48,6 +51,13 @@ var liquidFlag = cli.BoolFlag{
 var f embed.FS
 
 func init() {
+	dataDir := cleanAndExpandPath(os.Getenv("NIGIRI_DATADIR"))
+	if len(dataDir) > 0 {
+		nigiriDataDir = dataDir
+		statePath = filepath.Join(nigiriDataDir, stateFilename)
+		nigiriState = state.New(statePath, initialState)
+	}
+
 	if err := provisionResourcesToDatadir(); err != nil {
 		fatal(err)
 	}
@@ -83,10 +93,10 @@ func fatal(err error) {
 
 func getCompose(isLiquid bool) string {
 	if isLiquid {
-		return filepath.Join(defaultDataDir, regtestLiquidCompose)
+		return filepath.Join(nigiriDataDir, regtestLiquidCompose)
 	}
 
-	return filepath.Join(defaultDataDir, regtestCompose)
+	return filepath.Join(nigiriDataDir, regtestCompose)
 }
 
 // Provisioning Nigiri reosurces
@@ -102,38 +112,38 @@ func provisionResourcesToDatadir() error {
 	}
 
 	// create folders in volumes/{bitcoin,elements} for node datadirs
-	if err := makeDirectoryIfNotExists(filepath.Join(defaultDataDir, "volumes", "bitcoin")); err != nil {
+	if err := makeDirectoryIfNotExists(filepath.Join(nigiriDataDir, "volumes", "bitcoin")); err != nil {
 		return err
 	}
-	if err := makeDirectoryIfNotExists(filepath.Join(defaultDataDir, "volumes", "elements")); err != nil {
+	if err := makeDirectoryIfNotExists(filepath.Join(nigiriDataDir, "volumes", "elements")); err != nil {
 		return err
 	}
 
 	// copy resources into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", regtestCompose),
-		filepath.Join(defaultDataDir, regtestCompose),
+		filepath.Join(nigiriDataDir, regtestCompose),
 	); err != nil {
 		return err
 	}
 
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", regtestLiquidCompose),
-		filepath.Join(defaultDataDir, regtestLiquidCompose),
+		filepath.Join(nigiriDataDir, regtestLiquidCompose),
 	); err != nil {
 		return err
 	}
 
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "bitcoin.conf"),
-		filepath.Join(defaultDataDir, "volumes", "bitcoin", "bitcoin.conf"),
+		filepath.Join(nigiriDataDir, "volumes", "bitcoin", "bitcoin.conf"),
 	); err != nil {
 		return err
 	}
 
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "elements.conf"),
-		filepath.Join(defaultDataDir, "volumes", "elements", "elements.conf"),
+		filepath.Join(nigiriDataDir, "volumes", "elements", "elements.conf"),
 	); err != nil {
 		return err
 	}
@@ -170,4 +180,30 @@ func makeDirectoryIfNotExists(path string) error {
 		return os.MkdirAll(path, os.ModeDir|0755)
 	}
 	return nil
+}
+
+// cleanAndExpandPath expands environment variables and leading ~ in the
+// passed path, cleans the result, and returns it.
+// This function is taken from https://github.com/btcsuite/btcd
+func cleanAndExpandPath(path string) string {
+	if path == "" {
+		return ""
+	}
+
+	// Expand initial ~ to OS specific home directory.
+	if strings.HasPrefix(path, "~") {
+		var homeDir string
+		u, err := user.Current()
+		if err == nil {
+			homeDir = u.HomeDir
+		} else {
+			homeDir = os.Getenv("HOME")
+		}
+
+		path = strings.Replace(path, "~", homeDir, 1)
+	}
+
+	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%,
+	// but the variables can still be expanded via POSIX-style $VARIABLE.
+	return filepath.Clean(os.ExpandEnv(path))
 }

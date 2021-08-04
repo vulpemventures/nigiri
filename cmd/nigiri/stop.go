@@ -45,7 +45,7 @@ func stopAction(ctx *cli.Context) error {
 
 	if delete {
 		fmt.Println("Removing data from volumes...")
-		if err := os.RemoveAll(defaultDataDir); err != nil {
+		if err := os.RemoveAll(nigiriDataDir); err != nil {
 			return err
 		}
 
