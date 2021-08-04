@@ -20,7 +20,7 @@ var start = cli.Command{
 
 func startAction(ctx *cli.Context) error {
 
-	isRunning, err := getBoolFromState("running")
+	isRunning, err := nigiriState.GetBool("running")
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func startAction(ctx *cli.Context) error {
 		return err
 	}
 
-	if err := setState(map[string]string{
+	if err := nigiriState.Set(map[string]string{
 		"attachliquid": strconv.FormatBool(isLiquid),
 		"running":      strconv.FormatBool(true),
 	}); err != nil {

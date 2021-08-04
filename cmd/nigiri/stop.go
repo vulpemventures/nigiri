@@ -25,7 +25,7 @@ var stop = cli.Command{
 func stopAction(ctx *cli.Context) error {
 
 	delete := ctx.Bool("delete")
-	isLiquid, err := getBoolFromState("attachliquid")
+	isLiquid, err := nigiriState.GetBool("attachliquid")
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func stopAction(ctx *cli.Context) error {
 
 		fmt.Println("Nigiri has been cleaned up successfully.")
 	} else {
-		if err := setState(map[string]string{
+		if err := nigiriState.Set(map[string]string{
 			"running": strconv.FormatBool(false),
 		}); err != nil {
 			return err

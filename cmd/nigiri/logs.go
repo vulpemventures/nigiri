@@ -19,7 +19,7 @@ var logs = cli.Command{
 
 func logsAction(ctx *cli.Context) error {
 
-	isRunning, err := getBoolFromState("running")
+	isRunning, err := nigiriState.GetBool("running")
 	if err != nil {
 		return err
 	}

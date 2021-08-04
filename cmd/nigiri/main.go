@@ -11,6 +11,7 @@ import (
 
 	"github.com/btcsuite/btcutil"
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/pkg/state"
 )
 
 var (
@@ -28,6 +29,8 @@ var (
 		"ready":        strconv.FormatBool(false),
 		"running":      strconv.FormatBool(false),
 	}
+
+	nigiriState = state.New(statePath, initialState)
 
 	regtestCompose       = "docker-compose-regtest.yml"
 	regtestLiquidCompose = "docker-compose-regtest-liquid.yml"
@@ -104,7 +107,8 @@ func getCompose(isLiquid bool) string {
 }
 
 func provisionResourcesToDatadir() error {
-	isReady, err := getBoolFromState("ready")
+
+	isReady, err := nigiriState.GetBool("ready")
 	if err != nil {
 		return err
 	}
@@ -150,7 +154,7 @@ func provisionResourcesToDatadir() error {
 		return err
 	}
 
-	if err := setState(map[string]string{"ready": strconv.FormatBool(true)}); err != nil {
+	if err := nigiriState.Set(map[string]string{"ready": strconv.FormatBool(true)}); err != nil {
 		return err
 	}
 

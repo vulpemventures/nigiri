@@ -24,7 +24,7 @@ var push = cli.Command{
 
 func pushAction(ctx *cli.Context) error {
 
-	isRunning, err := getBoolFromState("running")
+	isRunning, err := nigiriState.GetBool("running")
 	if err != nil {
 		return err
 	}
