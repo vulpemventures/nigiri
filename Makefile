@@ -42,7 +42,7 @@ test: clean install
 	go test -v -count=1 -race ./...
 
 ## test-ci: runs travis tests
-test-ci:
+test-ci: clean
 	@echo "Testing..."
 	go test -short -v ./...
 
