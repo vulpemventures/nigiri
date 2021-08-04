@@ -2,11 +2,13 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
 
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
 var start = cli.Command{
@@ -55,6 +57,18 @@ func startAction(ctx *cli.Context) error {
 		"running":      strconv.FormatBool(true),
 	}); err != nil {
 		return err
+	}
+
+	services, err := docker.GetServices(composePath)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println()
+	fmt.Println("ENDPOINTS")
+
+	for _, endpoint := range services {
+		fmt.Println(endpoint)
 	}
 
 	return nil

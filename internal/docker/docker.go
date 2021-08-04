@@ -3,6 +3,7 @@ package docker
 import (
 	"errors"
 	"io/ioutil"
+	"strings"
 
 	"github.com/compose-spec/compose-go/loader"
 )
@@ -26,8 +27,16 @@ func GetServices(composeFile string) ([]string, error) {
 	serviceMap := parsed["services"].(map[string]interface{})
 
 	var services []string
-	for k := range serviceMap {
-		services = append(services, k)
+	for k, v := range serviceMap {
+		m := v.(map[string]interface{})
+		i := m["ports"].([]interface{})
+		for _, j := range i {
+			port := j.(string)
+			exposedPorts := strings.Split(port, ":")
+			endpoint := k + " localhost:" + exposedPorts[0]
+			services = append(services, endpoint)
+		}
+
 	}
 
 	return services, nil
