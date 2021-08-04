@@ -6,8 +6,6 @@ It offers a [JSON HTTP proxy passtrough](https://github.com/vulpemventures/nigir
 
 You can have Elements too with the `--liquid` flag.
 
-Are you looking to spin-up Nigiri in Travis or Github Action? Look [here](https://github.com/vulpemventures/nigiri-travis)
-
 
 # No time to make a Nigiri yourself?
 ## Pre-built binary
@@ -51,7 +49,6 @@ $ nigiri rpc --liquid getnewaddress "" "bech32"
 el1qqwwx9gyrcrjrhgnrnjq9dq9t4hykmr6ela46ej63dnkdkcg8veadrvg5p0xg0zd6j3aug74cv9m4cf4jslwdqnha2w2nsg9x3
 ```
 
-
 # Make from scratch
 ## Utensils
 
@@ -83,14 +80,11 @@ $ git clone https://github.com/vulpemventures/nigiri.git
 $ make install
 ```
 
-This will create `~/.nigiri` copying there the `{bitcoin|elements}.conf` you can modify.
 
 * Build binary 
+
 ```
-# MacOSX
-$ make build-mac
-# Linux 
-$ make build-linux
+$ make build
 ```
 
 Done! You should be able to find the binary in the local `./build` folder. Give it permission to execute and move/rename into your PATH.
@@ -186,6 +180,21 @@ bcrt1qsl4j5je4gu3ecjle8lckl3u8yywh8rff6xxk2r
 $ nigiri rpc --liquid getnewaddress "" "bech32"
 el1qqwwx9gyrcrjrhgnrnjq9dq9t4hykmr6ela46ej63dnkdkcg8veadrvg5p0xg0zd6j3aug74cv9m4cf4jslwdqnha2w2nsg9x3
 ```
+
+* Run in headless mode (without Esplora)
+If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag.
+
+```
+$ nigiri start --ci [--liquid]
+```
+
+
+* Update the docker images
+
+```
+$ nigiri update
+```
+
 
 
 

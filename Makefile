@@ -1,14 +1,17 @@
-.PHONY: install build release dry-release clean cov fmt help vet test
+.PHONY: install clean build release dry-release cov fmt help vet test
 
 ## install: installs dependencies
 install:
-	export GO111MODULE=on
-	chmod u+x ./scripts/install
-	./scripts/install	
+	go mod download
+	go mod tidy
 
-## build: build binary for ARM
+## clean: cleans the binary
+clean:
+	@echo "Cleaning..."
+	go clean
+
+## build: build binary
 build:
-	export GO111MODULE=on
 	chmod u+x ./scripts/build
 	./scripts/build
 
@@ -17,13 +20,6 @@ release:
 
 dry-release:
 	goreleaser --snapshot --skip-publish --rm-dist
-
-## clean: cleans the binary
-clean:
-	@echo "Cleaning..."
-	export GO111MODULE=on
-	chmod u+x ./scripts/clean
-	./scripts/clean
 
 ## help: prints this help message
 help:
