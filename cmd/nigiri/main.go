@@ -71,12 +71,13 @@ func main() {
 	app.Usage = "create your dockerized environment with a bitcoin and liquid node, with a block explorer and developer tools"
 	app.Commands = append(
 		app.Commands,
-		&start,
-		&stop,
 		&rpc,
+		&stop,
 		&logs,
 		&mint,
 		&push,
+		&start,
+		&update,
 		&faucet,
 	)
 
