@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/btcsuite/btcutil"
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/pkg/state"
 )
 
@@ -20,19 +20,8 @@ var (
 	commit  = "none"
 	date    = "unknown"
 
-	stateFilename = "nigiri.config.json"
-	nigiriDataDir = btcutil.AppDataDir("nigiri-new", false)
-	statePath     = filepath.Join(nigiriDataDir, stateFilename)
-
-	initialState = map[string]string{
-		"attachliquid": strconv.FormatBool(false),
-		"datadir":      nigiriDataDir,
-		"network":      "regtest",
-		"ready":        strconv.FormatBool(false),
-		"running":      strconv.FormatBool(false),
-	}
-
-	nigiriState = state.New(statePath, initialState)
+	nigiriDataDir = config.DefaultDatadir
+	nigiriState   = state.New(config.DefaultPath, config.InitialState)
 
 	regtestCompose       = "docker-compose-regtest.yml"
 	regtestLiquidCompose = "docker-compose-regtest-liquid.yml"
@@ -53,9 +42,8 @@ var f embed.FS
 func init() {
 	dataDir := cleanAndExpandPath(os.Getenv("NIGIRI_DATADIR"))
 	if len(dataDir) > 0 {
+		nigiriState = state.New(filepath.Join(dataDir, config.DefaultName), config.InitialState)
 		nigiriDataDir = dataDir
-		statePath = filepath.Join(nigiriDataDir, stateFilename)
-		nigiriState = state.New(statePath, initialState)
 	}
 
 	if err := provisionResourcesToDatadir(); err != nil {
