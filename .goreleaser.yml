@@ -9,10 +9,13 @@ builds:
       - darwin
     goarch:
       - amd64
+
 checksum:
   name_template: "checksums.txt"
+
 snapshot:
   name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
@@ -22,3 +25,6 @@ changelog:
 archives:
   - format: binary
     name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+
+release:
+  prerelease: auto
