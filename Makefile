@@ -15,9 +15,11 @@ build:
 	chmod u+x ./scripts/build
 	./scripts/build
 
+## release: build and upload binaries to Github Releases
 release:
 	goreleaser
 
+## dry-release: build and test goreleaser
 dry-release:
 	goreleaser --snapshot --skip-publish --rm-dist
 
