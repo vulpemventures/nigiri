@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
@@ -33,10 +35,15 @@ func startAction(ctx *cli.Context) error {
 
 	isLiquid := ctx.Bool("liquid")
 	datadir := ctx.String("datadir")
-	composePath := getCompose(datadir, isLiquid)
+	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	// spin up all the services in the compose file
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d")
+	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d", "esplora")
+	if isLiquid {
+		//this will only run chopsticks & chopsticks-liquid and servives they depends on
+		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "esplora", "esplora-liquid")
+	}
+
 	if ctx.Bool("ci") {
 		//this will only run chopsticks and servives it depends on
 		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "chopsticks")

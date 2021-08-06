@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/config"
 )
 
 var stop = cli.Command{
@@ -26,12 +28,8 @@ var stop = cli.Command{
 func stopAction(ctx *cli.Context) error {
 
 	delete := ctx.Bool("delete")
-	isLiquid, err := nigiriState.GetBool("attachliquid")
-	if err != nil {
-		return err
-	}
 	datadir := ctx.String("datadir")
-	composePath := getCompose(datadir, isLiquid)
+	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "stop")
 	if delete {

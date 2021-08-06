@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
@@ -34,7 +36,7 @@ func pushAction(ctx *cli.Context) error {
 
 	isLiquid := ctx.Bool("liquid")
 	datadir := ctx.String("datadir")
-	composePath := getCompose(datadir, isLiquid)
+	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	var serviceName string = "chopsticks"
 	if isLiquid {

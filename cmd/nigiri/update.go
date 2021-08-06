@@ -3,8 +3,10 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/config"
 )
 
 var update = cli.Command{
@@ -15,7 +17,7 @@ var update = cli.Command{
 
 func updateAction(ctx *cli.Context) error {
 	datadir := ctx.String("datadir")
-	composePath := getCompose(datadir, true)
+	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "pull")
 	bashCmd.Stdout = os.Stdout

@@ -9,6 +9,8 @@ import (
 
 var (
 	DefaultName    = "nigiri.config.json"
+	DefaultCompose = "docker-compose.yml"
+
 	DefaultDatadir = btcutil.AppDataDir("nigiri", false)
 	DefaultPath    = filepath.Join(DefaultDatadir, DefaultName)
 

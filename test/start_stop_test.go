@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/vulpemventures/nigiri/interal/state"
 	"github.com/vulpemventures/nigiri/internal/config"
-	"github.com/vulpemventures/nigiri/pkg/state"
 )
 
 const (

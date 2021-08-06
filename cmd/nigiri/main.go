@@ -12,7 +12,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"github.com/vulpemventures/nigiri/internal/config"
-	"github.com/vulpemventures/nigiri/pkg/state"
+	"github.com/vulpemventures/nigiri/internal/state"
 )
 
 var (
@@ -21,9 +21,6 @@ var (
 	date    = "unknown"
 
 	nigiriState = state.New(config.DefaultPath, config.InitialState)
-
-	regtestCompose       = "docker-compose-regtest.yml"
-	regtestLiquidCompose = "docker-compose-regtest-liquid.yml"
 )
 
 var liquidFlag = cli.BoolFlag{
@@ -38,8 +35,7 @@ var datadirFlag = cli.StringFlag{
 	Value: config.DefaultDatadir,
 }
 
-//go:embed resources/docker-compose-regtest.yml
-//go:embed resources/docker-compose-regtest-liquid.yml
+//go:embed resources/docker-compose.yml
 //go:embed resources/bitcoin.conf
 //go:embed resources/elements.conf
 var f embed.FS
@@ -91,14 +87,6 @@ func fatal(err error) {
 	os.Exit(1)
 }
 
-func getCompose(datadir string, isLiquid bool) string {
-	if isLiquid {
-		return filepath.Join(cleanAndExpandPath(datadir), regtestLiquidCompose)
-	}
-
-	return filepath.Join(cleanAndExpandPath(datadir), regtestCompose)
-}
-
 // Provisioning Nigiri reosurces
 func provisionResourcesToDatadir(datadir string) error {
 
@@ -121,15 +109,8 @@ func provisionResourcesToDatadir(datadir string) error {
 
 	// copy resources into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
-		filepath.Join("resources", regtestCompose),
-		filepath.Join(datadir, regtestCompose),
-	); err != nil {
-		return err
-	}
-
-	if err := copyFromResourcesToDatadir(
-		filepath.Join("resources", regtestLiquidCompose),
-		filepath.Join(datadir, regtestLiquidCompose),
+		filepath.Join("resources", config.DefaultCompose),
+		filepath.Join(datadir, config.DefaultCompose),
 	); err != nil {
 		return err
 	}

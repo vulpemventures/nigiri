@@ -4,8 +4,10 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/config"
 )
 
 var logs = cli.Command{
@@ -29,9 +31,8 @@ func logsAction(ctx *cli.Context) error {
 
 	serviceName := ctx.Args().First()
 
-	isLiquid := ctx.Bool("liquid")
 	datadir := ctx.String("datadir")
-	composePath := getCompose(datadir, isLiquid)
+	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "logs", serviceName)
 	bashCmd.Stdout = os.Stdout

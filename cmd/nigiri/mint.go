@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
@@ -32,7 +34,7 @@ func mintAction(ctx *cli.Context) error {
 	}
 
 	datadir := ctx.String("datadir")
-	composePath := getCompose(datadir, true)
+	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	serviceName := "chopsticks-liquid"
 
