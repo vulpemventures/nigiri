@@ -46,11 +46,13 @@ func stopAction(ctx *cli.Context) error {
 
 	if delete {
 		fmt.Println("Removing data from volumes...")
-		if err := os.RemoveAll(ctx.String("datadir")); err != nil {
+
+		datadir := ctx.String("datadir")
+		if err := os.RemoveAll(datadir); err != nil {
 			return err
 		}
 
-		if err := provisionResourcesToDatadir(ctx.String("datadir")); err != nil {
+		if err := provisionResourcesToDatadir(datadir); err != nil {
 			return err
 		}
 
