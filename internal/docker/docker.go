@@ -8,7 +8,7 @@ import (
 	"github.com/compose-spec/compose-go/loader"
 )
 
-func GetServices(composeFile string) ([]string, error) {
+func GetServices(composeFile string) ([][]string, error) {
 
 	composeBytes, err := ioutil.ReadFile(composeFile)
 	if err != nil {
@@ -26,15 +26,15 @@ func GetServices(composeFile string) ([]string, error) {
 
 	serviceMap := parsed["services"].(map[string]interface{})
 
-	var services []string
+	var services [][]string
 	for k, v := range serviceMap {
 		m := v.(map[string]interface{})
 		i := m["ports"].([]interface{})
 		for _, j := range i {
 			port := j.(string)
 			exposedPorts := strings.Split(port, ":")
-			endpoint := k + " localhost:" + exposedPorts[0]
-			services = append(services, endpoint)
+			endpoint := "localhost:" + exposedPorts[0]
+			services = append(services, []string{k, endpoint})
 		}
 
 	}

@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 	"github.com/vulpemventures/nigiri/internal/config"
@@ -74,8 +75,15 @@ func startAction(ctx *cli.Context) error {
 	fmt.Println()
 	fmt.Println("ENDPOINTS")
 
-	for _, endpoint := range services {
-		fmt.Println(endpoint)
+	for _, nameAndEndpoint := range services {
+		name := nameAndEndpoint[0]
+		endpoint := nameAndEndpoint[1]
+
+		if !isLiquid && strings.Contains(name, "liquid") {
+			continue
+		}
+
+		fmt.Println(name + " " + endpoint)
 	}
 
 	return nil
