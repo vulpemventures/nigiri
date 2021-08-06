@@ -34,7 +34,8 @@ func faucetAction(ctx *cli.Context) error {
 	}
 
 	isLiquid := ctx.Bool("liquid")
-	composePath := getCompose(isLiquid)
+	datadir := ctx.String("datadir")
+	composePath := getCompose(datadir, isLiquid)
 
 	var serviceName string = "chopsticks"
 	if isLiquid {

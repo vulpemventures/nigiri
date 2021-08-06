@@ -30,7 +30,8 @@ func stopAction(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	composePath := getCompose(isLiquid)
+	datadir := ctx.String("datadir")
+	composePath := getCompose(datadir, isLiquid)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "stop")
 	if delete {
@@ -45,11 +46,11 @@ func stopAction(ctx *cli.Context) error {
 
 	if delete {
 		fmt.Println("Removing data from volumes...")
-		if err := os.RemoveAll(nigiriDataDir); err != nil {
+		if err := os.RemoveAll(ctx.String("datadir")); err != nil {
 			return err
 		}
 
-		if err := provisionResourcesToDatadir(); err != nil {
+		if err := provisionResourcesToDatadir(ctx.String("datadir")); err != nil {
 			return err
 		}
 

@@ -30,7 +30,8 @@ func logsAction(ctx *cli.Context) error {
 	serviceName := ctx.Args().First()
 
 	isLiquid := ctx.Bool("liquid")
-	composePath := getCompose(isLiquid)
+	datadir := ctx.String("datadir")
+	composePath := getCompose(datadir, isLiquid)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "logs", serviceName)
 	bashCmd.Stdout = os.Stdout

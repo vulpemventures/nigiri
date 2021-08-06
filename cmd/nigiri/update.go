@@ -14,7 +14,8 @@ var update = cli.Command{
 }
 
 func updateAction(ctx *cli.Context) error {
-	composePath := getCompose(true)
+	datadir := ctx.String("datadir")
+	composePath := getCompose(datadir, true)
 
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "pull")
 	bashCmd.Stdout = os.Stdout

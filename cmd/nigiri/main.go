@@ -20,8 +20,7 @@ var (
 	commit  = "none"
 	date    = "unknown"
 
-	nigiriDataDir = config.DefaultDatadir
-	nigiriState   = state.New(config.DefaultPath, config.InitialState)
+	nigiriState = state.New(config.DefaultPath, config.InitialState)
 
 	regtestCompose       = "docker-compose-regtest.yml"
 	regtestLiquidCompose = "docker-compose-regtest-liquid.yml"
@@ -33,23 +32,17 @@ var liquidFlag = cli.BoolFlag{
 	Value: false,
 }
 
+var datadirFlag = cli.StringFlag{
+	Name:  "datadir",
+	Usage: "use different data directory",
+	Value: config.DefaultDatadir,
+}
+
 //go:embed resources/docker-compose-regtest.yml
 //go:embed resources/docker-compose-regtest-liquid.yml
 //go:embed resources/bitcoin.conf
 //go:embed resources/elements.conf
 var f embed.FS
-
-func init() {
-	dataDir := cleanAndExpandPath(os.Getenv("NIGIRI_DATADIR"))
-	if len(dataDir) > 0 {
-		nigiriState = state.New(filepath.Join(dataDir, config.DefaultName), config.InitialState)
-		nigiriDataDir = dataDir
-	}
-
-	if err := provisionResourcesToDatadir(); err != nil {
-		fatal(err)
-	}
-}
 
 func main() {
 	app := cli.NewApp()
@@ -57,6 +50,7 @@ func main() {
 	app.Version = formatVersion()
 	app.Name = "nigiri CLI"
 	app.Usage = "create your dockerized environment with a bitcoin and liquid node, with a block explorer and developer tools"
+	app.Flags = append(app.Flags, &datadirFlag)
 	app.Commands = append(
 		app.Commands,
 		&rpc,
@@ -67,7 +61,24 @@ func main() {
 		&start,
 		&update,
 		&faucet,
+		&versionCmd,
 	)
+
+	app.Before = func(ctx *cli.Context) error {
+
+		dataDir := config.DefaultDatadir
+
+		if ctx.IsSet("datadir") {
+			dataDir = cleanAndExpandPath(ctx.String("datadir"))
+			nigiriState = state.New(filepath.Join(dataDir, config.DefaultName), config.InitialState)
+		}
+
+		if err := provisionResourcesToDatadir(dataDir); err != nil {
+			return err
+		}
+
+		return nil
+	}
 
 	err := app.Run(os.Args)
 	if err != nil {
@@ -80,16 +91,16 @@ func fatal(err error) {
 	os.Exit(1)
 }
 
-func getCompose(isLiquid bool) string {
+func getCompose(datadir string, isLiquid bool) string {
 	if isLiquid {
-		return filepath.Join(nigiriDataDir, regtestLiquidCompose)
+		return filepath.Join(cleanAndExpandPath(datadir), regtestLiquidCompose)
 	}
 
-	return filepath.Join(nigiriDataDir, regtestCompose)
+	return filepath.Join(cleanAndExpandPath(datadir), regtestCompose)
 }
 
 // Provisioning Nigiri reosurces
-func provisionResourcesToDatadir() error {
+func provisionResourcesToDatadir(datadir string) error {
 
 	isReady, err := nigiriState.GetBool("ready")
 	if err != nil {
@@ -101,38 +112,38 @@ func provisionResourcesToDatadir() error {
 	}
 
 	// create folders in volumes/{bitcoin,elements} for node datadirs
-	if err := makeDirectoryIfNotExists(filepath.Join(nigiriDataDir, "volumes", "bitcoin")); err != nil {
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "bitcoin")); err != nil {
 		return err
 	}
-	if err := makeDirectoryIfNotExists(filepath.Join(nigiriDataDir, "volumes", "elements")); err != nil {
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "elements")); err != nil {
 		return err
 	}
 
 	// copy resources into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", regtestCompose),
-		filepath.Join(nigiriDataDir, regtestCompose),
+		filepath.Join(datadir, regtestCompose),
 	); err != nil {
 		return err
 	}
 
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", regtestLiquidCompose),
-		filepath.Join(nigiriDataDir, regtestLiquidCompose),
+		filepath.Join(datadir, regtestLiquidCompose),
 	); err != nil {
 		return err
 	}
 
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "bitcoin.conf"),
-		filepath.Join(nigiriDataDir, "volumes", "bitcoin", "bitcoin.conf"),
+		filepath.Join(datadir, "volumes", "bitcoin", "bitcoin.conf"),
 	); err != nil {
 		return err
 	}
 
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "elements.conf"),
-		filepath.Join(nigiriDataDir, "volumes", "elements", "elements.conf"),
+		filepath.Join(datadir, "volumes", "elements", "elements.conf"),
 	); err != nil {
 		return err
 	}

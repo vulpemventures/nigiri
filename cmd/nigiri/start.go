@@ -32,7 +32,8 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	isLiquid := ctx.Bool("liquid")
-	composePath := getCompose(isLiquid)
+	datadir := ctx.String("datadir")
+	composePath := getCompose(datadir, isLiquid)
 
 	// spin up all the services in the compose file
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d")

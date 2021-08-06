@@ -31,7 +31,8 @@ func mintAction(ctx *cli.Context) error {
 		return errors.New("wrong number of arguments")
 	}
 
-	composePath := getCompose(true)
+	datadir := ctx.String("datadir")
+	composePath := getCompose(datadir, true)
 
 	serviceName := "chopsticks-liquid"
 
