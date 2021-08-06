@@ -61,8 +61,7 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	if err := nigiriState.Set(map[string]string{
-		"attachliquid": strconv.FormatBool(isLiquid),
-		"running":      strconv.FormatBool(true),
+		"running": strconv.FormatBool(true),
 	}); err != nil {
 		return err
 	}
