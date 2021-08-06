@@ -1,29 +1,27 @@
-.PHONY: install build release dry-release clean cov fmt help vet test
+.PHONY: install clean build release dry-release cov fmt help vet test
 
 ## install: installs dependencies
 install:
-	export GO111MODULE=on
-	chmod u+x ./scripts/install
-	./scripts/install	
-
-## build: build binary for ARM
-build:
-	export GO111MODULE=on
-	chmod u+x ./scripts/build
-	./scripts/build
-
-release:
-	goreleaser
-
-dry-release:
-	goreleaser --snapshot --skip-publish --rm-dist
+	go mod download
+	go mod tidy
 
 ## clean: cleans the binary
 clean:
 	@echo "Cleaning..."
-	export GO111MODULE=on
-	chmod u+x ./scripts/clean
-	./scripts/clean
+	go clean
+
+## build: build binary
+build:
+	chmod u+x ./scripts/build
+	./scripts/build
+
+## release: build and upload binaries to Github Releases
+release:
+	goreleaser
+
+## dry-release: build and test goreleaser
+dry-release:
+	goreleaser --snapshot --skip-publish --rm-dist
 
 ## help: prints this help message
 help:
@@ -46,7 +44,7 @@ test: clean install
 	go test -v -count=1 -race ./...
 
 ## test-ci: runs travis tests
-test-ci:
+test-ci: clean
 	@echo "Testing..."
 	go test -short -v ./...
 

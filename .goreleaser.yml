@@ -1,7 +1,7 @@
 builds:
-  - main: ./cli/main.go    
+  - main: ./cmd/nigiri
     ldflags:
-    - -s -w -X github.com/vulpemventures/nigiri/cli/cmd.version={{.Version}} -X github.com/vulpemventures/nigiri/cli/cmd.commit={{.Commit}} -X github.com/vulpemventures/nigiri/cli/cmd.date={{.Date}}
+      - -s -X 'main.version={{.Version}}' -X 'main.commit={{.Commit}}' -X 'main.date={{.Date}}'
     env:
       - CGO_ENABLED=0
     goos:
@@ -9,17 +9,22 @@ builds:
       - darwin
     goarch:
       - amd64
+
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
+
 snapshot:
   name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
 archives:
-  - 
-    format: binary
+  - format: binary
     name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+
+release:
+  prerelease: auto
