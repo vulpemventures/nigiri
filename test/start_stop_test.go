@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vulpemventures/nigiri/interal/state"
 	"github.com/vulpemventures/nigiri/internal/config"
+	"github.com/vulpemventures/nigiri/internal/state"
 )
 
 const (
@@ -108,7 +108,7 @@ func testCommand(command, arg string, flag bool) error {
 
 	err := cmd.Start()
 	if err != nil {
-		fmt.Errorf("name: %v, args: %v, err: %v", command, arg, err.Error())
+		return fmt.Errorf("name: %v, args: %v, err: %v", command, arg, err.Error())
 	}
 
 	return nil
