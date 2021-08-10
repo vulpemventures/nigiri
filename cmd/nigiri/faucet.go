@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -53,6 +54,19 @@ func faucetAction(ctx *cli.Context) error {
 	request := map[string]interface{}{
 		"address": ctx.Args().First(),
 	}
+	
+	if ctx.Args().Len() >= 2 {
+		amountFloat, err := strconv.ParseFloat(ctx.Args().Get(1), 64)
+		if err != nil {
+			return fmt.Errorf("invalid amount: %v", err)
+		}
+		request["amount"] = amountFloat
+	}
+
+	if isLiquid && ctx.Args().Len() == 3 {
+		request["asset"] = ctx.Args().Get(2)
+	}
+	
 	requestPort := mappedPorts[0]
 	payload, err := json.Marshal(request)
 	if err != nil {
