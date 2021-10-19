@@ -47,6 +47,7 @@ services:
       - 0.0.0.0:50000
       - --cors
       - "*"
+      - --jsonrpc-import
     depends_on:
       - bitcoin
     ports:
@@ -79,6 +80,7 @@ services:
       - 0.0.0.0:50001
       - --cors
       - "*"
+      - --jsonrpc-import
     depends_on:
       - liquid
     ports:
