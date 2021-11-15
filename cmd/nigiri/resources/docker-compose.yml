@@ -7,7 +7,7 @@ services:
     command:
       - -datadir=config
     ports:
-      - 18443:18433
+      - 18443:18443
       - 18444:18444
     volumes:
       - ./volumes/bitcoin/:/config
