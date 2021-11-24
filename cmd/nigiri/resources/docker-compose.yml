@@ -9,6 +9,9 @@ services:
     ports:
       - 18443:18443
       - 18444:18444
+      # ZMQ
+      - 28332:28332
+      - 28333:28333
     volumes:
       - ./volumes/bitcoin/:/config
     restart: unless-stopped
@@ -21,6 +24,9 @@ services:
     ports:
       - 18884:18884
       - 18886:18886
+      # ZMQ
+      - 38332:38332
+      - 38333:38333
     volumes:
       - ./volumes/elements/:/config
     restart: unless-stopped
