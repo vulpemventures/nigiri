@@ -18,6 +18,7 @@ services:
   
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
+    user: 1000:1000
     container_name: liquid
     command:
       - -datadir=config
