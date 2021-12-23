@@ -17,8 +17,15 @@ You can have Elements too with the `--liquid` flag.
 $ curl https://getnigiri.vulpem.com | bash
 ```
 
-This will create a directory `~/.nigiri` copying there `{bitcoin|elements}.conf` you can modify.
+This will also install several configurable files, such as `bitcoin.conf` and `elements.conf`, that can be edited. These can be found browsing the following directory:
 
+POSIX (Linux/BSD): `~/.nigiri`
+
+macOS: `$HOME/Library/ApplicationSupport/Nigiri`
+
+Windows: `%LOCALAPPDATA%\Nigiri`
+
+Plan 9: `$home/nigiri`
 
 * Lauch Docker daemon (Mac OSX)
 
