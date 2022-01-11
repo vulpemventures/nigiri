@@ -56,7 +56,7 @@ This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying
 There are two ways to deal with this issue:
 
 1) Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
-2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in `$HOME/Library/Application\ Support/Nigiri/`. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
+2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
 
 ---
 
