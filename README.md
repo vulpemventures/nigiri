@@ -21,7 +21,7 @@ This will also install several configurable files, such as `bitcoin.conf` and `e
 
 POSIX (Linux/BSD): `~/.nigiri`
 
-macOS: `$HOME/Library/ApplicationSupport/Nigiri`
+macOS: `$HOME/Library/Application\ Support/Nigiri`
 
 Windows: `%LOCALAPPDATA%\Nigiri`
 
@@ -40,6 +40,26 @@ You may want to [Manage Docker as a non-root user](https://docs.docker.com/engin
 $ nigiri start --liquid
 ```
 **That's it.**
+
+---
+**Note for users of macOS Monterey**
+
+When trying to start Nigiri, you might get an error similar to the following:
+
+```
+Error response from daemon: Ports are not available: listen tcp 0.0.0.0:5000: bind: address already in use
+exit status 1
+```
+
+This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying to run using the very same port. 
+
+There are two ways to deal with this issue:
+
+1) Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
+2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
+
+---
+
 Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http://localhost:5001 for Liquid.
 
 * Use the Bitcoin CLI inside the box
