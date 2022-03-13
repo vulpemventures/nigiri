@@ -21,6 +21,10 @@ var start = cli.Command{
 	Flags: []cli.Flag{
 		&liquidFlag,
 		&cli.BoolFlag{
+			Name:  "signet",
+			Usage: "start Bitcoin node in signet",
+		},
+		&cli.BoolFlag{
 			Name:  "ci",
 			Usage: "runs in headless mode without esplora for continuous integration environments",
 			Value: false,
@@ -35,8 +39,16 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	isLiquid := ctx.Bool("liquid")
+	isSignet := ctx.Bool("signet")
+	runWithoutFrontend := ctx.Bool("ci")
 	datadir := ctx.String("datadir")
-	composePath := filepath.Join(datadir, config.DefaultCompose)
+	regtestComposePath := filepath.Join(datadir, config.DefaultCompose)
+	signetComposePath := filepath.Join(datadir, config.SignetCompose)
+
+	composePath := regtestComposePath
+	if isSignet {
+		composePath = signetComposePath
+	}
 
 	// spin up all the services in the compose file
 	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d", "esplora")
@@ -45,13 +57,20 @@ func startAction(ctx *cli.Context) error {
 		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "esplora", "esplora-liquid")
 	}
 
-	if ctx.Bool("ci") {
+	if runWithoutFrontend {
 		//this will only run chopsticks and servives it depends on
 		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "chopsticks")
 		if isLiquid {
 			//this will only run chopsticks & chopsticks-liquid and servives they depends on
 			bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "chopsticks", "chopsticks-liquid")
 		}
+	}
+
+	if isSignet {
+		if isLiquid || runWithoutFrontend {
+			return errors.New("signet can only be used with bitcoin")
+		}
+		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "esplora")
 	}
 
 	bashCmd.Stdout = os.Stdout
