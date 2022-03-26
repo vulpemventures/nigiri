@@ -176,7 +176,7 @@ $ nigiri push --liquid <hex>
 
 ```bash
 # Bitcoind
-$ nigiri logs node
+$ nigiri logs bitcoin
 # Electrs
 $ nigiri logs electrs
 # Chopsticks
@@ -187,11 +187,11 @@ $ nigiri logs chopsticks
 
 ```bash
 # Elementsd
-$ nigiri logs node --liquid
+$ nigiri logs liquid
 # Electrs Liquid
-$ nigiri logs electrs --liquid
+$ nigiri logs electrs-liquid
 # Chopsticks Liquid
-$ nigiri logs chopsticks --liquid
+$ nigiri logs chopsticks-liquid
 ```
 
 * Use the Bitcoin CLI inside the box
