@@ -1,0 +1,66 @@
+version: '3.7'
+services:
+
+  # Signet 
+  bitcoin:
+    image: ghcr.io/vulpemventures/bitcoin:latest
+    user: 1000:1000
+    container_name: bitcoin
+    command:
+      - -datadir=config
+    ports:
+      - 38333:38333
+      - 38332:38332
+      # ZMQ
+      - 48332:48332
+      - 48333:48333
+    volumes:
+      - ./volumes/bitcoin-signet/:/config
+    restart: unless-stopped
+
+  electrs:
+    image: ghcr.io/vulpemventures/electrs:latest
+    container_name: electrs
+    entrypoint:
+      - /build/electrs
+    command:
+      - -vvvv
+      - --network
+      - signet
+      - --daemon-dir
+      - /config
+      - --daemon-rpc-addr
+      - bitcoin:38332
+      - --cookie
+      - admin1:123
+      - --http-addr
+      - 0.0.0.0:30000
+      - --electrum-rpc-addr
+      - 0.0.0.0:50000
+      - --cors
+      - "*"
+      - --jsonrpc-import
+    depends_on:
+      - bitcoin
+    ports:
+      - 50000:50000
+      - 30000:30000
+    volumes:
+      - ./volumes/bitcoin-signet/:/config
+    restart: unless-stopped
+
+  # Block explorer frontend
+  esplora:
+    image: ghcr.io/vulpemventures/esplora:latest
+    container_name: esplora
+    depends_on:
+      - electrs
+    environment: 
+        API_URL: http://localhost:30000
+    ports:
+      - 5000:5000
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nigiri

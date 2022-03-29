@@ -36,7 +36,9 @@ var datadirFlag = cli.StringFlag{
 }
 
 //go:embed resources/docker-compose.yml
+//go:embed resources/docker-compose.signet.yml
 //go:embed resources/bitcoin.conf
+//go:embed resources/bitcoin.signet.conf
 //go:embed resources/elements.conf
 var f embed.FS
 
@@ -106,11 +108,21 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "elements")); err != nil {
 		return err
 	}
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "bitcoin-signet")); err != nil {
+		return err
+	}
 
 	// copy resources into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", config.DefaultCompose),
 		filepath.Join(datadir, config.DefaultCompose),
+	); err != nil {
+		return err
+	}
+
+	if err := copyFromResourcesToDatadir(
+		filepath.Join("resources", config.SignetCompose),
+		filepath.Join(datadir, config.SignetCompose),
 	); err != nil {
 		return err
 	}
@@ -125,6 +137,13 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "elements.conf"),
 		filepath.Join(datadir, "volumes", "elements", "elements.conf"),
+	); err != nil {
+		return err
+	}
+
+	if err := copyFromResourcesToDatadir(
+		filepath.Join("resources", "bitcoin.signet.conf"),
+		filepath.Join(datadir, "volumes", "bitcoin-signet", "bitcoin.conf"),
 	); err != nil {
 		return err
 	}
