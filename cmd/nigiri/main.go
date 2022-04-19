@@ -57,6 +57,8 @@ func main() {
 	app.Commands = append(
 		app.Commands,
 		&rpc,
+		&lnd,
+		&cln,
 		&stop,
 		&logs,
 		&mint,

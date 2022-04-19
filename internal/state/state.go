@@ -93,6 +93,19 @@ func (s *State) GetBool(key string) (bool, error) {
 	return value, nil
 }
 
+func (s *State) GetString(key string) (string, error) {
+	stateData, err := s.Get()
+	if err != nil {
+		return "", err
+	}
+
+	if _, ok := stateData[key]; !ok {
+		return "", errors.New("config: missing key " + key)
+	}
+
+	return stateData[key], nil
+}
+
 func merge(maps ...map[string]string) map[string]string {
 	merge := make(map[string]string)
 	for _, m := range maps {
