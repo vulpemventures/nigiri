@@ -45,7 +45,6 @@ var datadirFlag = cli.StringFlag{
 //go:embed resources/bitcoin.conf
 //go:embed resources/elements.conf
 //go:embed resources/lnd.conf
-//go:embed resources/lightning.conf
 var f embed.FS
 
 func main() {
@@ -117,7 +116,7 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lnd")); err != nil {
 		return err
 	}
-	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lnd2")); err != nil {
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lightningd")); err != nil {
 		return err
 	}
 
@@ -152,22 +151,6 @@ func provisionResourcesToDatadir(datadir string) error {
 	); err != nil {
 		return err
 	}
-
-	// copy second lnd.conf into the Nigiri data directory
-	if err := copyFromResourcesToDatadir(
-		filepath.Join("resources", "lnd.conf"),
-		filepath.Join(datadir, "volumes", "lnd2", "lnd.conf"),
-	); err != nil {
-		return err
-	}
-
-	/* 	// copy lightning.conf into the Nigiri data directory
-	   	if err := copyFromResourcesToDatadir(
-	   		filepath.Join("resources", "lightning.conf"),
-	   		filepath.Join(datadir, "volumes", "lightningd", "lightning.conf"),
-	   	); err != nil {
-	   		return err
-	   	} */
 
 	if err := nigiriState.Set(map[string]string{"ready": strconv.FormatBool(true)}); err != nil {
 		return err

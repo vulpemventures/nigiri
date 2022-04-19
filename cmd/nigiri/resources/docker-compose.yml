@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 services:
 
   # RPC daemon
@@ -169,7 +169,7 @@ services:
     container_name: lnd
     image: lightninglabs/lnd:v0.14.3-beta
     user: 1000:1000
-    depends_on: 
+    depends_on:
       - bitcoin
     volumes:
       - ./volumes/lnd:/data/.lnd
@@ -181,21 +181,28 @@ services:
       - "9735:9735" # p2p
       - "10009:10009" # grpc
 
-  lnd2:
-    container_name: lnd2
-    image: lightninglabs/lnd:v0.14.3-beta
-    user: 1000:1000
-    depends_on: 
-      - bitcoin
-    volumes:
-      - ./volumes/lnd2:/data/.lnd
+  lightningd:
+    container_name: cln
+    image: elementsproject/lightningd:latest
     environment:
-      HOME: /data
-    restart: unless-stopped
-    stop_grace_period: 5m30s
+      LIGHTNINGD_PORT: 9935
+      EXPOSE_TCP: "true"
+    command: 
+      - --network=regtest 
+      - --alias=nigiri
+      - --bitcoin-rpcconnect=bitcoin:18443
+      - --bitcoin-rpcuser=admin1 
+      - --bitcoin-rpcpassword=123 
+      - --log-level=debug 
+    depends_on:
+      - bitcoin
     ports:
-      - "19735:9735" # p2p
-      - "20009:10009" # grpc
+      - 9935:9935 # p2p
+      - 9835:9835 # rpc
+    restart: unless-stopped
+    volumes:
+      - ./volumes/lightningd:/root/.lightning
+      - ./volumes/bitcoin:/etc/bitcoin
 
 networks:
   default:

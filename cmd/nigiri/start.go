@@ -51,8 +51,8 @@ func startAction(ctx *cli.Context) error {
 	if isLN {
 		// LND
 		servicesToRun = append(servicesToRun, "lnd")
-		// Second LND node
-		servicesToRun = append(servicesToRun, "lnd2")
+		// Core Lightning Network
+		servicesToRun = append(servicesToRun, "lightningd")
 	}
 
 	if isCI {
