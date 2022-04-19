@@ -20,6 +20,7 @@ var start = cli.Command{
 	Action: startAction,
 	Flags: []cli.Flag{
 		&liquidFlag,
+		&lnFlag,
 		&cli.BoolFlag{
 			Name:  "ci",
 			Usage: "runs in headless mode without esplora for continuous integration environments",
@@ -35,25 +36,38 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	isLiquid := ctx.Bool("liquid")
+	isLN := ctx.Bool("ln")
+	isCI := ctx.Bool("ci")
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	// spin up all the services in the compose file
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "up", "-d", "esplora")
+	servicesToRun := []string{"esplora"}
 	if isLiquid {
 		//this will only run chopsticks & chopsticks-liquid and servives they depends on
-		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "esplora", "esplora-liquid")
+		servicesToRun = append(servicesToRun, "esplora-liquid")
 	}
 
-	if ctx.Bool("ci") {
+	if isLN {
+		// LND
+		servicesToRun = append(servicesToRun, "lnd")
+		// Second LND node
+		servicesToRun = append(servicesToRun, "lnd2")
+	}
+
+	if isCI {
 		//this will only run chopsticks and servives it depends on
-		bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "chopsticks")
+		servicesToRun = []string{"chopsticks"}
 		if isLiquid {
 			//this will only run chopsticks & chopsticks-liquid and servives they depends on
-			bashCmd = exec.Command("docker-compose", "-f", composePath, "up", "-d", "chopsticks", "chopsticks-liquid")
+			servicesToRun = append(servicesToRun, "chopsticks-liquid")
 		}
 	}
 
+	args := []string{"-f", composePath, "up", "-d"}
+	args = append(args, servicesToRun...)
+
+	bashCmd := exec.Command("docker-compose", args...)
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 

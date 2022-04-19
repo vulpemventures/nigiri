@@ -29,6 +29,12 @@ var liquidFlag = cli.BoolFlag{
 	Value: false,
 }
 
+var lnFlag = cli.BoolFlag{
+	Name:  "ln",
+	Usage: "enable Lightning Network",
+	Value: false,
+}
+
 var datadirFlag = cli.StringFlag{
 	Name:  "datadir",
 	Usage: "use different data directory",
@@ -38,6 +44,8 @@ var datadirFlag = cli.StringFlag{
 //go:embed resources/docker-compose.yml
 //go:embed resources/bitcoin.conf
 //go:embed resources/elements.conf
+//go:embed resources/lnd.conf
+//go:embed resources/lightning.conf
 var f embed.FS
 
 func main() {
@@ -106,8 +114,14 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "elements")); err != nil {
 		return err
 	}
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lnd")); err != nil {
+		return err
+	}
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lnd2")); err != nil {
+		return err
+	}
 
-	// copy resources into the Nigiri data directory
+	// copy docker compose into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", config.DefaultCompose),
 		filepath.Join(datadir, config.DefaultCompose),
@@ -115,6 +129,7 @@ func provisionResourcesToDatadir(datadir string) error {
 		return err
 	}
 
+	// copy bitcoin.conf into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "bitcoin.conf"),
 		filepath.Join(datadir, "volumes", "bitcoin", "bitcoin.conf"),
@@ -122,12 +137,37 @@ func provisionResourcesToDatadir(datadir string) error {
 		return err
 	}
 
+	// copy elements.conf into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "elements.conf"),
 		filepath.Join(datadir, "volumes", "elements", "elements.conf"),
 	); err != nil {
 		return err
 	}
+
+	// copy lnd.conf into the Nigiri data directory
+	if err := copyFromResourcesToDatadir(
+		filepath.Join("resources", "lnd.conf"),
+		filepath.Join(datadir, "volumes", "lnd", "lnd.conf"),
+	); err != nil {
+		return err
+	}
+
+	// copy second lnd.conf into the Nigiri data directory
+	if err := copyFromResourcesToDatadir(
+		filepath.Join("resources", "lnd.conf"),
+		filepath.Join(datadir, "volumes", "lnd2", "lnd.conf"),
+	); err != nil {
+		return err
+	}
+
+	/* 	// copy lightning.conf into the Nigiri data directory
+	   	if err := copyFromResourcesToDatadir(
+	   		filepath.Join("resources", "lightning.conf"),
+	   		filepath.Join(datadir, "volumes", "lightningd", "lightning.conf"),
+	   	); err != nil {
+	   		return err
+	   	} */
 
 	if err := nigiriState.Set(map[string]string{"ready": strconv.FormatBool(true)}); err != nil {
 		return err
