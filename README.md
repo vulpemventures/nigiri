@@ -47,19 +47,18 @@ Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http:/
 **Note for users of macOS Monterey an onward**
 <details>
   <summary>Show more...</summary>
-    When trying to start Nigiri, you might get an error similar to the following:
+   When trying to start Nigiri, you might get an error similar to the following:
 
-    ```
-    Error response from daemon: Ports are not available: listen tcp 0.0.0.0:5000: bind: address already in use
-    exit status 1
-    ```
+  ```bash
+  Error response from daemon: Ports are not available: listen tcp 0.0.0.0:5000: bind: address already in use 
+  exit status 1
+  ```
+  This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying to run using the very same port. 
 
-    This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying to run using the very same port. 
+  There are two ways to deal with this issue:
 
-    There are two ways to deal with this issue:
-
-    1) Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
-    2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
+  1) Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
+  2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
 </details>
 <br />
 
