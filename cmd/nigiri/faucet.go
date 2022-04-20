@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -51,10 +52,41 @@ func faucetAction(ctx *cli.Context) error {
 	}
 	mappedPorts := strings.Split(portSlice[0], ":")
 
-	request := map[string]interface{}{
-		"address": ctx.Args().First(),
+	network, err := nigiriState.GetString("network")
+	if err != nil {
+		return err
 	}
-	
+
+	var address string
+	firstArgument := ctx.Args().First()
+	if firstArgument == "cln" {
+		jsonOut, err := outputCommand("docker", "exec", "cln", "lightning-cli", "--network="+network, "newaddr")
+		if err != nil {
+			return err
+		}
+
+		address, err = getValueByKey(jsonOut, "bech32")
+		if err != nil {
+			return err
+		}
+	}
+
+	if firstArgument == "lnd" {
+		jsonOut, err := outputCommand("docker", "exec", "lnd", "lncli", "--network="+network, "newaddress", "p2wkh")
+		if err != nil {
+			return err
+		}
+
+		address, err = getValueByKey(jsonOut, "address")
+		if err != nil {
+			return err
+		}
+	}
+
+	request := map[string]interface{}{
+		"address": address,
+	}
+
 	if ctx.Args().Len() >= 2 {
 		amountFloat, err := strconv.ParseFloat(ctx.Args().Get(1), 64)
 		if err != nil {
@@ -66,7 +98,7 @@ func faucetAction(ctx *cli.Context) error {
 	if isLiquid && ctx.Args().Len() == 3 {
 		request["asset"] = ctx.Args().Get(2)
 	}
-	
+
 	requestPort := mappedPorts[0]
 	payload, err := json.Marshal(request)
 	if err != nil {
@@ -94,4 +126,22 @@ func faucetAction(ctx *cli.Context) error {
 	fmt.Println("txId: " + dat["txId"])
 
 	return nil
+}
+
+func getValueByKey(JSONobject []byte, key string) (string, error) {
+	var data map[string]interface{}
+	err := json.Unmarshal(JSONobject, &data)
+	if err != nil {
+		return "", err
+	}
+	return data[key].(string), nil
+}
+
+func outputCommand(name string, arg ...string) ([]byte, error) {
+	cmd := exec.Command(name, arg...)
+	b, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("name: %v, args: %v, err: %v", name, arg, err.Error())
+	}
+	return b, nil
 }
