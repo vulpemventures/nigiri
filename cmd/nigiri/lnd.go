@@ -25,9 +25,10 @@ func lndAction(ctx *cli.Context) error {
 		return err
 	}
 
-	rpcArgs := []string{"exec", "lnd", "lncli", "--network=" + network}
+	rpcArgs := []string{"exec", "-it", "lnd", "lncli", "--network=" + network}
 	cmdArgs := append(rpcArgs, ctx.Args().Slice()...)
 	bashCmd := exec.Command("docker", cmdArgs...)
+	bashCmd.Stdin = os.Stdin
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 

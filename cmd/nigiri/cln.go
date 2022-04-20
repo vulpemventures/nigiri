@@ -25,9 +25,10 @@ func clnAction(ctx *cli.Context) error {
 		return err
 	}
 
-	rpcArgs := []string{"exec", "cln", "lightning-cli", "--network=" + network}
+	rpcArgs := []string{"exec", "-it", "cln", "lightning-cli", "--network=" + network}
 	cmdArgs := append(rpcArgs, ctx.Args().Slice()...)
 	bashCmd := exec.Command("docker", cmdArgs...)
+	bashCmd.Stdin = os.Stdin
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 
