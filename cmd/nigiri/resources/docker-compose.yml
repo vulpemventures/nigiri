@@ -1,5 +1,6 @@
-version: '3.7'
+version: '3.8'
 services:
+
   # RPC daemon
   bitcoin:
     image: ghcr.io/vulpemventures/bitcoin:latest
@@ -16,7 +17,7 @@ services:
     volumes:
       - ./volumes/bitcoin/:/config
     restart: unless-stopped
-  
+
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
     user: 1000:1000
@@ -104,8 +105,8 @@ services:
     container_name: esplora
     depends_on:
       - chopsticks
-    environment: 
-        API_URL: http://localhost:3000
+    environment:
+      API_URL: http://localhost:3000
     ports:
       - 5000:5000
     restart: unless-stopped
@@ -120,6 +121,7 @@ services:
     ports:
       - 5001:5000
     restart: unless-stopped
+
   # Chopsticks
   chopsticks:
     image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
@@ -162,6 +164,45 @@ services:
     ports:
       - 3001:3000
     restart: unless-stopped
+
+  lnd:
+    container_name: lnd
+    image: lightninglabs/lnd:v0.14.3-beta
+    user: 1000:1000
+    depends_on:
+      - bitcoin
+    volumes:
+      - ./volumes/lnd:/data/.lnd
+    environment:
+      HOME: /data
+    restart: unless-stopped
+    stop_grace_period: 5m30s
+    ports:
+      - "9735:9735" # p2p
+      - "10009:10009" # grpc
+
+  lightningd:
+    container_name: cln
+    image: elementsproject/lightningd:latest
+    environment:
+      LIGHTNINGD_PORT: 9935
+      EXPOSE_TCP: "true"
+    command: 
+      - --network=regtest 
+      - --alias=nigiri
+      - --bitcoin-rpcconnect=bitcoin:18443
+      - --bitcoin-rpcuser=admin1 
+      - --bitcoin-rpcpassword=123 
+      - --log-level=debug 
+    depends_on:
+      - bitcoin
+    ports:
+      - 9935:9935 # p2p
+      - 9835:9835 # rpc
+    restart: unless-stopped
+    volumes:
+      - ./volumes/lightningd:/root/.lightning
+      - ./volumes/bitcoin:/etc/bitcoin
 
 networks:
   default:

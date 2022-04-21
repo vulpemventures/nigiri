@@ -41,40 +41,163 @@ $ nigiri start --liquid
 ```
 **That's it.**
 
----
-**Note for users of macOS Monterey**
-
-When trying to start Nigiri, you might get an error similar to the following:
-
-```
-Error response from daemon: Ports are not available: listen tcp 0.0.0.0:5000: bind: address already in use
-exit status 1
-```
-
-This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying to run using the very same port. 
-
-There are two ways to deal with this issue:
-
-1) Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
-2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
-
----
-
 Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http://localhost:5001 for Liquid.
 
-* Use the Bitcoin CLI inside the box
 
+**Note for users of macOS Monterey an onward**
+<details>
+  <summary>Show more...</summary>
+   When trying to start Nigiri, you might get an error similar to the following:
+
+  ```bash
+  Error response from daemon: Ports are not available: listen tcp 0.0.0.0:5000: bind: address already in use 
+  exit status 1
+  ```
+  This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying to run using the very same port. 
+
+  There are two ways to deal with this issue:
+
+  1) Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
+  2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
+</details>
+<br />
+
+## Tasting
+
+At the moment bitcoind, elements and electrs are started on *regtest* network.
+
+
+### Start nigiri
+
+```bash
+$ nigiri start
 ```
+- Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
+
+- Use the `--ln` flag to start a Core Lightning node and a LND node.
+
+### Stop nigiri
+
+```bash
+$ nigiri stop
+```
+Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
+
+### Generate and send bitcoin to given address
+
+```bash
+# Bitcoin
+$ nigiri faucet <bitcoin_address>
+## Fund the Core Lightning node
+$ nigiri faucet cln 0.01
+
+## Fund the LND node
+$ nigiri faucet lnd 0.01
+
+# Elements
+$ nigiri faucet --liquid <liquid_address>
+```
+
+### **Liquid only** Issue and send a given quantity of an asset
+
+```bash
+$ nigiri mint <liquid_address> 1000 VulpemToken VLP
+```
+
+### Broadcast a raw transaction and automatically generate a block
+
+```bash
+# Bitcoin
+$ nigiri push <hex>
+
+# Elements
+$ nigiri push --liquid <hex>
+```
+
+### Check the logs of Bitcoin services
+
+```bash
+# Bitcoind
+$ nigiri logs bitcoin
+# Electrs
+$ nigiri logs electrs
+# Chopsticks
+$ nigiri logs chopsticks
+```
+
+### Check the logs of Liquid services
+
+```bash
+# Elementsd
+$ nigiri logs liquid
+# Electrs Liquid
+$ nigiri logs electrs-liquid
+# Chopsticks Liquid
+$ nigiri logs chopsticks-liquid
+```
+
+### Check the logs of Lightning services
+
+```bash
+# Core Lightning
+$ nigiri logs cln
+# LND
+$ nigiri logs lnd
+```
+
+### Use the Bitcoin CLI inside the box
+
+```bash
 $ nigiri rpc getnewaddress "" "bech32"
 bcrt1qsl4j5je4gu3ecjle8lckl3u8yywh8rff6xxk2r
 ```
 
-* Use the Elements CLI inside the box
+### Use the Elements CLI inside the box
 
-```
+```bash
 $ nigiri rpc --liquid getnewaddress "" "bech32"
 el1qqwwx9gyrcrjrhgnrnjq9dq9t4hykmr6ela46ej63dnkdkcg8veadrvg5p0xg0zd6j3aug74cv9m4cf4jslwdqnha2w2nsg9x3
 ```
+
+### Use the Core Lightning & LND CLIs inside the box
+
+```bash
+# Core Lightning
+$ nigiri cln listpeers
+# LND
+$ nigiri lnd listpeers
+```
+
+### Connect Core Lightning to LND
+
+```bash
+$ nigiri cln connect `nigiri lnd getinfo | jq -r .identity_pubkey`@lnd:9735
+```
+
+### Open a channel between cln and lnd
+
+```bash
+$ nigiri lnd openchannel --node_key=`nigiri cln getinfo | jq -r .id` --local_amt=100000
+```
+
+
+### Run in headless mode (without Esplora)
+If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag.
+
+```
+$ nigiri start --ci [--liquid] [--ln]
+```
+
+### Update the docker images
+
+```
+$ nigiri update
+```
+
+Nigiri uses the default directory `~/.nigiri` to store configuration files and docker-compose files.
+To set a custom directory use the `--datadir` flag.
+
+Run the `help` command to see the full list of available flags.
 
 # Make from scratch
 ## Utensils
@@ -124,111 +247,6 @@ Remeber to always `clean` Nigiri before running `install` to upgrade to a new ve
 ```
 $ make clean
 ```
-
-
-
-## Tasting
-
-At the moment bitcoind, elements and electrs are started on *regtest* network.
-
-
-*  Start nigiri:
-
-```bash
-$ nigiri start
-```
-Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
-
-* Stop nigiri:
-
-```bash
-$ nigiri stop
-```
-Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
-
-* Generate and send bitcoin to given address
-
-```bash
-# Bitcoin
-$ nigiri faucet bcrt1qsl4j5je4gu3ecjle8lckl3u8yywh8rff6xxk2r
-
-# Elements
-$ nigiri faucet --liquid el1qqwwx9gyrcrjrhgnrnjq9dq9t4hykmr6ela46ej63dnkdkcg8veadrvg5p0xg0zd6j3aug74cv9m4cf4jslwdqnha2w2nsg9x3
-```
-
-* Liquid only Issue and send a given quantity of an asset
-
-```bash
-$ nigiri mint el1qqwwx9gyrcrjrhgnrnjq9dq9t4hykmr6ela46ej63dnkdkcg8veadrvg5p0xg0zd6j3aug74cv9m4cf4jslwdqnha2w2nsg9x3 1000 VulpemToken VLP
-```
-
-* Broadcast a raw transaction and automatically generate a block
-
-```bash
-# Bitcoin
-$ nigiri push <hex>
-
-# Elements
-$ nigiri push --liquid <hex>
-```
-
-* Check the logs of Bitcoin services
-
-```bash
-# Bitcoind
-$ nigiri logs bitcoin
-# Electrs
-$ nigiri logs electrs
-# Chopsticks
-$ nigiri logs chopsticks
-```
-
-* Check the logs of Liquid services
-
-```bash
-# Elementsd
-$ nigiri logs liquid
-# Electrs Liquid
-$ nigiri logs electrs-liquid
-# Chopsticks Liquid
-$ nigiri logs chopsticks-liquid
-```
-
-* Use the Bitcoin CLI inside the box
-
-```
-$ nigiri rpc getnewaddress "" "bech32"
-bcrt1qsl4j5je4gu3ecjle8lckl3u8yywh8rff6xxk2r
-```
-
-* Use the Elements CLI inside the box
-
-```
-$ nigiri rpc --liquid getnewaddress "" "bech32"
-el1qqwwx9gyrcrjrhgnrnjq9dq9t4hykmr6ela46ej63dnkdkcg8veadrvg5p0xg0zd6j3aug74cv9m4cf4jslwdqnha2w2nsg9x3
-```
-
-* Run in headless mode (without Esplora)
-If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag.
-
-```
-$ nigiri start --ci [--liquid]
-```
-
-
-* Update the docker images
-
-```
-$ nigiri update
-```
-
-
-
-
-Nigiri uses the default directory `~/.nigiri` to store configuration files and docker-compose files.
-To set a custom directory use the `--datadir` flag.
-
-Run the `help` command to see the full list of available flags.
 
 ## Nutrition Facts
 
