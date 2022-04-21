@@ -57,9 +57,8 @@ func faucetAction(ctx *cli.Context) error {
 		return err
 	}
 
-	var address string
-	firstArgument := ctx.Args().First()
-	if firstArgument == "cln" {
+	address := ctx.Args().First()
+	if address == "cln" {
 		jsonOut, err := outputCommand("docker", "exec", "cln", "lightning-cli", "--network="+network, "newaddr")
 		if err != nil {
 			return err
@@ -71,7 +70,7 @@ func faucetAction(ctx *cli.Context) error {
 		}
 	}
 
-	if firstArgument == "lnd" {
+	if address == "lnd" {
 		jsonOut, err := outputCommand("docker", "exec", "lnd", "lncli", "--network="+network, "newaddress", "p2wkh")
 		if err != nil {
 			return err
