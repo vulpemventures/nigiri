@@ -62,6 +62,13 @@ func startAction(ctx *cli.Context) error {
 			//this will only run chopsticks & chopsticks-liquid and servives they depends on
 			servicesToRun = append(servicesToRun, "chopsticks-liquid")
 		}
+		// add also LN services if needed
+		if isLN {
+			// LND
+			servicesToRun = append(servicesToRun, "lnd")
+			// Core Lightning Network
+			servicesToRun = append(servicesToRun, "lightningd")
+		}
 	}
 
 	args := []string{"-f", composePath, "up", "-d"}
@@ -77,6 +84,9 @@ func startAction(ctx *cli.Context) error {
 
 	if err := nigiriState.Set(map[string]string{
 		"running": strconv.FormatBool(true),
+		"ci":      strconv.FormatBool(isCI),
+		"liquid":  strconv.FormatBool(isLiquid),
+		"ln":      strconv.FormatBool(isLN),
 	}); err != nil {
 		return err
 	}
