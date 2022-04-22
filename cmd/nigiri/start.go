@@ -62,6 +62,13 @@ func startAction(ctx *cli.Context) error {
 			//this will only run chopsticks & chopsticks-liquid and servives they depends on
 			servicesToRun = append(servicesToRun, "chopsticks-liquid")
 		}
+		// add also LN services if needed
+		if isLN {
+			// LND
+			servicesToRun = append(servicesToRun, "lnd")
+			// Core Lightning Network
+			servicesToRun = append(servicesToRun, "lightningd")
+		}
 	}
 
 	args := []string{"-f", composePath, "up", "-d"}
