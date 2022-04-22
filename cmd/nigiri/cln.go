@@ -25,7 +25,16 @@ func clnAction(ctx *cli.Context) error {
 		return err
 	}
 
-	rpcArgs := []string{"exec", "-it", "cln", "lightning-cli", "--network=" + network}
+	isCi, err := nigiriState.GetBool("ci")
+	if err != nil {
+		return err
+	}
+
+	ttyOption := "-it"
+	if isCi {
+		ttyOption = "-i"
+	}
+	rpcArgs := []string{"exec", ttyOption, "cln", "lightning-cli", "--network=" + network}
 	cmdArgs := append(rpcArgs, ctx.Args().Slice()...)
 	bashCmd := exec.Command("docker", cmdArgs...)
 	bashCmd.Stdin = os.Stdin
