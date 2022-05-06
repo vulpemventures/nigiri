@@ -108,7 +108,7 @@ services:
     environment:
       API_URL: http://localhost:3000
     ports:
-      - 4400:5000
+      - 5000:5000
     restart: unless-stopped
 
   esplora-liquid:
@@ -183,7 +183,7 @@ services:
 
   sensei:
     container_name: sensei
-    image: sensei
+    image: litch/sensei:latest
     depends_on:
       - bitcoin
     volumes:
@@ -197,9 +197,9 @@ services:
       BITCOIND_RPC_PASSWORD: 123
     ports:
       - "5401:5401"
-      - "3100:3000"
-      - "3001:3001"
       - "9635:9735" # p2p
+      - "10000:10000"
+      - "10001:10001"
       
 
   lightningd:
