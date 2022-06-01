@@ -98,6 +98,12 @@ $ nigiri faucet lnd 0.01
 $ nigiri faucet --liquid <liquid_address>
 ```
 
+### Send Liquid asset to given address
+```bash
+$ nigiri rpc --liquid sendtoaddress <liquid_address> 500 "" "" false false 1 UNSET false <liquid_asset>
+```
+
+
 ### **Liquid only** Issue and send a given quantity of an asset
 
 ```bash
