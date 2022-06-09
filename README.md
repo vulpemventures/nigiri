@@ -145,7 +145,7 @@ $ nigiri logs chopsticks-liquid
 
 ```bash
 # Core Lightning
-$ nigiri logs cln
+$ nigiri logs lightningd
 # LND
 $ nigiri logs lnd
 ```
