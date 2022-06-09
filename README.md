@@ -1,17 +1,16 @@
-# 🍣 Nigiri Bitcoin 
+# 🍣 Nigiri Bitcoin
 
-Nigiri provides a command line interface that manages a selection of `docker-compose` batteries included to have ready-to-use bitcoin `regtest` development environment, with a **bitcoin** node, **electrum** explorer both backend and frontend user interface. 
+Nigiri provides a command line interface that manages a selection of `docker-compose` batteries included to have ready-to-use bitcoin `regtest` development environment, with a **bitcoin** node, **electrum** explorer both backend and frontend user interface.
 
 It offers a [JSON HTTP proxy passtrough](https://github.com/vulpemventures/nigiri-chopsticks) that adds to the explorer handy endpoints like `/faucet` and automatic block generation when calling the `/tx` pushing a transaction.
 
 You can have Elements too with the `--liquid` flag.
 
-
 # No time to make a Nigiri yourself?
+
 ## Pre-built binary
 
-
-* Download and install `nigiri` command line interface
+- Download and install `nigiri` command line interface
 
 ```
 $ curl https://getnigiri.vulpem.com | bash
@@ -27,51 +26,54 @@ Windows: `%LOCALAPPDATA%\Nigiri`
 
 Plan 9: `$home/nigiri`
 
-* Lauch Docker daemon (Mac OSX)
+- Lauch Docker daemon (Mac OSX)
 
 ```
 $ open -a Docker
-``` 
+```
+
 You may want to [Manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
 
-* Close and reopen your terminal, then start Bitcoin and Liquid
+- Close and reopen your terminal, then start Bitcoin and Liquid
 
 ```
 $ nigiri start --liquid
 ```
+
 **That's it.**
 
 Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http://localhost:5001 for Liquid.
 
-
 **Note for users of macOS Monterey an onward**
+
 <details>
   <summary>Show more...</summary>
    When trying to start Nigiri, you might get an error similar to the following:
 
-  ```bash
-  Error response from daemon: Ports are not available: listen tcp 0.0.0.0:5000: bind: address already in use 
-  exit status 1
-  ```
-  This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying to run using the very same port. 
+```bash
+Error response from daemon: Ports are not available: listen tcp 0.0.0.0:5000: bind: address already in use
+exit status 1
+```
 
-  There are two ways to deal with this issue:
+This is due to AirPlay Receiver using port 5000, conflicting with Esplora trying to run using the very same port.
 
-  1) Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
-  2) Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete`  before restarting it.
+There are two ways to deal with this issue:
+
+1. Uncheck AirPlay Receiver in `System Preferences → Sharing → AirPlay Receiver`
+2. Change Esplora’s port to something other than 5000. This can be done by changing it in [docker-compose.yml](https://github.com/vulpemventures/nigiri/blob/master/cmd/nigiri/resources/docker-compose.yml#L110) found in your data directory. If you previously tried starting Nigiri getting an error – you might have to run `nigiri stop --delete` before restarting it.
 </details>
 <br />
 
 ## Tasting
 
-At the moment bitcoind, elements and electrs are started on *regtest* network.
-
+At the moment bitcoind, elements and electrs are started on _regtest_ network.
 
 ### Start nigiri
 
 ```bash
 $ nigiri start
 ```
+
 - Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
 
 - Use the `--ln` flag to start a Core Lightning node and a LND node.
@@ -81,6 +83,7 @@ $ nigiri start
 ```bash
 $ nigiri stop
 ```
+
 Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
 
 ### Generate and send bitcoin to given address
@@ -99,6 +102,7 @@ $ nigiri faucet --liquid <liquid_address>
 ```
 
 ### Send Liquid asset to given address
+
 ```bash
 $ nigiri faucet --liquid <liquid_address> <amt> <liquid_asset>
 ```
@@ -185,8 +189,8 @@ $ nigiri cln connect `nigiri lnd getinfo | jq -r .identity_pubkey`@lnd:9735
 $ nigiri lnd openchannel --node_key=`nigiri cln getinfo | jq -r .id` --local_amt=100000
 ```
 
-
 ### Run in headless mode (without Esplora)
+
 If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag.
 
 ```
@@ -205,38 +209,38 @@ To set a custom directory use the `--datadir` flag.
 Run the `help` command to see the full list of available flags.
 
 # Make from scratch
+
 ## Utensils
 
-* [Docker (compose)](https://docs.docker.com/compose/)
-* Go
+- [Docker (compose)](https://docs.docker.com/compose/)
+- Go
 
 ## Ingredients
 
-* [Bitcoin daemon](https://bitcoin.org/en/bitcoin-core/)
-* [Liquid daemon](https://blockstream.com/liquid/)
-* [Electrum server](https://github.com/Blockstream/electrs)
-* [Esplora](https://github.com/Blockstream/esplora)
-* [Nigiri Chopsticks](https://github.com/vulpemventures/nigiri-chopsticks)
+- [Bitcoin daemon](https://bitcoin.org/en/bitcoin-core/)
+- [Liquid daemon](https://blockstream.com/liquid/)
+- [Electrum server](https://github.com/Blockstream/electrs)
+- [Esplora](https://github.com/Blockstream/esplora)
+- [Nigiri Chopsticks](https://github.com/vulpemventures/nigiri-chopsticks)
 
 ## Directions
 
-| Preparation Time: 5 min  | Cooking Difficulty: Easy |
-| --- | --- |
+| Preparation Time: 5 min | Cooking Difficulty: Easy |
+| ----------------------- | ------------------------ |
 
-* Clone the repo:
+- Clone the repo:
 
 ```bash
 $ git clone https://github.com/vulpemventures/nigiri.git
 ```
 
-* Enter project directory and install dependencies:
+- Enter project directory and install dependencies:
 
 ```bash
 $ make install
 ```
 
-
-* Build binary 
+- Build binary
 
 ```
 $ make build
@@ -244,8 +248,7 @@ $ make build
 
 Done! You should be able to find the binary in the local `./build` folder. Give it permission to execute and move/rename into your PATH.
 
-
-* Clean
+- Clean
 
 Remeber to always `clean` Nigiri before running `install` to upgrade to a new version.
 
@@ -257,18 +260,30 @@ $ make clean
 
 `Chopsticks` service exposes on port `3000` (and on `3001` if started with `--liquid` flag) all [Esplora's available endpoints](https://github.com/blockstream/esplora/blob/master/API.md) and extends them with the following:
 
-
 ### Bitcoin & Liquid
 
-- `POST /faucet` which expects a body `{ "address": <receiving_address> }` 
+- `POST /faucet` which expects a body `{ "address": <receiving_address> }`
 - `POST /tx` has been extended to automatically mine a block when is called.
 
 ### Liquid only
 
-- `POST /mint` which expects a body `{"address": "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq", "quantity": 1000, "name":"VULPEM", "ticker":"VLP"}` 
+- `POST /mint` which expects a body `{"address": "ert1q90dz89u8eudeswzynl3p2jke564ejc2cnfcwuq", "quantity": 1000, "name":"VULPEM", "ticker":"VLP"}`
 - `POST /registry` to get extra info about one or more assets like `name` and `ticker` which expects a body with an array of assets `{"assets": ["2dcf5a8834645654911964ec3602426fd3b9b4017554d3f9c19403e7fc1411d3"]}`
-
 
 ## Footnotes
 
 If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, check the real [recipe](https://www.allrecipes.com/recipe/228952/nigiri-sushi/) out and enjoy your own, delicious, hand made nigiri sushi.
+
+## [Additional Note] Troubleshooting for Windows WSL Users:
+
+If you're not using [Windows Terminal](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701?hl=en-us&gl=US) then I would _highly_ recommend installing it. I used this [Fireship guide](https://fireship.io/lessons/windows-10-for-web-dev/) to set-up my Windows 10 dev environment, and it's wonderful. I typically run the terminal with PowerShell open in one tab and the Ubuntu 20.04 Linux distribution in the other.
+
+Unfortunately, the first time I tried to install and run Nigiri in Ubuntu it didn't work. **The root cause of my problem was a compatibility issue with Docker and WSL2.**
+
+Note, if you haven't upgraded from WSL1 to WSL2 do it now. These instructions are pulled directly from the [Microsoft Docs](https://docs.microsoft.com/en-us/windows/wsl/install):
+
+> To see whether your Linux distribution is set to WSL 1 or WSL 2, use the command: wsl -l -v.
+
+> To change versions, use the command: wsl --set-version <distro name> 2 replacing <distro name> with the name of the Linux distribution that you want to update. For example, wsl --set-version Ubuntu-20.04 2 will set your Ubuntu 20.04 distribution to use WSL 2.
+
+Now that you've upgraded to WSL2 read this article -- [A Painless Way to WSL2 with Docker](https://thecodest.co/blog/painless-way-to-wsl-2-with-docker). It's well-written and tremendously helpful. If you carefully follow the process laid out by Lukasz Kolko, then you will have Docker running flawlessly in no time!
