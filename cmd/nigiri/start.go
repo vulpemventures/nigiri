@@ -53,6 +53,8 @@ func startAction(ctx *cli.Context) error {
 		servicesToRun = append(servicesToRun, "lnd")
 		// Core Lightning Network
 		servicesToRun = append(servicesToRun, "lightningd")
+		// Sensei
+		servicesToRun = append(servicesToRun, "sensei")
 	}
 
 	if isCI {

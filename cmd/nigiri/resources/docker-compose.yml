@@ -119,7 +119,7 @@ services:
     environment:
       API_URL: http://localhost:3001
     ports:
-      - 5001:5000
+      - 4401:5000
     restart: unless-stopped
 
   # Chopsticks
@@ -180,6 +180,27 @@ services:
     ports:
       - "9735:9735" # p2p
       - "10009:10009" # grpc
+
+  sensei:
+    container_name: sensei
+    image: litch/sensei:latest
+    depends_on:
+      - bitcoin
+    volumes:
+      - ./volumes/sensei:/data/.sensei
+    environment:
+      DATA_DIR: /data
+      NETWORK: regtest
+      BITCOIND_RPC_HOST: bitcoin
+      BITCOIND_RPC_PORT: 18443
+      BITCOIND_RPC_USERNAME: admin1
+      BITCOIND_RPC_PASSWORD: 123
+    ports:
+      - "5401:5401"
+      - "9635:9735" # p2p
+      - "10000:10000"
+      - "10001:10001"
+      
 
   lightningd:
     container_name: cln
