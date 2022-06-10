@@ -274,16 +274,8 @@ $ make clean
 
 If you really do love Sathoshi's favourite dish like us at Vulpem Ventures, check the real [recipe](https://www.allrecipes.com/recipe/228952/nigiri-sushi/) out and enjoy your own, delicious, hand made nigiri sushi.
 
-## [Additional Note] Troubleshooting for Windows WSL Users:
+## Additional Note for Windows WSL Users
 
-If you're not using [Windows Terminal](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701?hl=en-us&gl=US) then I would _highly_ recommend installing it. I used this [Fireship guide](https://fireship.io/lessons/windows-10-for-web-dev/) to set-up my Windows 10 dev environment, and it's wonderful. I typically run the terminal with PowerShell open in one tab and the Ubuntu 20.04 Linux distribution in the other.
+Potential Issue: Docker (+) WSL2 compatibility.
 
-Unfortunately, the first time I tried to install and run Nigiri in Ubuntu it didn't work. **The root cause of my problem was a compatibility issue with Docker and WSL2.**
-
-Note, if you haven't upgraded from WSL1 to WSL2 do it now. These instructions are pulled directly from the [Microsoft Docs](https://docs.microsoft.com/en-us/windows/wsl/install):
-
-> To see whether your Linux distribution is set to WSL 1 or WSL 2, use the command: wsl -l -v.
-
-> To change versions, use the command: wsl --set-version <distro name> 2 replacing <distro name> with the name of the Linux distribution that you want to update. For example, wsl --set-version Ubuntu-20.04 2 will set your Ubuntu 20.04 distribution to use WSL 2.
-
-Now that you've upgraded to WSL2 read this article -- [A Painless Way to WSL2 with Docker](https://thecodest.co/blog/painless-way-to-wsl-2-with-docker). It's well-written and tremendously helpful. If you carefully follow the process laid out by Lukasz Kolko, then you will have Docker running flawlessly in no time!
+Solution: Read [A Painless Way to WSL2 with Docker](https://thecodest.co/blog/painless-way-to-wsl-2-with-docker) carefully.
