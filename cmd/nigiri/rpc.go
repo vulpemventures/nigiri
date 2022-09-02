@@ -25,6 +25,11 @@ var rpc = cli.Command{
 			Usage: "generate block",
 			Value: 0,
 		},
+		&cli.BoolFlag{
+			Name:  "named",
+			Usage: "use named arguments",
+			Value: false,
+		},
 	},
 }
 
@@ -37,6 +42,7 @@ func rpcAction(ctx *cli.Context) error {
 	isLiquid := ctx.Bool("liquid")
 	rpcWallet := ctx.String("rpcwallet")
 	generate := ctx.Int("generate")
+	named := ctx.Bool("named")
 
 	rpcArgs := []string{"exec", "bitcoin", "bitcoin-cli", "-datadir=config", "-rpcwallet=" + rpcWallet}
 	if isLiquid {
@@ -44,6 +50,9 @@ func rpcAction(ctx *cli.Context) error {
 	}
 	if generate > 0 {
 		rpcArgs = append(rpcArgs, "-generate="+fmt.Sprint(generate))
+	}
+	if named {
+		rpcArgs = append(rpcArgs, "-named")
 	}
 	cmdArgs := append(rpcArgs, ctx.Args().Slice()...)
 	bashCmd := exec.Command("docker", cmdArgs...)
