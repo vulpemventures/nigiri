@@ -52,7 +52,7 @@ func startAction(ctx *cli.Context) error {
 		// LND
 		servicesToRun = append(servicesToRun, "lnd")
 		// Core Lightning Network
-		servicesToRun = append(servicesToRun, "lightningd")
+		servicesToRun = append(servicesToRun, "cln")
 	}
 
 	if isCI {
@@ -67,7 +67,7 @@ func startAction(ctx *cli.Context) error {
 			// LND
 			servicesToRun = append(servicesToRun, "lnd")
 			// Core Lightning Network
-			servicesToRun = append(servicesToRun, "lightningd")
+			servicesToRun = append(servicesToRun, "cln")
 		}
 	}
 
