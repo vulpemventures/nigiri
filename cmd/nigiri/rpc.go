@@ -49,7 +49,7 @@ func rpcAction(ctx *cli.Context) error {
 		rpcArgs = []string{"exec", "liquid", "elements-cli", "-datadir=config", "-rpcwallet=" + rpcWallet}
 	}
 	if generate > 0 {
-		rpcArgs = append(rpcArgs, "-generate="+fmt.Sprint(generate))
+		rpcArgs = append(rpcArgs, "-generate", fmt.Sprint(generate))
 	}
 	if named {
 		rpcArgs = append(rpcArgs, "-named")
