@@ -186,15 +186,15 @@ services:
     container_name: cln
     image: elementsproject/lightningd:latest
     environment:
-      LIGHTNINGD_PORT: 9935
       EXPOSE_TCP: "true"
     command: 
-      - --network=regtest 
       - --alias=nigiri
+      - --bind-addr=0.0.0.0:9935
       - --bitcoin-rpcconnect=bitcoin:18443
-      - --bitcoin-rpcuser=admin1 
       - --bitcoin-rpcpassword=123 
-      - --log-level=debug 
+      - --bitcoin-rpcuser=admin1
+      - --log-level=debug
+      - --network=regtest
     depends_on:
       - bitcoin
     ports:
