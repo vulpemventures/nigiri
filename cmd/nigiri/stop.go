@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 
@@ -31,9 +30,9 @@ func stopAction(ctx *cli.Context) error {
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "stop")
+	bashCmd := runDockerCompose(composePath, "stop")
 	if delete {
-		bashCmd = exec.Command("docker-compose", "-f", composePath, "down", "--volumes")
+		bashCmd = runDockerCompose(composePath, "down", "--volumes")
 	}
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr

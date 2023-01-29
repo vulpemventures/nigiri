@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/urfave/cli/v2"
@@ -34,7 +33,7 @@ func logsAction(ctx *cli.Context) error {
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
-	bashCmd := exec.Command("docker-compose", "-f", composePath, "logs", serviceName)
+	bashCmd := runDockerCompose(composePath, "logs", serviceName)
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 

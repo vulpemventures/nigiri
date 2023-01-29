@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -71,10 +70,10 @@ func startAction(ctx *cli.Context) error {
 		}
 	}
 
-	args := []string{"-f", composePath, "up", "-d"}
+	args := []string{"up", "-d"}
 	args = append(args, servicesToRun...)
 
-	bashCmd := exec.Command("docker-compose", args...)
+	bashCmd := runDockerCompose(composePath, args...)
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 
