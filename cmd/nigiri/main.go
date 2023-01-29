@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strconv"
@@ -212,4 +213,17 @@ func cleanAndExpandPath(path string) string {
 	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%,
 	// but the variables can still be expanded via POSIX-style $VARIABLE.
 	return filepath.Clean(os.ExpandEnv(path))
+}
+
+// runDockerCompose runs docker-compose with the given arguments
+func runDockerCompose(composePath string, args ...string) *exec.Cmd {
+	var cmd *exec.Cmd
+
+	_, err := exec.LookPath("docker-compose")
+	if err != nil {
+		cmd = exec.Command("docker", append([]string{"compose", "-f", composePath}, args...)...)
+	} else {
+		cmd = exec.Command("docker-compose", append([]string{"-f", composePath}, args...)...)
+	}
+	return cmd
 }
