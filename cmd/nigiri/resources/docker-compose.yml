@@ -3,11 +3,12 @@ services:
 
   # RPC daemon
   bitcoin:
-    image: ghcr.io/vulpemventures/bitcoin:latest
-    user: 1000:1000
+    image: lncm/bitcoind:v24.0.1
     container_name: bitcoin
-    command:
-      - -datadir=config
+    # wildcard user 0:0 to avoid permission problems
+    user: 0:0
+    restart: on-failure
+    stop_grace_period: 30s
     ports:
       - 18443:18443
       - 18444:18444
@@ -15,8 +16,7 @@ services:
       - 28332:28332
       - 28333:28333
     volumes:
-      - ./volumes/bitcoin/:/config
-    restart: unless-stopped
+      - ./volumes/bitcoin:/root/.bitcoin
 
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
