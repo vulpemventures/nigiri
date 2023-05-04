@@ -4,7 +4,7 @@ Nigiri provides a command line interface that manages a selection of `docker-com
 
 It offers a [JSON HTTP proxy passtrough](https://github.com/vulpemventures/nigiri-chopsticks) that adds to the explorer handy endpoints like `/faucet` and automatic block generation when calling the `/tx` pushing a transaction.
 
-You can have Elements too with the `--liquid` flag.
+You can have Lightning with `--ln` flag and/or Elements with the `--liquid` flag.
 
 
 # No time to make a Nigiri yourself?
