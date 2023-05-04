@@ -74,7 +74,7 @@ $ nigiri start
 ```
 - Use the `--liquid` flag to let you do experiments with the Liquid sidechain. A liquid daemon and a block explorer are also started when passing this flag.
 
-- Use the `--ln` flag to start a Core Lightning node and a LND node.
+- Use the `--ln` flag to start a Core Lightning node, a LND node and a Taro daemon.
 
 ### Stop nigiri
 
@@ -171,6 +171,8 @@ el1qqwwx9gyrcrjrhgnrnjq9dq9t4hykmr6ela46ej63dnkdkcg8veadrvg5p0xg0zd6j3aug74cv9m4
 $ nigiri cln listpeers
 # LND
 $ nigiri lnd listpeers
+# Taro
+$ nigiri taro assets list
 ```
 
 ### Connect Core Lightning to LND

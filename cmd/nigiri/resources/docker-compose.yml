@@ -167,7 +167,7 @@ services:
 
   lnd:
     container_name: lnd
-    image: lightninglabs/lnd:v0.15.4-beta
+    image: ghcr.io/vulpemventures/lnd
     user: 1000:1000
     depends_on:
       - bitcoin
@@ -181,6 +181,30 @@ services:
       - "9735:9735" # p2p
       - "10009:10009" # grpc"
       - "18080:18080" # rest"
+  
+  taro:
+    container_name: taro
+    image: ghcr.io/vulpemventures/taro
+    user: 1000:1000
+    depends_on:
+      - bitcoin
+      - lnd
+    volumes:
+      - ./volumes/taro:/data/.taro
+      - ./volumes/lnd:/data/.lnd
+    environment:
+      HOME: /data
+    command:
+      - --network=regtest
+      - --debuglevel=debug 
+      - --lnd.host=lnd:10009 
+      - --lnd.macaroonpath=/data/.lnd/data/chain/bitcoin/regtest/admin.macaroon 
+      - --lnd.tlspath=/data/.lnd/tls.cert
+    restart: unless-stopped
+    stop_grace_period: 5m30s
+    ports:
+      - "10029:10029" # grpc
+      - "8089:8089" # rest"
 
   cln:
     container_name: cln
