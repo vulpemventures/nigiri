@@ -53,7 +53,7 @@ func main() {
 
 	app.Version = formatVersion()
 	app.Name = "nigiri CLI"
-	app.Usage = "create your dockerized environment with a bitcoin and liquid node, with a block explorer and developer tools"
+	app.Usage = "one-click bitcoin development environment"
 	app.Flags = append(app.Flags, &datadirFlag)
 	app.Commands = append(
 		app.Commands,
@@ -64,6 +64,7 @@ func main() {
 		&logs,
 		&mint,
 		&push,
+		&taro,
 		&start,
 		&update,
 		&faucet,
@@ -120,6 +121,9 @@ func provisionResourcesToDatadir(datadir string) error {
 		return err
 	}
 	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lightningd")); err != nil {
+		return err
+	}
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "taro")); err != nil {
 		return err
 	}
 
