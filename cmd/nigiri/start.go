@@ -49,7 +49,7 @@ func startAction(ctx *cli.Context) error {
 
 	if isLN {
 		// LND
-		servicesToRun = append(servicesToRun, "taro")
+		servicesToRun = append(servicesToRun, "tap")
 		// Core Lightning Network
 		servicesToRun = append(servicesToRun, "cln")
 	}
@@ -64,7 +64,7 @@ func startAction(ctx *cli.Context) error {
 		// add also LN services if needed
 		if isLN {
 			// LND
-			servicesToRun = append(servicesToRun, "taro")
+			servicesToRun = append(servicesToRun, "tap")
 			// Core Lightning Network
 			servicesToRun = append(servicesToRun, "cln")
 		}

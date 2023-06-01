@@ -8,13 +8,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var taro = cli.Command{
-	Name:   "taro",
-	Usage:  "invoke taro command line interface",
-	Action: taroAction,
+var tap = cli.Command{
+	Name:   "tap",
+	Usage:  "invoke tap command line interface",
+	Action: tapAction,
 }
 
-func taroAction(ctx *cli.Context) error {
+func tapAction(ctx *cli.Context) error {
 
 	if isRunning, _ := nigiriState.GetBool("running"); !isRunning {
 		return errors.New("nigiri is not running")
@@ -34,7 +34,7 @@ func taroAction(ctx *cli.Context) error {
 	if isCi {
 		ttyOption = "-i"
 	}
-	rpcArgs := []string{"exec", ttyOption, "taro", "tarocli", "--network=" + network}
+	rpcArgs := []string{"exec", ttyOption, "tap", "tapcli", "--network=" + network, "--tapddir=/data/.tapd"}
 	cmdArgs := append(rpcArgs, ctx.Args().Slice()...)
 	bashCmd := exec.Command("docker", cmdArgs...)
 	bashCmd.Stdin = os.Stdin

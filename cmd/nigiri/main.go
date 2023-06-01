@@ -64,7 +64,7 @@ func main() {
 		&logs,
 		&mint,
 		&push,
-		&taro,
+		&tap,
 		&start,
 		&update,
 		&faucet,
@@ -123,7 +123,7 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lightningd")); err != nil {
 		return err
 	}
-	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "taro")); err != nil {
+	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "tapd")); err != nil {
 		return err
 	}
 
