@@ -167,7 +167,7 @@ services:
 
   lnd:
     container_name: lnd
-    image: ghcr.io/vulpemventures/lnd
+    image: ghcr.io/vulpemventures/lnd:v0.16.2-beta
     user: 1000:1000
     depends_on:
       - bitcoin
@@ -182,15 +182,15 @@ services:
       - "10009:10009" # grpc"
       - "18080:18080" # rest"
   
-  taro:
-    container_name: taro
-    image: ghcr.io/vulpemventures/taro
+  tap:
+    container_name: tap
+    image: ghcr.io/vulpemventures/tapd:v0.2.0
     user: 1000:1000
     depends_on:
       - bitcoin
       - lnd
     volumes:
-      - ./volumes/taro:/data/.taro
+      - ./volumes/tapd:/data/.tapd
       - ./volumes/lnd:/data/.lnd
     environment:
       HOME: /data
