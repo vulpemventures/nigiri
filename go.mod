@@ -11,5 +11,5 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/urfave/cli/v2 v2.3.0
-	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 )
