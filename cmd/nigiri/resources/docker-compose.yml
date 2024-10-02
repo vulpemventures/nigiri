@@ -5,8 +5,7 @@ services:
   bitcoin:
     image: lncm/bitcoind:v24.0.1
     container_name: bitcoin
-    # wildcard user 0:0 to avoid permission problems
-    user: 0:0
+    user: 1000:1000
     restart: on-failure
     stop_grace_period: 30s
     ports:
@@ -16,7 +15,7 @@ services:
       - 28332:28332
       - 28333:28333
     volumes:
-      - ./volumes/bitcoin:/root/.bitcoin
+      - ./volumes/bitcoin:/data/.bitcoin
 
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
@@ -209,6 +208,7 @@ services:
   cln:
     container_name: cln
     image: elementsproject/lightningd:latest
+    user: 1000:1000
     environment:
       EXPOSE_TCP: "true"
     command: 
@@ -226,7 +226,7 @@ services:
       - 9835:9835 # rpc
     restart: unless-stopped
     volumes:
-      - ./volumes/lightningd:/root/.lightning
+      - ./volumes/lightningd:/.lightning
       - ./volumes/bitcoin:/etc/bitcoin
 
 networks:
