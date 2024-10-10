@@ -3,7 +3,7 @@ module github.com/vulpemventures/nigiri
 go 1.16
 
 require (
-	github.com/btcsuite/btcd v0.24.0 // indirect
+	github.com/btcsuite/btcd v0.24.2 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/compose-spec/compose-go v0.0.0-20210729195839-de56f4f0cb3c
