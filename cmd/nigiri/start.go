@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/internal/docker"
+	"github.com/vulpemventures/nigiri/internal/proxy"
 )
 
 var start = cli.Command{
@@ -89,6 +90,13 @@ func startAction(ctx *cli.Context) error {
 	}); err != nil {
 		return err
 	}
+
+	// Start the proxy
+	go func() {
+		if err := proxy.Start(); err != nil {
+			fmt.Printf("Error starting proxy: %v\n", err)
+		}
+	}()
 
 	services, err := docker.GetServices(composePath)
 	if err != nil {

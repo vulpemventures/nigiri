@@ -10,7 +10,7 @@ services:
     restart: on-failure
     stop_grace_period: 30s
     ports:
-      - 18443:18443
+      - 28443:28443
       - 18444:18444
       # ZMQ
       - 28332:28332
@@ -47,21 +47,21 @@ services:
       - --daemon-dir
       - /config
       - --daemon-rpc-addr
-      - bitcoin:18443
+      - bitcoin:28443
       - --cookie
       - admin1:123
       - --http-addr
-      - 0.0.0.0:30000
+      - 0.0.0.0:30001
       - --electrum-rpc-addr
-      - 0.0.0.0:50000
+      - 0.0.0.0:50001
       - --cors
       - "*"
       - --jsonrpc-import
     depends_on:
       - bitcoin
     ports:
-      - 50000:50000
-      - 30000:30000
+      - 50001:50001
+      - 30001:30001
     volumes:
       - ./volumes/bitcoin/:/config
     restart: unless-stopped
@@ -131,9 +131,9 @@ services:
       - --use-mining
       - --use-logger
       - --rpc-addr
-      - bitcoin:18443
+      - bitcoin:28443
       - --electrs-addr
-      - electrs:30000
+      - electrs:30001
       - --addr
       - 0.0.0.0:3000
     depends_on:

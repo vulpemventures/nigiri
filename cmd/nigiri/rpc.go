@@ -12,6 +12,7 @@ import (
 
 	"github.com/logrusorgru/aurora"
 	"github.com/urfave/cli/v2"
+	"github.com/vulpemventures/nigiri/internal/proxy"
 )
 
 var rpc = cli.Command{
@@ -48,9 +49,14 @@ func rpcAction(ctx *cli.Context) error {
 	generate := ctx.Int("generate")
 	named := ctx.Bool("named")
 
-	rpcArgs := []string{"exec", "bitcoin", "bitcoin-cli", "-rpcwallet=" + rpcWallet}
+	rpcArgs := []string{"exec", "bitcoin", "bitcoin-cli",
+		"-rpcport=" + proxy.ProxyBitcoinPort,
+		"-rpcwallet=" + rpcWallet}
 	if isLiquid {
-		rpcArgs = []string{"exec", "liquid", "elements-cli", "-datadir=config", "-rpcwallet=" + rpcWallet}
+		rpcArgs = []string{"exec", "liquid", "elements-cli",
+			"-datadir=config",
+			// TODO @tiero: add -rpcport for elements too
+			"-rpcwallet=" + rpcWallet}
 	}
 	if generate > 0 {
 		rpcArgs = append(rpcArgs, "-generate", fmt.Sprint(generate))
