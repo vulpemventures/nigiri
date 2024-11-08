@@ -3,7 +3,7 @@ services:
 
   # RPC daemon
   bitcoin:
-    image: lncm/bitcoind:v26.1
+    image: getumbrel/bitcoind:v28.0
     container_name: bitcoin
     user: 1000:1000
     restart: on-failure
