@@ -258,11 +258,14 @@ func cleanAndExpandPath(path string) string {
 func runDockerCompose(composePath string, args ...string) *exec.Cmd {
 	var cmd *exec.Cmd
 
+	// Try to find docker-compose binary
 	_, err := exec.LookPath("docker-compose")
-	if err != nil {
-		cmd = exec.Command("docker", append([]string{"compose", "-f", composePath}, args...)...)
-	} else {
+	if err == nil {
+		// docker-compose found, use it
 		cmd = exec.Command("docker-compose", append([]string{"-f", composePath}, args...)...)
+	} else {
+		// docker-compose not found, fallback to 'docker compose'
+		cmd = exec.Command("docker", append([]string{"compose", "-f", composePath}, args...)...)
 	}
 	return cmd
 }
