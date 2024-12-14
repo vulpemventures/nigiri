@@ -100,7 +100,6 @@ func fatal(err error) {
 
 // Provisioning Nigiri reosurces
 func provisionResourcesToDatadir(datadir string) error {
-
 	isReady, err := nigiriState.GetBool("ready")
 	if err != nil {
 		return err
@@ -110,27 +109,43 @@ func provisionResourcesToDatadir(datadir string) error {
 		return nil
 	}
 
+	// Get current user info for setting correct ownership
+	currentUser, err := user.Current()
+	if err != nil {
+		return fmt.Errorf("get current user: %w", err)
+	}
+
+	uid, err := strconv.Atoi(currentUser.Uid)
+	if err != nil {
+		return fmt.Errorf("parse uid: %w", err)
+	}
+
+	gid, err := strconv.Atoi(currentUser.Gid)
+	if err != nil {
+		return fmt.Errorf("parse gid: %w", err)
+	}
+
 	// create folders in volumes/{bitcoin,elements} for node datadirs
-	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "bitcoin")); err != nil {
-		return err
+	volumeDirs := []string{
+		filepath.Join(datadir, "volumes", "bitcoin"),
+		filepath.Join(datadir, "volumes", "elements"),
+		filepath.Join(datadir, "volumes", "lnd"),
+		filepath.Join(datadir, "volumes", "lightningd"),
+		filepath.Join(datadir, "volumes", "tapd"),
 	}
-	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "elements")); err != nil {
-		return err
-	}
-	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lnd")); err != nil {
-		return err
-	}
-	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "lightningd")); err != nil {
-		return err
-	}
-	if err := makeDirectoryIfNotExists(filepath.Join(datadir, "volumes", "tapd")); err != nil {
-		return err
+
+	for _, dir := range volumeDirs {
+		if err := makeDirectoryIfNotExists(dir, uid, gid); err != nil {
+			return err
+		}
 	}
 
 	// copy docker compose into the Nigiri data directory
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", config.DefaultCompose),
 		filepath.Join(datadir, config.DefaultCompose),
+		uid,
+		gid,
 	); err != nil {
 		return err
 	}
@@ -139,6 +154,8 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "bitcoin.conf"),
 		filepath.Join(datadir, "volumes", "bitcoin", "bitcoin.conf"),
+		uid,
+		gid,
 	); err != nil {
 		return err
 	}
@@ -147,6 +164,8 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "elements.conf"),
 		filepath.Join(datadir, "volumes", "elements", "elements.conf"),
+		uid,
+		gid,
 	); err != nil {
 		return err
 	}
@@ -155,6 +174,8 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "lnd.conf"),
 		filepath.Join(datadir, "volumes", "lnd", "lnd.conf"),
+		uid,
+		gid,
 	); err != nil {
 		return err
 	}
@@ -173,22 +194,36 @@ func formatVersion() string {
 	)
 }
 
-func copyFromResourcesToDatadir(src string, dest string) error {
+func copyFromResourcesToDatadir(src string, dest string, uid, gid int) error {
 	data, err := f.ReadFile(src)
 	if err != nil {
 		return fmt.Errorf("read embed: %w", err)
 	}
-	err = ioutil.WriteFile(dest, data, 0777)
+
+	// First write the file
+	err = ioutil.WriteFile(dest, data, 0660)
 	if err != nil {
 		return fmt.Errorf("write %s to %s: %w", src, dest, err)
+	}
+
+	// Then set ownership
+	if err := os.Chown(dest, uid, gid); err != nil {
+		return fmt.Errorf("chown %s: %w", dest, err)
 	}
 
 	return nil
 }
 
-func makeDirectoryIfNotExists(path string) error {
+func makeDirectoryIfNotExists(path string, uid, gid int) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return os.MkdirAll(path, os.ModeDir|0755)
+		// Create directory with correct permissions
+		if err := os.MkdirAll(path, 0770); err != nil {
+			return err
+		}
+		// Set ownership
+		if err := os.Chown(path, uid, gid); err != nil {
+			return fmt.Errorf("chown %s: %w", path, err)
+		}
 	}
 	return nil
 }
