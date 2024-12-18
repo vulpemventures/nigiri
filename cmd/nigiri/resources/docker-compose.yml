@@ -164,7 +164,7 @@ services:
 
   lnd:
     container_name: lnd
-    image: lightninglabs/lnd:v0.18.3-beta
+    image: lightninglabs/lnd:v0.18.4-beta.rc2
     depends_on:
       - bitcoin
     volumes:
@@ -180,7 +180,7 @@ services:
   
   tap:
     container_name: tap
-    image: ghcr.io/vulpemventures/tapd:v0.2.0
+    image: lightninglabs/taproot-assets:v0.4.1
     depends_on:
       - bitcoin
       - lnd
