@@ -267,5 +267,29 @@ func runDockerCompose(composePath string, args ...string) *exec.Cmd {
 		// docker-compose not found, fallback to 'docker compose'
 		cmd = exec.Command("docker", append([]string{"compose", "-f", composePath}, args...)...)
 	}
+
+	// Set up the command with user environment
+	if err := setupCmdWithUser(cmd); err != nil {
+		// Log the error but don't fail - let the command try to run anyway
+		fmt.Fprintf(os.Stderr, "Warning: failed to setup user environment: %v\n", err)
+	}
+
 	return cmd
+}
+
+// setupCmdWithUser configures a command to run with the current user's UID/GID
+// This is used to ensure files created by containers have correct ownership
+func setupCmdWithUser(cmd *exec.Cmd) error {
+	currentUser, err := user.Current()
+	if err != nil {
+		return fmt.Errorf("get current user: %w", err)
+	}
+
+	// Set environment variables for Docker
+	cmd.Env = append(os.Environ(),
+		"UID="+currentUser.Uid,
+		"GID="+currentUser.Gid,
+	)
+
+	return nil
 }
