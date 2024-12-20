@@ -211,7 +211,10 @@ services:
     user: 1000:1000
     environment:
       EXPOSE_TCP: "true"
-    command: 
+      LIGHTNINGD_NETWORK: regtest
+      LIGHTNINGD_DATA: .lightning
+    command:
+      - --lightning-dir=.lightning
       - --alias=nigiri
       - --bind-addr=0.0.0.0:9935
       - --bitcoin-rpcconnect=bitcoin:18443
@@ -219,11 +222,13 @@ services:
       - --bitcoin-rpcuser=admin1
       - --log-level=debug
       - --network=regtest
+      - --grpc-port=9836
     depends_on:
       - bitcoin
     ports:
       - 9935:9935 # p2p
       - 9835:9835 # rpc
+      - 9836:9836 # grpc
     restart: unless-stopped
     volumes:
       - ./volumes/lightningd:/.lightning
