@@ -253,9 +253,10 @@ services:
       ARK_BITCOIND_RPC_HOST: "bitcoin:18443"
       ARK_BITCOIND_ZMQ_BLOCK: "tcp://bitcoin:28332"
       ARK_BITCOIND_ZMQ_TX: "tcp://bitcoin:28333"
-      ARK_DATADIR: "/data"
+      ARK_DATADIR: "/app/data"
     volumes:
-      - ./volumes/ark:/data
+      - ./volumes/ark/data:/app/data
+      - ./volumes/ark/wallet:/app/wallet-data
     ports:
       - "7070:7070"
     restart: unless-stopped

@@ -138,7 +138,8 @@ func provisionResourcesToDatadir(datadir string) error {
 		filepath.Join(datadir, "volumes", "lnd"),
 		filepath.Join(datadir, "volumes", "lightningd"),
 		filepath.Join(datadir, "volumes", "tapd"),
-		filepath.Join(datadir, "volumes", "ark"),
+		filepath.Join(datadir, "volumes", "ark", "data"),
+		filepath.Join(datadir, "volumes", "ark", "wallet"),
 	}
 
 	for _, dir := range volumeDirs {
