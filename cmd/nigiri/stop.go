@@ -32,11 +32,20 @@ func stopAction(ctx *cli.Context) error {
 
 	bashCmd := runDockerCompose(composePath, "stop")
 	if delete {
-		cleanupCmd := runDockerCompose(composePath, "run", "--rm", "--entrypoint", "sh", "bitcoin", "-c", "chown -R $(id -u):$(id -g) /data/.bitcoin")
+		cleanupCmd := runDockerCompose(composePath, "run", "-T", "--rm", "--entrypoint", "sh", "bitcoin", "-c", "chown -R $(id -u):$(id -g) /data/.bitcoin")
 		cleanupCmd.Stdout = os.Stdout
 		cleanupCmd.Stderr = os.Stderr
 		if err := cleanupCmd.Run(); err != nil {
 			fmt.Printf("Warning: cleanup container failed: %v\n", err)
+		}
+
+		if ctx.Bool("ark") {
+			arkCleanupCmd := runDockerCompose(composePath, "run", "-T", "--rm", "--entrypoint", "sh", "ark", "-c", "chown -R $(id -u):$(id -g) /data")
+			arkCleanupCmd.Stdout = os.Stdout
+			arkCleanupCmd.Stderr = os.Stderr
+			if err := arkCleanupCmd.Run(); err != nil {
+				fmt.Printf("Warning: ark cleanup container failed: %v\n", err)
+			}
 		}
 
 		bashCmd = runDockerCompose(composePath, "down", "--volumes")
