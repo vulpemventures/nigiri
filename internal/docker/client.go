@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -12,6 +13,7 @@ import (
 type Client interface {
 	RunCompose(composePath string, args ...string) *exec.Cmd
 	GetEndpoints(composePath string) (map[string]string, error)
+	GetPortsForService(composePath string, serviceName string) ([]string, error)
 }
 
 // DefaultClient is the default implementation using real Docker commands
@@ -57,21 +59,50 @@ func (c *DefaultClient) GetEndpoints(composePath string) (map[string]string, err
 		return nil, fmt.Errorf("failed to parse compose file: %w", err)
 	}
 
+	// Extract endpoints
 	endpoints := make(map[string]string)
-
-	// Iterate through services and find their ports
-	for name, service := range config.Services {
-		if len(service.Ports) > 0 {
-			// Get the first port mapping
-			portMapping := service.Ports[0]
-			// Split on : to get published port
-			parts := strings.Split(portMapping, ":")
-			if len(parts) > 0 {
-				port := parts[0]
-				endpoints[name] = fmt.Sprintf("localhost:%s", port)
+	for service, details := range config.Services {
+		for _, port := range details.Ports {
+			parts := strings.Split(port, ":")
+			if len(parts) >= 2 {
+				// Use the first port mapping found
+				endpoints[service] = fmt.Sprintf("localhost:%s", parts[0])
+				break
 			}
 		}
 	}
 
 	return endpoints, nil
+}
+
+// GetPortsForService returns all exposed ports for a specific service
+func (c *DefaultClient) GetPortsForService(composePath string, serviceName string) ([]string, error) {
+	// Read the compose file
+	data, err := os.ReadFile(composePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read compose file: %w", err)
+	}
+
+	// Parse YAML
+	var config ComposeConfig
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("failed to parse compose file: %w", err)
+	}
+
+	// Get service details
+	service, exists := config.Services[serviceName]
+	if !exists {
+		return nil, fmt.Errorf("service %s not found in compose file", serviceName)
+	}
+
+	// Extract host ports
+	var ports []string
+	for _, port := range service.Ports {
+		parts := strings.Split(port, ":")
+		if len(parts) >= 2 {
+			ports = append(ports, parts[0])
+		}
+	}
+
+	return ports, nil
 }

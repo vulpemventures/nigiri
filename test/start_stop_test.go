@@ -201,7 +201,7 @@ func TestBasicStartStop(t *testing.T) {
 	
 	// Test start command
 	mockClient.ClearCommands()
-	mockClient.MockCmd = exec.Command("echo", "mock start")
+	mockClient.SetMockCmd(exec.Command("echo", "mock start"))
 	
 	// Execute start command
 	mockClient.RunCompose(composePath, "up", "-d", "bitcoin", "electrs", "chopsticks", "esplora")
@@ -225,7 +225,7 @@ func TestBasicStartStop(t *testing.T) {
 
 	// Test stop command
 	mockClient.ClearCommands()
-	mockClient.MockCmd = exec.Command("echo", "mock stop")
+	mockClient.SetMockCmd(exec.Command("echo", "mock stop"))
 	
 	// Execute stop command
 	mockClient.RunCompose(composePath, "down")
@@ -358,7 +358,7 @@ func TestServiceCombinations(t *testing.T) {
 			
 			// Test start command
 			mockClient.ClearCommands()
-			mockClient.MockCmd = exec.Command("echo", "mock start")
+			mockClient.SetMockCmd(exec.Command("echo", "mock start"))
 			
 			// Build the docker-compose command with appropriate services
 			args := []string{"up", "-d"}
@@ -418,7 +418,7 @@ func TestServiceCombinations(t *testing.T) {
 
 			// Test stop command
 			mockClient.ClearCommands()
-			mockClient.MockCmd = exec.Command("echo", "mock stop")
+			mockClient.SetMockCmd(exec.Command("echo", "mock stop"))
 			
 			// Execute stop command
 			mockClient.RunCompose(composePath, "down")

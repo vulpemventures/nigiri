@@ -69,7 +69,7 @@ func main() {
 		&update,
 		&versionCmd,
 
-		// Bitcoin RPC and utilities
+		// Bitcoin and Elements RPCs
 		&rpc,
 		&faucet,
 		&mint,
