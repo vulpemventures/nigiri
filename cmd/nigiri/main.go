@@ -61,21 +61,22 @@ func main() {
 	app.Name = "nigiri CLI"
 	app.Usage = "one-click bitcoin development environment"
 	app.Flags = append(app.Flags, &datadirFlag, &arkFlag)
-	app.Commands = append(
-		app.Commands,
-		&rpc,
-		&lnd,
-		&cln,
+	app.Commands = []*cli.Command{
+		&start,
 		&stop,
-		&logs,
+		&rpc,
+		&faucet,
 		&mint,
 		&push,
-		&tap,
-		&start,
+		&logs,
 		&update,
-		&faucet,
 		&versionCmd,
-	)
+		&ark,
+		&arkd,
+		&cln,
+		&lnd,
+		&tap,
+	}
 
 	app.Before = func(ctx *cli.Context) error {
 

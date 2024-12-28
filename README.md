@@ -187,6 +187,26 @@ $ nigiri cln connect `nigiri lnd getinfo | jq -r .identity_pubkey`@lnd:9735
 $ nigiri lnd openchannel --node_key=`nigiri cln getinfo | jq -r .id` --local_amt=100000
 ```
 
+### Use the Ark CLI inside the box
+
+```bash
+# Check versions
+$ nigiri ark --version    # or -v
+$ nigiri arkd --version   # or -v
+
+# Initialize the Ark client (only needed once)
+$ nigiri ark init --network regtest --password secret --server-url localhost:7070 --explorer http://chopsticks:3000
+
+# Use the Ark client
+$ nigiri ark config                # Show wallet configuration
+$ nigiri ark receive              # Show receiving addresses
+$ nigiri ark balance              # Show wallet balance
+
+# Use the Ark daemon client
+$ nigiri arkd wallet status       # Show wallet status
+$ nigiri arkd wallet create --password secret  # Create a new wallet
+$ nigiri arkd wallet unlock --password secret  # Unlock the wallet
+```
 
 ### Run in headless mode (without Esplora)
 If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag.
