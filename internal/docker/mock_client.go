@@ -13,6 +13,8 @@ type MockClient struct {
 	}
 	// MockCmd is the command that will be returned by RunCompose
 	MockCmd *exec.Cmd
+	// Endpoints stores the mock endpoints
+	Endpoints map[string]string
 }
 
 func NewMockClient() *MockClient {
@@ -21,6 +23,12 @@ func NewMockClient() *MockClient {
 			ComposePath string
 			Args        []string
 		}, 0),
+		Endpoints: map[string]string{
+			"bitcoin":   "localhost:18443",
+			"electrs":   "localhost:3002",
+			"esplora":   "localhost:3000",
+			"chopsticks": "localhost:3000",
+		},
 	}
 }
 
@@ -54,4 +62,9 @@ func (m *MockClient) GetLastCommand() (string, []string, bool) {
 // ClearCommands clears the stored commands
 func (m *MockClient) ClearCommands() {
 	m.Commands = m.Commands[:0]
+}
+
+// GetEndpoints returns the mock endpoints
+func (m *MockClient) GetEndpoints(composePath string) (map[string]string, error) {
+	return m.Endpoints, nil
 }

@@ -6,9 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
+	"github.com/logrusorgru/aurora"
 	"github.com/urfave/cli/v2"
 	"github.com/vulpemventures/nigiri/internal/config"
+	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
 var start = cli.Command{
@@ -23,7 +26,6 @@ var start = cli.Command{
 }
 
 func startAction(ctx *cli.Context) error {
-
 	if isRunning, _ := nigiriState.GetBool("running"); isRunning {
 		return errors.New("nigiri is already running, please stop it first")
 	}
@@ -64,6 +66,38 @@ func startAction(ctx *cli.Context) error {
 		"ark":     strconv.FormatBool(ctx.Bool("ark")),
 	}); err != nil {
 		return fmt.Errorf("failed to update state: %w", err)
+	}
+
+	// Get endpoints from docker-compose
+	client := docker.NewDefaultClient()
+	endpoints, err := client.GetEndpoints(composePath)
+	if err != nil {
+		return fmt.Errorf("failed to get endpoints: %w", err)
+	}
+
+	// Filter endpoints based on enabled services
+	filteredEndpoints := make(map[string]string)
+	for name, endpoint := range endpoints {
+		if !ctx.Bool("liquid") && strings.Contains(name, "liquid") {
+			continue
+		}
+		if !ctx.Bool("ln") && (strings.Contains(name, "lnd") || strings.Contains(name, "cln") || strings.Contains(name, "tap")) {
+			continue
+		}
+		if !ctx.Bool("ark") && strings.Contains(name, "ark") {
+			continue
+		}
+		filteredEndpoints[name] = endpoint
+	}
+
+	// Display endpoints
+	fmt.Println("\n🍜 ENDPOINTS")
+	for name, endpoint := range filteredEndpoints {
+		fmt.Printf("%s %s: %s\n", 
+			aurora.Green("✓"),
+			aurora.Blue(name),
+			endpoint,
+		)
 	}
 
 	return nil

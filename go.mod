@@ -7,6 +7,7 @@ require (
 	github.com/compose-spec/compose-go v0.0.0-20210729195839-de56f4f0cb3c
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/urfave/cli/v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -33,5 +34,4 @@ require (
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
