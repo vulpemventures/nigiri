@@ -42,6 +42,12 @@ var datadirFlag = cli.StringFlag{
 	Value: config.DefaultDatadir,
 }
 
+var arkFlag = cli.BoolFlag{
+	Name:  "ark",
+	Usage: "enable Ark Network",
+	Value: false,
+}
+
 //go:embed resources/docker-compose.yml
 //go:embed resources/bitcoin.conf
 //go:embed resources/elements.conf
@@ -54,22 +60,30 @@ func main() {
 	app.Version = formatVersion()
 	app.Name = "nigiri CLI"
 	app.Usage = "one-click bitcoin development environment"
-	app.Flags = append(app.Flags, &datadirFlag)
-	app.Commands = append(
-		app.Commands,
-		&rpc,
-		&lnd,
-		&cln,
+	app.Flags = append(app.Flags, &datadirFlag, &arkFlag)
+	app.Commands = []*cli.Command{
+		// Core commands
+		&start,
 		&stop,
 		&logs,
+		&update,
+		&versionCmd,
+
+		// Bitcoin and Elements RPCs
+		&rpc,
+		&faucet,
 		&mint,
 		&push,
+
+		// Ark commands
+		&ark,
+		&arkd,
+
+		// Lightning commands
+		&cln,
+		&lnd,
 		&tap,
-		&start,
-		&update,
-		&faucet,
-		&versionCmd,
-	)
+	}
 
 	app.Before = func(ctx *cli.Context) error {
 
@@ -132,6 +146,8 @@ func provisionResourcesToDatadir(datadir string) error {
 		filepath.Join(datadir, "volumes", "lnd"),
 		filepath.Join(datadir, "volumes", "lightningd"),
 		filepath.Join(datadir, "volumes", "tapd"),
+		filepath.Join(datadir, "volumes", "ark", "data"),
+		filepath.Join(datadir, "volumes", "ark", "wallet"),
 	}
 
 	for _, dir := range volumeDirs {

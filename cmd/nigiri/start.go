@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/logrusorgru/aurora"
 	"github.com/urfave/cli/v2"
 	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/internal/docker"
@@ -20,60 +21,35 @@ var start = cli.Command{
 	Flags: []cli.Flag{
 		&liquidFlag,
 		&lnFlag,
-		&cli.BoolFlag{
-			Name:  "ci",
-			Usage: "runs in headless mode without esplora for continuous integration environments",
-			Value: false,
-		},
+		&arkFlag,
 	},
 }
 
 func startAction(ctx *cli.Context) error {
-
 	if isRunning, _ := nigiriState.GetBool("running"); isRunning {
 		return errors.New("nigiri is already running, please stop it first")
 	}
 
-	isLiquid := ctx.Bool("liquid")
-	isLN := ctx.Bool("ln")
-	isCI := ctx.Bool("ci")
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
-	// spin up all the services in the compose file
-	servicesToRun := []string{"esplora"}
-	if isLiquid {
-		//this will only run chopsticks & chopsticks-liquid and servives they depends on
-		servicesToRun = append(servicesToRun, "esplora-liquid")
+	// Build the docker-compose command with appropriate services
+	services := []string{"bitcoin", "electrs", "chopsticks", "esplora"}
+
+	if ctx.Bool("liquid") {
+		services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
 	}
 
-	if isLN {
-		// LND
-		servicesToRun = append(servicesToRun, "tap")
-		// Core Lightning Network
-		servicesToRun = append(servicesToRun, "cln")
+	if ctx.Bool("ln") {
+		services = append(services, "lnd", "tap", "cln")
 	}
 
-	if isCI {
-		//this will only run chopsticks and servives it depends on
-		servicesToRun = []string{"chopsticks"}
-		if isLiquid {
-			//this will only run chopsticks & chopsticks-liquid and servives they depends on
-			servicesToRun = append(servicesToRun, "chopsticks-liquid")
-		}
-		// add also LN services if needed
-		if isLN {
-			// LND
-			servicesToRun = append(servicesToRun, "tap")
-			// Core Lightning Network
-			servicesToRun = append(servicesToRun, "cln")
-		}
+	if ctx.Bool("ark") {
+		services = append(services, "ark")
 	}
 
-	args := []string{"up", "-d"}
-	args = append(args, servicesToRun...)
-
-	bashCmd := runDockerCompose(composePath, args...)
+	// Start the services
+	bashCmd := runDockerCompose(composePath, append([]string{"up", "-d"}, services...)...)
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
 
@@ -81,32 +57,47 @@ func startAction(ctx *cli.Context) error {
 		return err
 	}
 
+	// Update state
+	fmt.Printf("🍣 nigiri configuration located at %s\n", nigiriState.FilePath())
 	if err := nigiriState.Set(map[string]string{
 		"running": strconv.FormatBool(true),
-		"ci":      strconv.FormatBool(isCI),
-		"liquid":  strconv.FormatBool(isLiquid),
-		"ln":      strconv.FormatBool(isLN),
+		"liquid":  strconv.FormatBool(ctx.Bool("liquid")),
+		"ln":      strconv.FormatBool(ctx.Bool("ln")),
+		"ark":     strconv.FormatBool(ctx.Bool("ark")),
 	}); err != nil {
-		return err
+		return fmt.Errorf("failed to update state: %w", err)
 	}
 
-	services, err := docker.GetServices(composePath)
+	// Get endpoints from docker-compose
+	client := docker.NewDefaultClient()
+	endpoints, err := client.GetEndpoints(composePath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get endpoints: %w", err)
 	}
 
-	fmt.Println()
-	fmt.Println("ENDPOINTS")
-
-	for _, nameAndEndpoint := range services {
-		name := nameAndEndpoint[0]
-		endpoint := nameAndEndpoint[1]
-
-		if !isLiquid && strings.Contains(name, "liquid") {
+	// Filter endpoints based on enabled services
+	filteredEndpoints := make(map[string]string)
+	for name, endpoint := range endpoints {
+		if !ctx.Bool("liquid") && strings.Contains(name, "liquid") {
 			continue
 		}
+		if !ctx.Bool("ln") && (strings.Contains(name, "lnd") || strings.Contains(name, "cln") || strings.Contains(name, "tap")) {
+			continue
+		}
+		if !ctx.Bool("ark") && strings.Contains(name, "ark") {
+			continue
+		}
+		filteredEndpoints[name] = endpoint
+	}
 
-		fmt.Println(name + " " + endpoint)
+	// Display endpoints
+	fmt.Println("\n🍜 ENDPOINTS")
+	for name, endpoint := range filteredEndpoints {
+		fmt.Printf("%s %s: %s\n", 
+			aurora.Green("✓"),
+			aurora.Blue(name),
+			endpoint,
+		)
 	}
 
 	return nil

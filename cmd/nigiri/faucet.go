@@ -46,7 +46,9 @@ func faucetAction(ctx *cli.Context) error {
 		serviceName = "chopsticks-liquid"
 	}
 
-	portSlice, err := docker.GetPortsForService(composePath, serviceName)
+	// Get the port for the service
+	dockerClient := docker.NewDefaultClient()
+	portSlice, err := dockerClient.GetPortsForService(composePath, serviceName)
 	if err != nil {
 		return err
 	}

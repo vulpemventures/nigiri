@@ -32,7 +32,7 @@ func stopAction(ctx *cli.Context) error {
 
 	bashCmd := runDockerCompose(composePath, "stop")
 	if delete {
-		cleanupCmd := runDockerCompose(composePath, "run", "--rm", "--entrypoint", "sh", "bitcoin", "-c", "chown -R $(id -u):$(id -g) /data/.bitcoin")
+		cleanupCmd := runDockerCompose(composePath, "run", "-T", "--rm", "--entrypoint", "sh", "bitcoin", "-c", "chown -R $(id -u):$(id -g) /data/.bitcoin")
 		cleanupCmd.Stdout = os.Stdout
 		cleanupCmd.Stderr = os.Stderr
 		if err := cleanupCmd.Run(); err != nil {

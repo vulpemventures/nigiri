@@ -1,4 +1,4 @@
-name: Go
+name: Go Tests
 
 on:
   push:
@@ -7,25 +7,26 @@ on:
     branches: [master]
 
 jobs:
-  integration:
-    name: Unit Tests
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
-          go-version: ">1.17.2"
+          go-version: '1.23.4'
+          cache: true
 
-      - name: Get dependencies
-        run: go get -v -t -d ./...
+      - name: Code Format Check
+        run: make fmt
 
-      - name: Test
-        run: |
-          make fmt
-          make install
-          make test-ci
+      - name: Code Analysis
+        run: make vet
+
+      - name: Run Tests
+        run: make test

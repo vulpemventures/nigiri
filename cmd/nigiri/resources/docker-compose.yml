@@ -234,6 +234,33 @@ services:
       - ./volumes/lightningd:/.lightning
       - ./volumes/bitcoin:/etc/bitcoin
 
+  ark:
+    container_name: ark
+    image: ghcr.io/ark-network/ark:v0.4.2
+    user: "${UID:-1000}:${GID:-1000}"
+    depends_on:
+      - bitcoin
+    environment:
+      ARK_ROUND_INTERVAL: "15"
+      ARK_LOG_LEVEL: "5"
+      ARK_NETWORK: "regtest"
+      ARK_PORT: "7070"
+      ARK_NO_TLS: "true"
+      ARK_NO_MACAROONS: "true"
+      ARK_TX_BUILDER_TYPE: "covenantless"
+      ARK_BITCOIND_RPC_USER: "admin1"
+      ARK_BITCOIND_RPC_PASS: "123"
+      ARK_BITCOIND_RPC_HOST: "bitcoin:18443"
+      ARK_BITCOIND_ZMQ_BLOCK: "tcp://bitcoin:28332"
+      ARK_BITCOIND_ZMQ_TX: "tcp://bitcoin:28333"
+      ARK_DATADIR: "/app/data"
+    volumes:
+      - ./volumes/ark/data:/app/data
+      - ./volumes/ark/wallet:/app/wallet-data
+    ports:
+      - "7070:7070"
+    restart: unless-stopped
+
 networks:
   default:
     name: nigiri

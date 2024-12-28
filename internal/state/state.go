@@ -25,6 +25,10 @@ func New(filePath string, initialState map[string]string) *State {
 	}
 }
 
+func (s *State) FilePath() string {
+	return s.filePath
+}
+
 func (s *State) Get() (map[string]string, error) {
 	file, err := ioutil.ReadFile(s.filePath)
 	if err != nil {
