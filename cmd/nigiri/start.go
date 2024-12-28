@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -55,13 +56,14 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	// Update state
+	fmt.Printf("🍣 nigiri configuration located at %s\n", nigiriState.FilePath())
 	if err := nigiriState.Set(map[string]string{
 		"running": strconv.FormatBool(true),
 		"liquid":  strconv.FormatBool(ctx.Bool("liquid")),
 		"ln":      strconv.FormatBool(ctx.Bool("ln")),
 		"ark":     strconv.FormatBool(ctx.Bool("ark")),
 	}); err != nil {
-		return err
+		return fmt.Errorf("failed to update state: %w", err)
 	}
 
 	return nil
