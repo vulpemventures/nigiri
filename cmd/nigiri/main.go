@@ -62,17 +62,24 @@ func main() {
 	app.Usage = "one-click bitcoin development environment"
 	app.Flags = append(app.Flags, &datadirFlag, &arkFlag)
 	app.Commands = []*cli.Command{
+		// Core commands
 		&start,
 		&stop,
+		&logs,
+		&update,
+		&versionCmd,
+
+		// Bitcoin RPC and utilities
 		&rpc,
 		&faucet,
 		&mint,
 		&push,
-		&logs,
-		&update,
-		&versionCmd,
+
+		// Ark commands
 		&ark,
 		&arkd,
+
+		// Lightning commands
 		&cln,
 		&lnd,
 		&tap,

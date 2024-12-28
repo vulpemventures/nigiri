@@ -1,10 +1,15 @@
 # 🍣 Nigiri Bitcoin 
 
-Nigiri provides a command line interface that manages a selection of `docker-compose` batteries included to have ready-to-use bitcoin `regtest` development environment, with a **bitcoin** node, **electrum** explorer both backend and frontend user interface. 
+Nigiri provides a command line interface that manages a selection of `docker-compose` batteries included to have a ready-to-use Bitcoin `regtest` development environment. Out of the box, you get:
 
-It offers a [JSON HTTP proxy passtrough](https://github.com/vulpemventures/nigiri-chopsticks) that adds to the explorer handy endpoints like `/faucet` and automatic block generation when calling the `/tx` pushing a transaction.
+* **Bitcoin Node**: A Bitcoin Core node running in regtest mode
+* **Electrum**: Backend and frontend explorer for quick blockchain inspection
+* **Chopsticks**: A [JSON HTTP proxy](https://github.com/vulpemventures/nigiri-chopsticks) that adds handy endpoints like `/faucet` and automatic block generation
 
-You can have Lightning with `--ln` flag and/or Elements with the `--liquid` flag.
+You can extend your setup with:
+* **Ark**: A Bitcoin layer two implementation for scalable off-chain transactions
+* **Elements/Liquid sidechain** with `--liquid` flag
+* **Lightning Network nodes** with `--ln` flag (Core Lightning, LND, and Taproot Assets)
 
 
 # No time to make a Nigiri yourself?
@@ -37,12 +42,17 @@ You may want to [Manage Docker as a non-root user](https://docs.docker.com/engin
 * Close and reopen your terminal, then start Bitcoin and Liquid
 
 ```
-$ nigiri start --liquid
+$ nigiri start --ark
 ```
 **That's it.**
 
-Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain or http://localhost:5001 for Liquid.
+Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain.
 
+Want more? Add Elements/Liquid or Lightning nodes:
+```bash
+$ nigiri start --ark --liquid  # Add Elements/Liquid sidechain
+$ nigiri start --ark --ln      # Add Lightning Network nodes
+```
 
 **Note for users of macOS Monterey an onward**
 <details>
