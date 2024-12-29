@@ -48,10 +48,22 @@ $ nigiri start --ark
 
 Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain.
 
-Want more? Add Elements/Liquid or Lightning nodes:
+Want more? Add Elements/Liquid, Lightning nodes, or Ark:
 ```bash
 $ nigiri start --ark --liquid  # Add Elements/Liquid sidechain
 $ nigiri start --ark --ln      # Add Lightning Network nodes
+$ nigiri start --liquid --ln   # Add both Liquid and Lightning
+$ nigiri start --ark --liquid --ln  # Add all features
+```
+
+### Run in headless mode (without Esplora)
+If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag. This flag can be combined with any other flag:
+
+```bash
+$ nigiri start --ci  # Basic headless mode
+$ nigiri start --ci --ark  # With Ark
+$ nigiri start --ci --liquid --ln  # With Liquid and Lightning
+$ nigiri start --ci --ark --liquid --ln  # With all features
 ```
 
 **Note for users of macOS Monterey an onward**
@@ -216,13 +228,6 @@ $ nigiri ark balance              # Show wallet balance
 $ nigiri arkd wallet status       # Show wallet status
 $ nigiri arkd wallet create --password secret  # Create a new wallet
 $ nigiri arkd wallet unlock --password secret  # Unlock the wallet
-```
-
-### Run in headless mode (without Esplora)
-If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag.
-
-```
-$ nigiri start --ci [--liquid] [--ln]
 ```
 
 ### Update the docker images
