@@ -14,6 +14,12 @@ import (
 	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
+var ciFlag = cli.BoolFlag{
+	Name:  "ci",
+	Usage: "runs in headless mode without esplora for continuous integration environments",
+	Value: false,
+}
+
 var start = cli.Command{
 	Name:   "start",
 	Usage:  "start nigiri",
@@ -22,6 +28,7 @@ var start = cli.Command{
 		&liquidFlag,
 		&lnFlag,
 		&arkFlag,
+		&ciFlag,
 	},
 }
 
@@ -34,10 +41,22 @@ func startAction(ctx *cli.Context) error {
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
 	// Build the docker-compose command with appropriate services
-	services := []string{"bitcoin", "electrs", "chopsticks", "esplora"}
-
-	if ctx.Bool("liquid") {
-		services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
+	var services []string
+	
+	if ctx.Bool("ci") {
+		// In CI mode, only run chopsticks and its dependencies
+		services = []string{"bitcoin", "electrs", "chopsticks"}
+		
+		if ctx.Bool("liquid") {
+			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid")
+		}
+	} else {
+		// Not in CI mode, include all services including Esplora
+		services = []string{"bitcoin", "electrs", "chopsticks", "esplora"}
+		
+		if ctx.Bool("liquid") {
+			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
+		}
 	}
 
 	if ctx.Bool("ln") {
@@ -64,6 +83,7 @@ func startAction(ctx *cli.Context) error {
 		"liquid":  strconv.FormatBool(ctx.Bool("liquid")),
 		"ln":      strconv.FormatBool(ctx.Bool("ln")),
 		"ark":     strconv.FormatBool(ctx.Bool("ark")),
+		"ci":      strconv.FormatBool(ctx.Bool("ci")),
 	}); err != nil {
 		return fmt.Errorf("failed to update state: %w", err)
 	}
