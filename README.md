@@ -56,16 +56,6 @@ $ nigiri start --liquid --ln   # Add both Liquid and Lightning
 $ nigiri start --ark --liquid --ln  # Add all features
 ```
 
-### Run in headless mode (without Esplora)
-If you are looking to spin-up Nigiri in Travis or Github Action you can use the `--ci` flag. This flag can be combined with any other flag:
-
-```bash
-$ nigiri start --ci  # Basic headless mode
-$ nigiri start --ci --ark  # With Ark
-$ nigiri start --ci --liquid --ln  # With Liquid and Lightning
-$ nigiri start --ci --ark --liquid --ln  # With all features
-```
-
 **Note for users of macOS Monterey an onward**
 <details>
   <summary>Show more...</summary>
