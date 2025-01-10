@@ -1,6 +1,5 @@
 name: nigiri
 services:
-
   # RPC daemon
   bitcoin:
     image: getumbrel/bitcoind:v28.0
@@ -180,7 +179,7 @@ services:
       - "9735:9735" # p2p
       - "10009:10009" # grpc"
       - "18080:18080" # rest"
-  
+
   tap:
     container_name: tap
     image: lightninglabs/taproot-assets:v0.4.1
@@ -195,9 +194,9 @@ services:
       HOME: /data
     command:
       - --network=regtest
-      - --debuglevel=debug 
-      - --lnd.host=lnd:10009 
-      - --lnd.macaroonpath=/data/.lnd/data/chain/bitcoin/regtest/admin.macaroon 
+      - --debuglevel=debug
+      - --lnd.host=lnd:10009
+      - --lnd.macaroonpath=/data/.lnd/data/chain/bitcoin/regtest/admin.macaroon
       - --lnd.tlspath=/data/.lnd/tls.cert
     restart: unless-stopped
     stop_grace_period: 5m30s
@@ -218,17 +217,18 @@ services:
       - --alias=nigiri
       - --bind-addr=0.0.0.0:9935
       - --bitcoin-rpcconnect=bitcoin:18443
-      - --bitcoin-rpcpassword=123 
+      - --bitcoin-rpcpassword=123
       - --bitcoin-rpcuser=admin1
       - --log-level=debug
       - --network=regtest
-      - --grpc-port=9836
+      - --grpc-host=0.0.0.0
+      - --grpc-port=9936
     depends_on:
       - bitcoin
     ports:
-      - 9935:9935 # p2p
-      - 9835:9835 # rpc
-      - 9836:9836 # grpc
+      - "9835:9835" # rpc
+      - "9935:9935" # p2p
+      - "9936:9936" # grpc
     restart: unless-stopped
     volumes:
       - ./volumes/lightningd:/.lightning
