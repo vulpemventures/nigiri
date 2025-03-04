@@ -236,7 +236,7 @@ services:
 
   ark:
     container_name: ark
-    image: ghcr.io/ark-network/ark:v0.4.2
+    image: ghcr.io/ark-network/ark:v0.5.0
     user: "${UID:-1000}:${GID:-1000}"
     depends_on:
       - bitcoin
