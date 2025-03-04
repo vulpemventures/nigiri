@@ -46,8 +46,6 @@ func arkdAction(ctx *cli.Context) error {
 		return runArkCommand(ctx, "arkd", "--version")
 	}
 	args := ctx.Args().Slice()
-	// Add default flags
-	args = append([]string{"--no-macaroon"}, args...)
 	return runArkCommand(ctx, "arkd", args...)
 }
 
