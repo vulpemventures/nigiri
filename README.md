@@ -32,7 +32,7 @@ Windows: `%LOCALAPPDATA%\Nigiri`
 
 Plan 9: `$home/nigiri`
 
-- Lauch Docker daemon (Mac OSX)
+- Launch Docker daemon (Mac OSX)
 
 ```
 $ open -a Docker
@@ -288,7 +288,7 @@ Done! You should be able to find the binary in the local `./build` folder. Give 
 
 - Clean
 
-Remeber to always `clean` Nigiri before running `install` to upgrade to a new version.
+Remember to always `clean` Nigiri before running `install` to upgrade to a new version.
 
 ```
 $ make clean

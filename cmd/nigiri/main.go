@@ -112,7 +112,7 @@ func fatal(err error) {
 	os.Exit(1)
 }
 
-// Provisioning Nigiri reosurces
+// Provisioning Nigiri resources
 func provisionResourcesToDatadir(datadir string) error {
 	isReady, err := nigiriState.GetBool("ready")
 	if err != nil {
