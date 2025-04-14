@@ -20,6 +20,7 @@ You can extend your setup with:
 
 ```bash
 curl https://getnigiri.vulpem.com | bash
+```
 
 > [!NOTE]
 > On Windows, you are heavily encouraged to make use of [WSL](https://learn.microsoft.com/en-us/windows/wsl). Ensure that Docker is configured to integrate and use WSL. Prepending most commands in this document with `wsl` is sufficient.
