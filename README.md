@@ -226,21 +226,20 @@ nigiri cln pay `nigiri lnd addinvoice 21 | jq -r .payment_request`
 nigiri ark --version    # or -v
 nigiri arkd --version   # or -v
 
-# Use the Ark daemon client
-nigiri arkd wallet status       # Show wallet status
-nigiri arkd wallet create --password secret  # Create a new wallet
-nigiri arkd wallet unlock --password secret  # Unlock the wallet
-nigiri arkd wallet address # to get address to deposit
-
-# use nigiri faucet to deposit
-
-# Initialize the Ark client (only needed once)
-nigiri ark init --network regtest --password secret --server-url localhost:7070 --explorer http://chopsticks:3000
 
 # Use the Ark client
 nigiri ark config                # Show wallet configuration
 nigiri ark receive              # Show receiving addresses
 nigiri ark balance              # Show wallet balance
+
+# Configure the Ark daemon client
+nigiri arkd wallet status       # Show wallet status
+nigiri arkd wallet create --password secret  # Create a new wallet
+nigiri arkd wallet unlock --password secret  # Unlock the wallet
+nigiri arkd wallet status       # Verify ark wallet is set up
+
+# Initialize the Ark client (only needed once)
+nigiri ark init --network regtest --password secret --server-url localhost:7070 --explorer http://chopsticks:3000
 ```
 
 ### Update the docker images
