@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	sli "slices"
 	"strings"
 	"strconv"
 	"testing"
@@ -219,7 +220,7 @@ func TestBasicStartStop(t *testing.T) {
 	
 	// Check that the correct services were started
 	expectedArgs := []string{"up", "-d", "bitcoin", "electrs", "chopsticks", "esplora"}
-	if !stringSliceEqual(args, expectedArgs) {
+	if !sli.Equal(args, expectedArgs) {
 		t.Errorf("Expected args %v, got %v", expectedArgs, args)
 	}
 
@@ -237,7 +238,7 @@ func TestBasicStartStop(t *testing.T) {
 	}
 	
 	expectedArgs = []string{"down"}
-	if !stringSliceEqual(args, expectedArgs) {
+	if !sli.Equal(args, expectedArgs) {
 		t.Errorf("Expected args %v, got %v", expectedArgs, args)
 	}
 }
@@ -380,7 +381,7 @@ func TestServiceCombinations(t *testing.T) {
 			
 			// Check that the correct services were started
 			expectedArgs := append([]string{"up", "-d"}, tt.expectedServices...)
-			if !stringSliceEqual(actualArgs, expectedArgs) {
+			if !sli.Equal(actualArgs, expectedArgs) {
 				t.Errorf("Expected args %v, got %v", expectedArgs, actualArgs)
 			}
 
@@ -429,22 +430,10 @@ func TestServiceCombinations(t *testing.T) {
 				t.Fatal("No Docker commands were executed for stop")
 			}
 			
-			if !stringSliceEqual(stopArgs, []string{"down"}) {
+			if !sli.Equal(stopArgs, []string{"down"}) {
 				t.Errorf("Expected stop args [down], got %v", stopArgs)
 			}
 		})
 	}
 }
 
-// Helper function to compare string slices
-func stringSliceEqual(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
