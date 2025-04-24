@@ -1,12 +1,14 @@
 package test
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
+	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/vulpemventures/nigiri/internal/config"
@@ -15,11 +17,47 @@ import (
 )
 
 var (
-	tmpDatadir = filepath.Join(os.TempDir(), "nigiri-tmp")
-	mockClient *docker.MockClient
+	tmpDatadir       string
+	mockClient       *docker.MockClient
+	nigiriBinaryPath string // Store path to the built binary
 )
 
 func TestMain(m *testing.M) {
+	// Determine home directory for temp path
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Printf("Failed to get user home directory: %v\n", err)
+		os.Exit(1)
+	}
+	// Use a path inside the user's home directory for potentially better Docker mount compatibility
+	tmpDatadir = filepath.Join(homeDir, "nigiri-tmp")
+	fmt.Printf("Using temp directory: %s\n", tmpDatadir)
+
+	// Ensure the directory does not exist from a previous failed run
+	_ = os.RemoveAll(tmpDatadir)
+
+	// Build the nigiri binary for integration tests
+	binaryName := "nigiri_test"
+	nigiriBinaryPath = filepath.Join(tmpDatadir, binaryName) // Build inside tmpDatadir for easy cleanup
+
+	// Ensure tmpDatadir exists before build
+	if err := os.MkdirAll(tmpDatadir, 0755); err != nil {
+		fmt.Printf("Failed to create base temp dir for build: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Building nigiri binary for tests at %s...\n", nigiriBinaryPath)
+	buildCmd := exec.Command("go", "build", "-o", nigiriBinaryPath, "../cmd/nigiri")
+	buildCmd.Stdout = os.Stdout
+	buildCmd.Stderr = os.Stderr
+	if err := buildCmd.Run(); err != nil {
+		fmt.Printf("Failed to build nigiri binary: %v\n", err)
+		// Cleanup partially created dir? Best effort.
+		_ = os.RemoveAll(tmpDatadir)
+		os.Exit(1)
+	}
+	fmt.Println("Build successful.")
+
 	// Initialize mock client
 	mockClient = docker.NewMockClient()
 
@@ -447,4 +485,130 @@ func stringSliceEqual(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+// Helper to run the built nigiri binary
+func runNigiri(t *testing.T, args ...string) error {
+	t.Helper()
+	cmdArgs := append([]string{"--datadir", tmpDatadir}, args...)
+	cmd := exec.Command(nigiriBinaryPath, cmdArgs...)
+	cmd.Stdout = os.Stdout // Or capture if needed
+	cmd.Stderr = os.Stderr
+	t.Logf("Running: %s %v", nigiriBinaryPath, cmdArgs)
+	err := cmd.Run()
+	if err != nil {
+		t.Logf("Command failed: %v", err)
+	}
+	return err // Return error for checking
+}
+
+// Helper to check flags file content (semantic comparison)
+func checkFlagsFile(t *testing.T, expectExists bool, expectedJsonString string) {
+	t.Helper()
+	flagsFilePath := filepath.Join(tmpDatadir, "flags.json") // Assuming name defined in start.go
+	_, err := os.Stat(flagsFilePath)
+
+	if expectExists {
+		if os.IsNotExist(err) {
+			t.Fatalf("Expected flags file '%s' to exist, but it doesn't", flagsFilePath)
+		}
+		if err != nil {
+			t.Fatalf("Error checking flags file '%s': %v", flagsFilePath, err)
+		}
+		// Read actual content
+		actualContentBytes, readErr := os.ReadFile(flagsFilePath)
+		if readErr != nil {
+			t.Fatalf("Failed to read flags file '%s': %v", flagsFilePath, readErr)
+		}
+
+		// Unmarshal both expected and actual into maps for comparison
+		var expectedMap, actualMap map[string]interface{}
+
+		errUnmarshalExpected := json.Unmarshal([]byte(expectedJsonString), &expectedMap)
+		if errUnmarshalExpected != nil {
+			t.Fatalf("Failed to unmarshal expected JSON string: %v\nString was:\n%s", errUnmarshalExpected, expectedJsonString)
+		}
+
+		errUnmarshalActual := json.Unmarshal(actualContentBytes, &actualMap)
+		if errUnmarshalActual != nil {
+			t.Fatalf("Failed to unmarshal actual flags file content: %v\nContent was:\n%s", errUnmarshalActual, string(actualContentBytes))
+		}
+
+		// Compare maps using reflect.DeepEqual
+		if !reflect.DeepEqual(expectedMap, actualMap) {
+			t.Errorf("Flags file content mismatch (semantic).\nExpected: %v\nGot:      %v", expectedMap, actualMap)
+		}
+
+	} else {
+		if err == nil {
+			t.Fatalf("Expected flags file '%s' to not exist, but it does", flagsFilePath)
+		}
+		if !os.IsNotExist(err) {
+			t.Fatalf("Error checking non-existence of flags file '%s': %v", flagsFilePath, err)
+		}
+	}
+}
+
+func TestRememberForget(t *testing.T) {
+	// Ensure state is clean before starting
+	stateFilePath := filepath.Join(tmpDatadir, config.DefaultName) // Use config constant
+	flagsFilePath := filepath.Join(tmpDatadir, "flags.json")       // Matches start.go
+
+	errState := os.Remove(stateFilePath)
+	// Ignore 'not exist' error, but fail on others
+	if errState != nil && !os.IsNotExist(errState) {
+		t.Fatalf("Failed to remove previous state file '%s' before test: %v", stateFilePath, errState)
+	}
+	errFlags := os.Remove(flagsFilePath)
+	// Ignore 'not exist' error, but fail on others
+	if errFlags != nil && !os.IsNotExist(errFlags) {
+		t.Fatalf("Failed to remove previous flags file '%s' before test: %v", flagsFilePath, errFlags)
+	}
+
+	// 1. Start with --liquid and --remember
+	t.Log("Running: start --liquid --remember")
+	if err := runNigiri(t, "start", "--liquid", "--remember"); err != nil {
+		// Start might fail if docker-compose isn't mocked/available,
+		// but we primarily care about the flags file for this test.
+		// Let's only log the error for now, but check the file.
+		t.Logf("Note: 'start' command returned error (expected in CI without docker?): %v", err)
+	}
+	// Check flags.json was created with liquid: true
+	// Need to marshal the expected struct to JSON string for comparison
+	expectedFlags := map[string]bool{"liquid": true, "ln": false, "ark": false, "ci": false}
+	expectedJsonBytes, _ := json.MarshalIndent(expectedFlags, "", "  ")
+	checkFlagsFile(t, true, string(expectedJsonBytes))
+
+	// 2. Stop
+	t.Log("Running: stop")
+	_ = runNigiri(t, "stop") // Ignore error for now
+
+	// 3. Start again (should load remembered flags)
+	t.Log("Running: start (expecting remembered flags)")
+	// We can't easily verify docker services without mocking docker-compose,
+	// but we can ensure the flags file *wasn't* overwritten if --remember wasn't used.
+	_ = runNigiri(t, "start")
+	checkFlagsFile(t, true, string(expectedJsonBytes)) // Should still contain the remembered flags
+
+	// 4. Stop again
+	t.Log("Running: stop")
+	_ = runNigiri(t, "stop")
+
+	// 5. Forget
+	t.Log("Running: forget")
+	if err := runNigiri(t, "forget"); err != nil {
+		t.Fatalf("forget command failed: %v", err)
+	}
+	// Check flags.json was removed
+	checkFlagsFile(t, false, "")
+
+	// 6. Start again (should use defaults, no liquid)
+	t.Log("Running: start (expecting default flags)")
+	_ = runNigiri(t, "start")
+	// Check flags.json does *not* exist (because --remember wasn't used)
+	checkFlagsFile(t, false, "")
+
+	// 7. Stop finally
+	t.Log("Running: stop")
+	_ = runNigiri(t, "stop")
 }

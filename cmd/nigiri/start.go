@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -20,6 +21,12 @@ var ciFlag = cli.BoolFlag{
 	Value: false,
 }
 
+var rememberFlag = cli.BoolFlag{
+	Name:  "remember",
+	Usage: "remember the flags used in this command for future runs",
+	Value: false,
+}
+
 var start = cli.Command{
 	Name:   "start",
 	Usage:  "start nigiri",
@@ -29,7 +36,48 @@ var start = cli.Command{
 		&lnFlag,
 		&arkFlag,
 		&ciFlag,
+		&rememberFlag,
 	},
+}
+
+const savedFlagsFileName = "flags.json"
+
+type savedFlags struct {
+	Liquid bool `json:"liquid"`
+	Ln     bool `json:"ln"`
+	Ark    bool `json:"ark"`
+	Ci     bool `json:"ci"`
+}
+
+func loadFlags(datadir string) (*savedFlags, error) {
+	flagsFilePath := filepath.Join(datadir, savedFlagsFileName)
+	data, err := os.ReadFile(flagsFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return &savedFlags{}, nil
+		}
+		return nil, fmt.Errorf("failed to read saved flags file: %w", err)
+	}
+
+	var flags savedFlags
+	if err := json.Unmarshal(data, &flags); err != nil {
+		return nil, fmt.Errorf("failed to parse saved flags file: %w", err)
+	}
+	return &flags, nil
+}
+
+func saveFlags(datadir string, flags *savedFlags) error {
+	flagsFilePath := filepath.Join(datadir, savedFlagsFileName)
+	data, err := json.MarshalIndent(flags, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal flags: %w", err)
+	}
+
+	if err := os.WriteFile(flagsFilePath, data, 0644); err != nil {
+		return fmt.Errorf("failed to write saved flags file: %w", err)
+	}
+	fmt.Printf("Flags remembered in %s\n", flagsFilePath)
+	return nil
 }
 
 func startAction(ctx *cli.Context) error {
@@ -40,34 +88,62 @@ func startAction(ctx *cli.Context) error {
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
-	// Build the docker-compose command with appropriate services
+	loadedFlags, err := loadFlags(datadir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: could not load saved flags: %v\n", err)
+		loadedFlags = &savedFlags{}
+	}
+
+	effectiveFlags := savedFlags{
+		Liquid: loadedFlags.Liquid,
+		Ln:     loadedFlags.Ln,
+		Ark:    loadedFlags.Ark,
+		Ci:     loadedFlags.Ci,
+	}
+
+	if ctx.IsSet("liquid") {
+		effectiveFlags.Liquid = ctx.Bool("liquid")
+	}
+	if ctx.IsSet("ln") {
+		effectiveFlags.Ln = ctx.Bool("ln")
+	}
+	if ctx.IsSet("ark") {
+		effectiveFlags.Ark = ctx.Bool("ark")
+	}
+	if ctx.IsSet("ci") {
+		effectiveFlags.Ci = ctx.Bool("ci")
+	}
+
+	if ctx.Bool("remember") {
+		if err := saveFlags(datadir, &effectiveFlags); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: could not save flags: %v\n", err)
+		}
+	}
+
 	var services []string
-	
-	if ctx.Bool("ci") {
-		// In CI mode, only run chopsticks and its dependencies
+
+	if effectiveFlags.Ci {
 		services = []string{"bitcoin", "electrs", "chopsticks"}
-		
-		if ctx.Bool("liquid") {
+
+		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid")
 		}
 	} else {
-		// Not in CI mode, include all services including Esplora
 		services = []string{"bitcoin", "electrs", "chopsticks", "esplora"}
-		
-		if ctx.Bool("liquid") {
+
+		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
 		}
 	}
 
-	if ctx.Bool("ln") {
+	if effectiveFlags.Ln {
 		services = append(services, "lnd", "tap", "cln")
 	}
 
-	if ctx.Bool("ark") {
+	if effectiveFlags.Ark {
 		services = append(services, "ark")
 	}
 
-	// Start the services
 	bashCmd := runDockerCompose(composePath, append([]string{"up", "-d"}, services...)...)
 	bashCmd.Stdout = os.Stdout
 	bashCmd.Stderr = os.Stderr
@@ -76,44 +152,43 @@ func startAction(ctx *cli.Context) error {
 		return err
 	}
 
-	// Update state
 	fmt.Printf("🍣 nigiri configuration located at %s\n", nigiriState.FilePath())
 	if err := nigiriState.Set(map[string]string{
 		"running": strconv.FormatBool(true),
-		"liquid":  strconv.FormatBool(ctx.Bool("liquid")),
-		"ln":      strconv.FormatBool(ctx.Bool("ln")),
-		"ark":     strconv.FormatBool(ctx.Bool("ark")),
-		"ci":      strconv.FormatBool(ctx.Bool("ci")),
+		"liquid":  strconv.FormatBool(effectiveFlags.Liquid),
+		"ln":      strconv.FormatBool(effectiveFlags.Ln),
+		"ark":     strconv.FormatBool(effectiveFlags.Ark),
+		"ci":      strconv.FormatBool(effectiveFlags.Ci),
 	}); err != nil {
 		return fmt.Errorf("failed to update state: %w", err)
 	}
 
-	// Get endpoints from docker-compose
 	client := docker.NewDefaultClient()
 	endpoints, err := client.GetEndpoints(composePath)
 	if err != nil {
 		return fmt.Errorf("failed to get endpoints: %w", err)
 	}
 
-	// Filter endpoints based on enabled services
+	// Filter endpoints based on *effective* flags
 	filteredEndpoints := make(map[string]string)
 	for name, endpoint := range endpoints {
-		if !ctx.Bool("liquid") && strings.Contains(name, "liquid") {
+		if !effectiveFlags.Liquid && strings.Contains(name, "liquid") {
 			continue
 		}
-		if !ctx.Bool("ln") && (strings.Contains(name, "lnd") || strings.Contains(name, "cln") || strings.Contains(name, "tap")) {
+		if !effectiveFlags.Ln && (strings.Contains(name, "lnd") || strings.Contains(name, "cln") || strings.Contains(name, "tap")) {
 			continue
 		}
-		if !ctx.Bool("ark") && strings.Contains(name, "ark") {
+		if !effectiveFlags.Ark && strings.Contains(name, "ark") {
 			continue
 		}
+
 		filteredEndpoints[name] = endpoint
 	}
 
 	// Display endpoints
 	fmt.Println("\n🍜 ENDPOINTS")
 	for name, endpoint := range filteredEndpoints {
-		fmt.Printf("%s %s: %s\n", 
+		fmt.Printf("%s %s: %s\n",
 			aurora.Green("✓"),
 			aurora.Blue(name),
 			endpoint,
