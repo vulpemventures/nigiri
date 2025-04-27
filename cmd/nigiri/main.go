@@ -68,6 +68,7 @@ func main() {
 		&logs,
 		&update,
 		&versionCmd,
+		&forget,
 
 		// Bitcoin and Elements RPCs
 		&rpc,

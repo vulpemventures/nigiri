@@ -98,6 +98,8 @@ nigiri start
 
 - Use the `--ln` flag to start a Core Lightning node, a LND node and a Tap daemon.
 
+- Use the `--remember` flag to save the currently used flags (like `--liquid`, `--ln`, `--ark`) so they are automatically applied on subsequent `nigiri start` calls without needing to specify them again.
+
 ### Stop nigiri
 
 ```bash
@@ -105,6 +107,14 @@ nigiri stop
 ```
 
 Use the `--delete` flag to not just stop Docker containers but also to remove them and delete the config file and any new data written in volumes.
+
+### Forget remembered flags
+
+```bash
+nigiri forget
+```
+
+This command removes any flags previously saved using `nigiri start --remember`, causing future `nigiri start` calls to use default flags unless specified.
 
 ### Generate and send bitcoin to given address
 
