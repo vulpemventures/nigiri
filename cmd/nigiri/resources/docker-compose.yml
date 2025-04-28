@@ -2,9 +2,12 @@ name: nigiri
 services:
   # RPC daemon
   bitcoin:
-    image: getumbrel/bitcoind:v28.0
+    image: bitcoin/bitcoin:29
     container_name: bitcoin
     user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
     restart: on-failure
     stop_grace_period: 30s
     ports:
@@ -14,7 +17,7 @@ services:
       - 28332:28332
       - 28333:28333
     volumes:
-      - ./volumes/bitcoin:/data/.bitcoin
+      - ./volumes/bitcoin:/home/bitcoin/.bitcoin
 
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
