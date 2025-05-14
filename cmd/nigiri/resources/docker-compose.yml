@@ -4,10 +4,6 @@ services:
   bitcoin:
     image: bitcoin/bitcoin:29
     container_name: bitcoin
-    user: "${UID:-1000}:${GID:-1000}"
-    environment:
-      UID: ${UID:-1000}
-      GID: ${GID:-1000}
     restart: on-failure
     stop_grace_period: 30s
     ports:
