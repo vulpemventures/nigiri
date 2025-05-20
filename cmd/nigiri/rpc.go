@@ -48,7 +48,7 @@ func rpcAction(ctx *cli.Context) error {
 	generate := ctx.Int("generate")
 	named := ctx.Bool("named")
 
-	rpcArgs := []string{"exec", "bitcoin", "bitcoin-cli", "-rpcwallet=" + rpcWallet}
+	rpcArgs := []string{"exec", "bitcoin", "bitcoin-cli", "-rpcuser=admin1", "-rpcpassword=123", "-rpcport=18443", "-rpcwallet=" + rpcWallet}
 	if isLiquid {
 		rpcArgs = []string{"exec", "liquid", "elements-cli", "-datadir=config", "-rpcwallet=" + rpcWallet}
 	}
