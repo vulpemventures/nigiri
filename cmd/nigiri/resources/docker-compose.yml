@@ -2,7 +2,7 @@ name: nigiri
 services:
   # RPC daemon
   bitcoin:
-    image: getumbrel/bitcoind:v28.0
+    image: ghcr.io/getumbrel/docker-bitcoind:v29.0
     container_name: bitcoin
     user: "${UID:-1000}:${GID:-1000}"
     restart: on-failure
