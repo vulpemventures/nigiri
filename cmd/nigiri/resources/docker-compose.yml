@@ -234,29 +234,43 @@ services:
       - ./volumes/lightningd:/.lightning
       - ./volumes/bitcoin:/etc/bitcoin
 
-  ark:
-    container_name: ark
-    image: ghcr.io/arkade-os/ark:v0.6.2
-    user: "${UID:-1000}:${GID:-1000}"
+  ark-wallet:
+    container_name: ark-wallet
+    image: ghcr.io/arkade-os/arkd-wallet:v0.7.0
     depends_on:
       - bitcoin
     environment:
-      ARK_ROUND_INTERVAL: "15"
-      ARK_LOG_LEVEL: "5"
-      ARK_NETWORK: "regtest"
-      ARK_PORT: "7070"
-      ARK_NO_TLS: "true"
-      ARK_NO_MACAROONS: "true"
-      ARK_TX_BUILDER_TYPE: "covenantless"
-      ARK_BITCOIND_RPC_USER: "admin1"
-      ARK_BITCOIND_RPC_PASS: "123"
-      ARK_BITCOIND_RPC_HOST: "bitcoin:18443"
-      ARK_BITCOIND_ZMQ_BLOCK: "tcp://bitcoin:28332"
-      ARK_BITCOIND_ZMQ_TX: "tcp://bitcoin:28333"
-      ARK_DATADIR: "/app/data"
+      ARKD_WALLET_ESPLORA_URL: "http://chopsticks:3000"
+      ARKD_WALLET_NEUTRINO_PEER: "bitcoin:18444"
+      ARKD_WALLET_DATADIR: "./data/regtest"
+      ARKD_WALLET_NETWORK: "regtest"
+    volumes:
+      - ./volumes/ark/wallet:/app/data
+    ports:
+      - "6060:6060"
+
+  ark:
+    container_name: ark
+    image: ghcr.io/arkade-os/arkd:v0.7.0
+    depends_on:
+      - bitcoin
+      - ark-wallet
+    environment:
+      ARKD_LOG_LEVEL: "5"
+      ARKD_NO_MACAROONS: "true"
+      ARKD_VTXO_TREE_EXPIRY: "100" # blocks
+      ARKD_SCHEDULER_TYPE: "block"
+      ARKD_UNILATERAL_EXIT_DELAY: "512"
+      ARKD_BOARDING_EXIT_DELAY: "1024"
+      ARKD_DATADIR: "./data/regtest"
+      ARKD_WALLET_ADDR: "ark-wallet:6060"
+      ARKD_ESPLORA_URL: "http://chopsticks:3000"
+      ARKD_VTXO_MIN_AMOUNT: "1"
+      ARKD_LIVE_STORE_TYPE: "inmemory"
+      ARKD_EVENT_DB_TYPE: "badger"
+      ARKD_DB_TYPE: "sqlite"
     volumes:
       - ./volumes/ark/data:/app/data
-      - ./volumes/ark/wallet:/app/wallet-data
     ports:
       - "7070:7070"
     restart: unless-stopped
