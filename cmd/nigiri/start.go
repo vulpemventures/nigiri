@@ -29,12 +29,6 @@ var rememberFlag = cli.BoolFlag{
 	Value: false,
 }
 
-var setupArkFlag = cli.BoolFlag{
-	Name:  "setup-ark",
-	Usage: "setup Ark Network",
-	Value: false,
-}
-
 var start = cli.Command{
 	Name:   "start",
 	Usage:  "start nigiri",
@@ -45,7 +39,6 @@ var start = cli.Command{
 		&arkFlag,
 		&ciFlag,
 		&rememberFlag,
-		&setupArkFlag,
 	},
 }
 
@@ -204,20 +197,17 @@ func startAction(ctx *cli.Context) error {
 		)
 	}
 
-	if ctx.Bool("setup-ark") {
-		if !effectiveFlags.Ark {
-			fmt.Println("--ark flag not set, skipping --setup-ark")
-			return nil
-		}
-
+	if effectiveFlags.Ark {
 		done := make(chan bool)
-		go spinner(done, "Setting up ark daemon...")
-		time.Sleep(4 * time.Second)
-		done <- true
+		go spinner(done, "setting up arkd...")
 
-		if err := setupArk(composePath); err != nil {
+		time.Sleep(4 * time.Second) // give time for the container to start
+		if err := setupArk(); err != nil {
 			return fmt.Errorf("failed to setup Ark: %w", err)
 		}
+
+		done <- true
+		fmt.Println("✓ arkd setup completed successfully!")
 	}
 
 	return nil
@@ -226,14 +216,10 @@ func startAction(ctx *cli.Context) error {
 func spinner(done chan bool, message string) {
 	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 	i := 0
-	// Create a long enough string of spaces to clear the line
-	clearLine := strings.Repeat(" ", 80)
 	for {
 		select {
 		case <-done:
-			// Clear the line completely
-			fmt.Printf("\r%s", clearLine)
-			fmt.Print("\r")
+			fmt.Printf("\r%s\r", strings.Repeat(" ", len(message)+3))
 			return
 		default:
 			fmt.Printf("\r%s %s", frames[i], message)
@@ -243,130 +229,40 @@ func spinner(done chan bool, message string) {
 	}
 }
 
-func setupArk(composePath string) error {
-	// Create wallet with password "secret" (ignore if already exists)
-	done := make(chan bool)
-	go spinner(done, "Creating Ark wallet...")
-
+func setupArk() error {
 	bashCmd := exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "create", "--password", "secret")
-	bashCmd.Run() // Ignore error as wallet might already exist
-	done <- true
-
-	// Unlock wallet
-	done = make(chan bool)
-	go spinner(done, "Unlocking Ark wallet...")
+	bashCmd.Run()
 
 	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "unlock", "--password", "secret")
 	if err := bashCmd.Run(); err != nil {
-		done <- true
 		return fmt.Errorf("failed to unlock wallet: %w", err)
 	}
-	done <- true
-
-	// Check wallet status
-	done = make(chan bool)
-	go spinner(done, "Checking wallet status...")
 
 	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "status")
 	if err := bashCmd.Run(); err != nil {
-		done <- true
 		return fmt.Errorf("failed to check wallet status: %w", err)
 	}
-	done <- true
 
-	fmt.Println("✓ arkd wallet unlocked")
-
-	// Wait for ark daemon to be ready
-	done = make(chan bool)
-	go spinner(done, "Waiting for Ark daemon to be ready...")
 	time.Sleep(10 * time.Second)
-	done <- true
-
-	// Initialize ark wallet
-	done = make(chan bool)
-	go spinner(done, "Initializing Ark wallet...")
 
 	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "init", "--network", "regtest", "--password", "secret", "--server-url", "localhost:7070", "--explorer", "http://chopsticks:3000")
-	if err := bashCmd.Run(); err != nil {
-		done <- true
-		return fmt.Errorf("failed to initialize ark wallet: %w", err)
-	}
-	done <- true
+	bashCmd.Run() // Ignore error as wallet might already exist
 
-	fmt.Println("✓ ark wallet initialized")
-
-	// Get wallet address and fund it
-	done = make(chan bool)
-	go spinner(done, "Getting wallet address...")
-
+	// faucet arkd wallet
 	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "address")
 	output, err := bashCmd.Output()
 	if err != nil {
-		done <- true
 		return fmt.Errorf("failed to get wallet address: %w", err)
 	}
 	address := strings.TrimSpace(string(output))
-	done <- true
 
 	// Fund the address using nigiri faucet
-	done = make(chan bool)
-	go spinner(done, "Funding wallet address...")
-
 	for i := 0; i < 10; i++ {
 		bashCmd = exec.Command("nigiri", "faucet", address)
 		if err := bashCmd.Run(); err != nil {
-			done <- true
+			return fmt.Errorf("failed to fund wallet address: %w", err)
 		}
 	}
-	done <- true
 
-	// Get boarding address
-	done = make(chan bool)
-	go spinner(done, "Getting boarding address...")
-
-	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "receive")
-	output, err = bashCmd.Output()
-	if err != nil {
-		done <- true
-		return fmt.Errorf("failed to get boarding address: %w", err)
-	}
-	done <- true
-
-	// Parse JSON to extract boarding_address
-	var response map[string]interface{}
-	if err := json.Unmarshal(output, &response); err != nil {
-		return fmt.Errorf("failed to parse ark receive response: %w", err)
-	}
-
-	boardingAddress, ok := response["boarding_address"].(string)
-	if !ok {
-		return fmt.Errorf("boarding_address not found in response")
-	}
-
-	// Fund the boarding address
-	done = make(chan bool)
-	go spinner(done, "Funding boarding address...")
-
-	bashCmd = exec.Command("nigiri", "faucet", boardingAddress)
-	if err := bashCmd.Run(); err != nil {
-		done <- true
-		return fmt.Errorf("failed to fund boarding address: %w", err)
-	}
-	done <- true
-
-	// Settle the wallet
-	done = make(chan bool)
-	go spinner(done, "Settling wallet...")
-
-	time.Sleep(5 * time.Second)
-
-	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "settle", "--password", "secret")
-	if err := bashCmd.Run(); err != nil {
-		done <- true
-		return fmt.Errorf("failed to settle wallet: %w", err)
-	}
-	done <- true
-
-	fmt.Println("✓ Ark setup completed successfully!")
 	return nil
 }
