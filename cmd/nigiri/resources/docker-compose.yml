@@ -240,8 +240,10 @@ services:
     depends_on:
       - bitcoin
     environment:
-      ARKD_WALLET_ESPLORA_URL: "http://chopsticks:3000"
-      ARKD_WALLET_NEUTRINO_PEER: "bitcoin:18444"
+      ARKD_WALLET_LOG_LEVEL: "5"
+      ARKD_WALLET_BITCOIND_RPC_USER: admin1
+      ARKD_WALLET_BITCOIND_RPC_PASS: 123
+      ARKD_WALLET_BITCOIND_RPC_HOST: bitcoin:18443
       ARKD_WALLET_DATADIR: "./data/regtest"
       ARKD_WALLET_NETWORK: "regtest"
     volumes:
