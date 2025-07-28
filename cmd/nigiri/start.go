@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/urfave/cli/v2"
@@ -141,7 +143,7 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	if effectiveFlags.Ark {
-		services = append(services, "ark")
+		services = append(services, "ark", "ark-wallet")
 	}
 
 	bashCmd := runDockerCompose(composePath, append([]string{"up", "-d"}, services...)...)
@@ -193,6 +195,73 @@ func startAction(ctx *cli.Context) error {
 			aurora.Blue(name),
 			endpoint,
 		)
+	}
+
+	if effectiveFlags.Ark {
+		done := make(chan bool)
+		go spinner(done, "setting up arkd...")
+
+		time.Sleep(4 * time.Second) // give time for the container to start
+		if err := setupArk(); err != nil {
+			return fmt.Errorf("failed to setup Ark: %w", err)
+		}
+
+		done <- true
+		fmt.Println("✓ arkd setup completed successfully!")
+	}
+
+	return nil
+}
+
+func spinner(done chan bool, message string) {
+	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	i := 0
+	for {
+		select {
+		case <-done:
+			fmt.Printf("\r%s\r", strings.Repeat(" ", len(message)+3))
+			return
+		default:
+			fmt.Printf("\r%s %s", frames[i], message)
+			time.Sleep(100 * time.Millisecond)
+			i = (i + 1) % len(frames)
+		}
+	}
+}
+
+func setupArk() error {
+	bashCmd := exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "create", "--password", "secret")
+	bashCmd.Run()
+
+	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "unlock", "--password", "secret")
+	if err := bashCmd.Run(); err != nil {
+		return fmt.Errorf("failed to unlock wallet: %w", err)
+	}
+
+	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "status")
+	if err := bashCmd.Run(); err != nil {
+		return fmt.Errorf("failed to check wallet status: %w", err)
+	}
+
+	time.Sleep(10 * time.Second)
+
+	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "init", "--network", "regtest", "--password", "secret", "--server-url", "localhost:7070", "--explorer", "http://chopsticks:3000")
+	bashCmd.Run() // Ignore error as wallet might already exist
+
+	// faucet arkd wallet
+	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "address")
+	output, err := bashCmd.Output()
+	if err != nil {
+		return fmt.Errorf("failed to get wallet address: %w", err)
+	}
+	address := strings.TrimSpace(string(output))
+
+	// Fund the address using nigiri faucet
+	for i := 0; i < 10; i++ {
+		bashCmd = exec.Command("nigiri", "faucet", address)
+		if err := bashCmd.Run(); err != nil {
+			return fmt.Errorf("failed to fund wallet address: %w", err)
+		}
 	}
 
 	return nil
