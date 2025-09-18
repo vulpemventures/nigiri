@@ -165,7 +165,7 @@ services:
 
   lnd:
     container_name: lnd
-    image: lightninglabs/lnd:v0.18.4-beta.rc2
+    image: lightninglabs/lnd:latest
     user: "${UID:-1000}:${GID:-1000}"
     depends_on:
       - bitcoin
@@ -182,7 +182,7 @@ services:
 
   tap:
     container_name: tap
-    image: lightninglabs/taproot-assets:v0.4.1
+    image: lightninglabs/taproot-assets:latest
     user: "${UID:-1000}:${GID:-1000}"
     depends_on:
       - bitcoin
@@ -236,7 +236,7 @@ services:
 
   ark-wallet:
     container_name: ark-wallet
-    image: ghcr.io/arkade-os/arkd-wallet:v0.7.0
+    image: ghcr.io/arkade-os/arkd-wallet:latest
     depends_on:
       - bitcoin
     environment:
@@ -253,7 +253,7 @@ services:
 
   ark:
     container_name: ark
-    image: ghcr.io/arkade-os/arkd:v0.7.0
+    image: ghcr.io/arkade-os/arkd:latest
     depends_on:
       - bitcoin
       - ark-wallet
