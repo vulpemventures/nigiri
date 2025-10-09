@@ -198,11 +198,22 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	if effectiveFlags.Ark {
+		// Wait for nbxplorer to sync
+		if err := waitForNbxplorerSync(datadir); err != nil {
+			return err
+		}
+
+		// Wait for ark containers to start
+		if err := waitForArkContainers(client); err != nil {
+			return err
+		}
+
+		// Setup arkd
 		done := make(chan bool)
 		go spinner(done, "setting up arkd...")
 
-		time.Sleep(4 * time.Second) // give time for the container to start
 		if err := setupArk(); err != nil {
+			done <- true
 			return fmt.Errorf("failed to setup Ark: %w", err)
 		}
 
@@ -229,28 +240,92 @@ func spinner(done chan bool, message string) {
 	}
 }
 
-func setupArk() error {
-	bashCmd := exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "create", "--password", "secret")
-	bashCmd.Run()
+func waitForNbxplorerSync(datadir string) error {
+	done := make(chan bool)
+	go spinner(done, "waiting for nbxplorer to sync...")
 
-	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "unlock", "--password", "secret")
-	if err := bashCmd.Run(); err != nil {
-		return fmt.Errorf("failed to unlock wallet: %w", err)
+	signalFilePath := filepath.Join(datadir, "volumes", "nbxplorer", "btc_fully_synched")
+	timeout := time.After(120 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeout:
+			done <- true
+			return fmt.Errorf("timeout waiting for nbxplorer to sync")
+		case <-ticker.C:
+			if _, err := os.Stat(signalFilePath); err == nil {
+				done <- true
+				fmt.Println("✓ nbxplorer synced successfully!")
+				return nil
+			}
+		}
+	}
+}
+
+func waitForArkContainers(client docker.Client) error {
+	done := make(chan bool)
+	go spinner(done, "waiting for ark containers to start...")
+
+	timeout := time.After(60 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeout:
+			done <- true
+			return fmt.Errorf("timeout waiting for ark containers to start")
+		case <-ticker.C:
+			walletRunning, _ := client.IsContainerRunning("ark-wallet")
+			arkRunning, _ := client.IsContainerRunning("ark")
+			if walletRunning && arkRunning {
+				done <- true
+				fmt.Println("✓ ark containers started successfully!")
+				return nil
+			}
+		}
+	}
+}
+
+func setupArk() error {
+	time.Sleep(8 * time.Second) // wait for ark containers to start before trying to set up the wallet
+
+	bashCmd := exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "create", "--password", "secret")
+	output, err := bashCmd.CombinedOutput()
+	if err != nil {
+		// Check if wallet is already initialized - this is not an error
+		if strings.Contains(string(output), "wallet already initialized") {
+			fmt.Println("ℹ wallet already initialized, skipping creation")
+		} else {
+			return fmt.Errorf("failed to create wallet: %w\nOutput: %s", err, string(output))
+		}
 	}
 
+	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "unlock", "--password", "secret")
+	output, err = bashCmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to unlock wallet: %w\nOutput: %s", err, string(output))
+	}
+	time.Sleep(4 * time.Second)
 	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "status")
-	if err := bashCmd.Run(); err != nil {
-		return fmt.Errorf("failed to check wallet status: %w", err)
+	output, err = bashCmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to check wallet status: %w\nOutput: %s", err, string(output))
 	}
 
 	time.Sleep(10 * time.Second)
 
-	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "init", "--network", "regtest", "--password", "secret", "--server-url", "localhost:7070", "--explorer", "http://chopsticks:3000")
-	bashCmd.Run() // Ignore error as wallet might already exist
+	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "init", "--password", "secret", "--server-url", "localhost:7070", "--explorer", "http://chopsticks:3000")
+	output, err = bashCmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to initialize ark client wallet: %w\nOutput: %s", err, string(output))
+	}
 
 	// faucet arkd wallet
 	bashCmd = exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "address")
-	output, err := bashCmd.Output()
+	output, err = bashCmd.Output()
 	if err != nil {
 		return fmt.Errorf("failed to get wallet address: %w", err)
 	}
