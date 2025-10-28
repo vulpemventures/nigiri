@@ -5,3 +5,4 @@ cmd/nigiri/resources/volumes/
 vendor/
 build/
 dist/
+.idea

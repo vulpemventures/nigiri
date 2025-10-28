@@ -234,18 +234,57 @@ services:
       - ./volumes/lightningd:/.lightning
       - ./volumes/bitcoin:/etc/bitcoin
 
+  postgres:
+    restart: unless-stopped
+    image: postgres:16
+    ports:
+      - 39372:5432
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=arkd
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data
+
+  nbxplorer:
+    restart: unless-stopped
+    expose:
+      - "32838"
+    depends_on:
+      - postgres
+      - bitcoin
+    image: nicolasdorier/nbxplorer:2.5.30-1
+    environment:
+      NBXPLORER_NETWORK: regtest
+      NBXPLORER_CHAINS: "btc"
+      NBXPLORER_BTCRPCURL: http://bitcoin:18443/
+      NBXPLORER_BTCNODEENDPOINT: bitcoin:18444
+      NBXPLORER_BTCRPCUSER: admin1
+      NBXPLORER_BTCRPCPASSWORD: 123
+      NBXPLORER_VERBOSE: 1
+      NBXPLORER_BIND: 0.0.0.0:32838
+      NBXPLORER_TRIMEVENTS: 10000
+      NBXPLORER_SIGNALFILESDIR: /datadir
+      NBXPLORER_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorer
+      NBXPLORER_EXPOSERPC: 1
+      NBXPLORER_NOAUTH: 1
+    volumes:
+      - ./volumes/nbxplorer:/datadir
+    ports:
+      - "32838:32838"
+
   ark-wallet:
     container_name: ark-wallet
-    image: ghcr.io/arkade-os/arkd-wallet:latest
+    image: ghcr.io/arkade-os/arkd-wallet:v0.8.0-rc.1
+    restart: unless-stopped
     depends_on:
       - bitcoin
+      - nbxplorer
     environment:
       ARKD_WALLET_LOG_LEVEL: "5"
-      ARKD_WALLET_BITCOIND_RPC_USER: admin1
-      ARKD_WALLET_BITCOIND_RPC_PASS: 123
-      ARKD_WALLET_BITCOIND_RPC_HOST: bitcoin:18443
+      ARKD_WALLET_NBXPLORER_URL: "http://nbxplorer:32838"
       ARKD_WALLET_DATADIR: "./data/regtest"
-      ARKD_WALLET_NETWORK: "regtest"
+      ARKD_WALLET_NETWORK: "regtest"      
+      ARKD_WALLET_SIGNER_KEY: "19422b10efd05403820ff6a3365422be2fc5f07f34a6d1603f7298328f0f80f6"
     volumes:
       - ./volumes/ark/wallet:/app/data
     ports:
@@ -253,29 +292,35 @@ services:
 
   ark:
     container_name: ark
-    image: ghcr.io/arkade-os/arkd:latest
+    image: ghcr.io/arkade-os/arkd:v0.8.0-rc.1
+    restart: unless-stopped
     depends_on:
       - bitcoin
       - ark-wallet
+      - postgres
     environment:
       ARKD_LOG_LEVEL: "5"
+      ARKD_NO_TLS: "true"
       ARKD_NO_MACAROONS: "true"
-      ARKD_VTXO_TREE_EXPIRY: "100" # blocks
-      ARKD_SCHEDULER_TYPE: "block"
-      ARKD_UNILATERAL_EXIT_DELAY: "512"
-      ARKD_BOARDING_EXIT_DELAY: "1024"
       ARKD_DATADIR: "./data/regtest"
       ARKD_WALLET_ADDR: "ark-wallet:6060"
       ARKD_ESPLORA_URL: "http://chopsticks:3000"
       ARKD_VTXO_MIN_AMOUNT: "1"
+      ARKD_VTXO_TREE_EXPIRY: "20"
+      ARKD_UNILATERAL_EXIT_DELAY: "512"
+      ARKD_BOARDING_EXIT_DELAY: "1024"
+      ARKD_DB_TYPE: "postgres"
+      ARKD_PG_DB_URL: "postgresql://postgres@postgres:5432/arkd?sslmode=disable"
+      ARKD_EVENT_DB_TYPE: "postgres"
+      ARKD_PG_EVENT_DB_URL: "postgresql://postgres@postgres:5432/arkd_events?sslmode=disable"
       ARKD_LIVE_STORE_TYPE: "inmemory"
-      ARKD_EVENT_DB_TYPE: "badger"
-      ARKD_DB_TYPE: "sqlite"
+      ARKD_UNLOCKER_TYPE: "env"
+      ARKD_UNLOCKER_PASSWORD: "secret"
+      ARKD_SCHEDULER_TYPE: "block"
     volumes:
       - ./volumes/ark/data:/app/data
     ports:
       - "7070:7070"
-    restart: unless-stopped
 
 networks:
   default:

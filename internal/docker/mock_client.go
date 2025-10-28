@@ -9,6 +9,7 @@ type MockClient struct {
 	RunComposeFunc        func(composePath string, args ...string) *exec.Cmd
 	GetEndpointsFunc     func(composePath string) (map[string]string, error)
 	GetPortsForServiceFunc func(composePath string, serviceName string) ([]string, error)
+	IsContainerRunningFunc func(containerName string) (bool, error)
 
 	// For tracking test interactions
 	commands []struct {
@@ -104,4 +105,12 @@ func (m *MockClient) SetMockCmd(cmd *exec.Cmd) {
 // Alias for backward compatibility
 func (m *MockClient) MockCmd() *exec.Cmd {
 	return m.mockCmd
+}
+
+func (m *MockClient) IsContainerRunning(containerName string) (bool, error) {
+	if m.IsContainerRunningFunc != nil {
+		return m.IsContainerRunningFunc(containerName)
+	}
+	// Default mock behavior - return true for testing
+	return true, nil
 }

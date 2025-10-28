@@ -14,6 +14,7 @@ type Client interface {
 	RunCompose(composePath string, args ...string) *exec.Cmd
 	GetEndpoints(composePath string) (map[string]string, error)
 	GetPortsForService(composePath string, serviceName string) ([]string, error)
+	IsContainerRunning(containerName string) (bool, error)
 }
 
 // DefaultClient is the default implementation using real Docker commands
@@ -105,4 +106,14 @@ func (c *DefaultClient) GetPortsForService(composePath string, serviceName strin
 	}
 
 	return ports, nil
+}
+
+// IsContainerRunning checks if a container is running
+func (c *DefaultClient) IsContainerRunning(containerName string) (bool, error) {
+	cmd := exec.Command("docker", "inspect", "-f", "{{.State.Running}}", containerName)
+	output, err := cmd.Output()
+	if err != nil {
+		return false, nil // Container doesn't exist or other error
+	}
+	return strings.TrimSpace(string(output)) == "true", nil
 }
