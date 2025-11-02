@@ -212,7 +212,7 @@ func startAction(ctx *cli.Context) error {
 		done := make(chan bool)
 		go spinner(done, "setting up arkd...")
 
-		if err := setupArk(); err != nil {
+		if err := setupArk(datadir); err != nil {
 			done <- true
 			return fmt.Errorf("failed to setup Ark: %w", err)
 		}
@@ -289,7 +289,7 @@ func waitForArkContainers(client docker.Client) error {
 	}
 }
 
-func setupArk() error {
+func setupArk(datadir string) error {
 	time.Sleep(8 * time.Second) // wait for ark containers to start before trying to set up the wallet
 
 	bashCmd := exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "create", "--password", "secret")
@@ -333,7 +333,7 @@ func setupArk() error {
 
 	// Fund the address using nigiri faucet
 	for i := 0; i < 10; i++ {
-		bashCmd = exec.Command("nigiri", "faucet", address)
+		bashCmd = exec.Command("nigiri", "--datadir", datadir, "faucet", address)
 		if err := bashCmd.Run(); err != nil {
 			return fmt.Errorf("failed to fund wallet address: %w", err)
 		}
