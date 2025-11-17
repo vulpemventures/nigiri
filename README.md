@@ -64,7 +64,7 @@ nigiri start --liquid --ln   # Add both Liquid and Lightning
 nigiri start --ark --liquid --ln  # Add all features
 ```
 
-**Note for users of macOS Monterey an onward**
+**Note for users of macOS Monterey and onward**
 
 <details>
   <summary>Show more...</summary>
