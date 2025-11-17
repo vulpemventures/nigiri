@@ -165,7 +165,7 @@ services:
 
   lnd:
     container_name: lnd
-    image: lightninglabs/lnd:latest
+    image: lightninglabs/lnd:v0.19.3-beta
     user: "${UID:-1000}:${GID:-1000}"
     depends_on:
       - bitcoin

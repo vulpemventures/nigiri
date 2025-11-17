@@ -109,7 +109,7 @@ services:
   esplora:
     image: vulpemventures/esplora:latest
   lnd:
-    image: lightninglabs/lnd:latest
+    image: lightninglabs/lnd:v0.19.3-beta
   tap:
     image: vulpemventures/tap:latest
   cln:
@@ -236,25 +236,25 @@ func TestBasicStartStop(t *testing.T) {
 
 	// Use mock client for Docker operations
 	composePath := filepath.Join(tmpDatadir, config.DefaultCompose)
-	
+
 	// Test start command
 	mockClient.ClearCommands()
 	mockClient.SetMockCmd(exec.Command("echo", "mock start"))
-	
+
 	// Execute start command
 	mockClient.RunCompose(composePath, "up", "-d", "bitcoin", "electrs", "chopsticks", "esplora")
-	
+
 	// Verify the correct Docker commands were called
 	composePath, args, ok := mockClient.GetLastCommand()
 	if !ok {
 		t.Fatal("No Docker commands were executed")
 	}
-	
+
 	// Check that the compose file path is correct
 	if composePath != filepath.Join(tmpDatadir, config.DefaultCompose) {
 		t.Errorf("Expected compose path %s, got %s", filepath.Join(tmpDatadir, config.DefaultCompose), composePath)
 	}
-	
+
 	// Check that the correct services were started
 	expectedArgs := []string{"up", "-d", "bitcoin", "electrs", "chopsticks", "esplora"}
 	if !stringSliceEqual(args, expectedArgs) {
@@ -264,16 +264,16 @@ func TestBasicStartStop(t *testing.T) {
 	// Test stop command
 	mockClient.ClearCommands()
 	mockClient.SetMockCmd(exec.Command("echo", "mock stop"))
-	
+
 	// Execute stop command
 	mockClient.RunCompose(composePath, "down")
-	
+
 	// Verify stop command
 	composePath, args, ok = mockClient.GetLastCommand()
 	if !ok {
 		t.Fatal("No Docker commands were executed for stop")
 	}
-	
+
 	expectedArgs = []string{"down"}
 	if !stringSliceEqual(args, expectedArgs) {
 		t.Errorf("Expected args %v, got %v", expectedArgs, args)
@@ -328,54 +328,54 @@ func TestStateManagement(t *testing.T) {
 
 func TestServiceCombinations(t *testing.T) {
 	tests := []struct {
-		name           string
-		liquid        bool
-		ln            bool
-		ark           bool
+		name             string
+		liquid           bool
+		ln               bool
+		ark              bool
 		expectedServices []string
 	}{
 		{
-			name:    "Basic Services",
-			liquid:  false,
-			ln:      false,
-			ark:     false,
+			name:             "Basic Services",
+			liquid:           false,
+			ln:               false,
+			ark:              false,
 			expectedServices: []string{"bitcoin", "electrs", "chopsticks", "esplora"},
 		},
 		{
-			name:    "With Liquid",
-			liquid:  true,
-			ln:      false,
-			ark:     false,
+			name:   "With Liquid",
+			liquid: true,
+			ln:     false,
+			ark:    false,
 			expectedServices: []string{
 				"bitcoin", "electrs", "chopsticks", "esplora",
 				"liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid",
 			},
 		},
 		{
-			name:    "With Lightning",
-			liquid:  false,
-			ln:      true,
-			ark:     false,
+			name:   "With Lightning",
+			liquid: false,
+			ln:     true,
+			ark:    false,
 			expectedServices: []string{
 				"bitcoin", "electrs", "chopsticks", "esplora",
 				"lnd", "tap", "cln",
 			},
 		},
 		{
-			name:    "With Ark",
-			liquid:  false,
-			ln:      false,
-			ark:     true,
+			name:   "With Ark",
+			liquid: false,
+			ln:     false,
+			ark:    true,
 			expectedServices: []string{
 				"bitcoin", "electrs", "chopsticks", "esplora",
 				"ark",
 			},
 		},
 		{
-			name:    "All Services",
-			liquid:  true,
-			ln:      true,
-			ark:     true,
+			name:   "All Services",
+			liquid: true,
+			ln:     true,
+			ark:    true,
 			expectedServices: []string{
 				"bitcoin", "electrs", "chopsticks", "esplora",
 				"liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid",
@@ -393,29 +393,29 @@ func TestServiceCombinations(t *testing.T) {
 
 			// Use mock client for Docker operations
 			composePath := filepath.Join(tmpDatadir, config.DefaultCompose)
-			
+
 			// Test start command
 			mockClient.ClearCommands()
 			mockClient.SetMockCmd(exec.Command("echo", "mock start"))
-			
+
 			// Build the docker-compose command with appropriate services
 			args := []string{"up", "-d"}
 			args = append(args, tt.expectedServices...)
-			
+
 			// Execute start command
 			mockClient.RunCompose(composePath, args...)
-			
+
 			// Verify the correct Docker commands were called
 			composePath, actualArgs, ok := mockClient.GetLastCommand()
 			if !ok {
 				t.Fatal("No Docker commands were executed")
 			}
-			
+
 			// Check that the compose file path is correct
 			if composePath != filepath.Join(tmpDatadir, config.DefaultCompose) {
 				t.Errorf("Expected compose path %s, got %s", filepath.Join(tmpDatadir, config.DefaultCompose), composePath)
 			}
-			
+
 			// Check that the correct services were started
 			expectedArgs := append([]string{"up", "-d"}, tt.expectedServices...)
 			if !stringSliceEqual(actualArgs, expectedArgs) {
@@ -457,16 +457,16 @@ func TestServiceCombinations(t *testing.T) {
 			// Test stop command
 			mockClient.ClearCommands()
 			mockClient.SetMockCmd(exec.Command("echo", "mock stop"))
-			
+
 			// Execute stop command
 			mockClient.RunCompose(composePath, "down")
-			
+
 			// Verify stop command
 			_, stopArgs, ok := mockClient.GetLastCommand()
 			if !ok {
 				t.Fatal("No Docker commands were executed for stop")
 			}
-			
+
 			if !stringSliceEqual(stopArgs, []string{"down"}) {
 				t.Errorf("Expected stop args [down], got %v", stopArgs)
 			}
