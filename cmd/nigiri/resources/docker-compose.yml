@@ -182,7 +182,7 @@ services:
 
   tap:
     container_name: tap
-    image: lightninglabs/taproot-assets:latest
+    image: lightninglabs/taproot-assets:v0.6.1
     user: "${UID:-1000}:${GID:-1000}"
     depends_on:
       - bitcoin
