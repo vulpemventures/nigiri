@@ -1,6 +1,6 @@
 module github.com/vulpemventures/nigiri
 
-go 1.23
+go 1.24.0
 
 require (
 	github.com/btcsuite/btcd/btcutil v1.1.5
@@ -17,7 +17,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20141024133853-64131543e789 // indirect
 )
