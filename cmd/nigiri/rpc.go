@@ -70,13 +70,13 @@ func rpcAction(ctx *cli.Context) error {
 		if err := bashCmd.Run(); err != nil {
 			w.CloseWithError(err)
 		} else {
-			w.Close()
+			_ = w.Close()
 		}
 	}()
 
 	// Read the output of the "docker exec" command from the pipe
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.Bytes()
 
 	// Use the json.Unmarshal function to parse the output of the

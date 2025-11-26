@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math"
 	"net/http"
 	"os/exec"
@@ -43,7 +43,7 @@ func faucetAction(ctx *cli.Context) error {
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
-	var serviceName string = "chopsticks"
+	serviceName := "chopsticks"
 	if isLiquid {
 		serviceName = "chopsticks-liquid"
 	}
@@ -124,7 +124,7 @@ func faucetAction(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
