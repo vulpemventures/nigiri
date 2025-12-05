@@ -113,7 +113,7 @@ services:
   tap:
     image: vulpemventures/tap:latest
   cln:
-    image: elementsproject/lightningd:latest
+    image: elementsproject/lightningd:v25.09.3
   ark:
     image: vulpemventures/ark:latest`,
 

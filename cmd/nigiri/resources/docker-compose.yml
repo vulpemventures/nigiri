@@ -206,7 +206,7 @@ services:
 
   cln:
     container_name: cln
-    image: elementsproject/lightningd:latest
+    image: elementsproject/lightningd:v25.09.3
     user: "${UID:-1000}:${GID:-1000}"
     environment:
       EXPOSE_TCP: "true"
