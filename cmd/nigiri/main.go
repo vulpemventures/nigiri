@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
@@ -220,7 +219,7 @@ func copyFromResourcesToDatadir(src string, dest string, uid, gid int) error {
 	}
 
 	// First write the file
-	err = ioutil.WriteFile(dest, data, 0660)
+	err = os.WriteFile(dest, data, 0660)
 	if err != nil {
 		return fmt.Errorf("write %s to %s: %w", src, dest, err)
 	}
