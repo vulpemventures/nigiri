@@ -269,7 +269,7 @@ func TestBasicStartStop(t *testing.T) {
 	mockClient.RunCompose(composePath, "down")
 
 	// Verify stop command
-	composePath, args, ok = mockClient.GetLastCommand()
+	_, args, ok = mockClient.GetLastCommand()
 	if !ok {
 		t.Fatal("No Docker commands were executed for stop")
 	}
