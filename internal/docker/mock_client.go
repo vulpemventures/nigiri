@@ -6,8 +6,8 @@ import (
 
 // MockClient is a mock implementation of the Client interface for testing
 type MockClient struct {
-	RunComposeFunc        func(composePath string, args ...string) *exec.Cmd
-	GetEndpointsFunc     func(composePath string) (map[string]string, error)
+	RunComposeFunc         func(composePath string, args ...string) *exec.Cmd
+	GetEndpointsFunc       func(composePath string) (map[string]string, error)
 	GetPortsForServiceFunc func(composePath string, serviceName string) ([]string, error)
 	IsContainerRunningFunc func(containerName string) (bool, error)
 
