@@ -3,6 +3,8 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -611,4 +613,147 @@ func TestRememberForget(t *testing.T) {
 	// 7. Stop finally
 	t.Log("Running: stop")
 	_ = runNigiri(t, "stop")
+}
+
+func TestUpdateForce(t *testing.T) {
+	// Create a mock update script
+	mockScript := `#!/bin/bash
+echo "Mock update script executed successfully"
+exit 0
+`
+
+	// Create a test HTTP server that serves the mock script
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(mockScript))
+	}))
+	defer server.Close()
+
+	// Set the environment variable to use the test server URL
+	originalURL := os.Getenv("NIGIRI_TEST_UPDATE_SCRIPT_URL")
+	os.Setenv("NIGIRI_TEST_UPDATE_SCRIPT_URL", server.URL)
+	defer func() {
+		if originalURL == "" {
+			os.Unsetenv("NIGIRI_TEST_UPDATE_SCRIPT_URL")
+		} else {
+			os.Setenv("NIGIRI_TEST_UPDATE_SCRIPT_URL", originalURL)
+		}
+	}()
+
+	// Run the update --force command
+	// Note: This will replace the current process with the mock script,
+	// so we need to run it in a separate process
+	cmd := exec.Command(nigiriBinaryPath, "--datadir", tmpDatadir, "update", "--force")
+	cmd.Env = append(os.Environ(), "NIGIRI_TEST_UPDATE_SCRIPT_URL="+server.URL)
+	
+	output, err := cmd.CombinedOutput()
+	
+	// The command should execute the mock script successfully
+	// Since syscall.Exec replaces the process, we expect the output to be from the mock script
+	if err != nil {
+		t.Logf("Command output: %s", string(output))
+		// Check if the output contains our expected message
+		if !strings.Contains(string(output), "Mock update script executed successfully") {
+			t.Fatalf("update --force failed: %v\nOutput: %s", err, string(output))
+		}
+	}
+	
+	// Verify that the download message was printed
+	if !strings.Contains(string(output), "Downloading update script") {
+		t.Errorf("Expected download message in output, got: %s", string(output))
+	}
+}
+
+func TestCustomCompose(t *testing.T) {
+	// Clean up any previous state
+	stateFilePath := filepath.Join(tmpDatadir, config.DefaultName)
+	flagsFilePath := filepath.Join(tmpDatadir, "flags.json")
+	_ = os.Remove(stateFilePath)
+	_ = os.Remove(flagsFilePath)
+
+	// Create a custom docker-compose file
+	customComposePath := filepath.Join(tmpDatadir, "custom-compose.yml")
+	customComposeContent := `name: nigiri-custom
+services:
+  bitcoin:
+    image: getumbrel/bitcoind:v28.0
+    container_name: bitcoin-custom
+  electrs:
+    image: vulpemventures/electrs:latest
+  chopsticks:
+    image: vulpemventures/nigiri-chopsticks:latest
+  esplora:
+    image: vulpemventures/esplora:latest
+`
+	
+	if err := os.WriteFile(customComposePath, []byte(customComposeContent), 0644); err != nil {
+		t.Fatalf("Failed to create custom compose file: %v", err)
+	}
+	defer os.Remove(customComposePath)
+
+	// Test 1: Start with custom compose and --remember
+	t.Log("Running: start --compose custom-compose.yml --remember")
+	cmd := exec.Command(nigiriBinaryPath, "--datadir", tmpDatadir, "start", "--compose", customComposePath, "--remember")
+	output, err := cmd.CombinedOutput()
+	
+	// We expect it to fail because docker-compose isn't available in CI,
+	// but it should at least accept the flag and find the file
+	if err != nil {
+		// Check that it's not failing due to file not found
+		if strings.Contains(string(output), "custom compose file not found") {
+			t.Fatalf("Custom compose file should have been found: %s", string(output))
+		}
+		// Expected error is docker-compose not found, which is fine
+		t.Logf("Expected docker-compose error (first start): %s", string(output))
+	}
+
+	// Verify flags.json was created with the compose path
+	expectedFlags := map[string]interface{}{
+		"liquid":  false,
+		"ln":      false,
+		"ark":     false,
+		"ci":      false,
+		"compose": customComposePath,
+	}
+	expectedJsonBytes, _ := json.MarshalIndent(expectedFlags, "", "  ")
+	checkFlagsFile(t, true, string(expectedJsonBytes))
+
+	// Stop
+	t.Log("Running: stop")
+	_ = runNigiri(t, "stop")
+
+	// Test 2: Start again without --compose flag (should use remembered path)
+	t.Log("Running: start (expecting remembered compose path)")
+	cmd = exec.Command(nigiriBinaryPath, "--datadir", tmpDatadir, "start")
+	output, err = cmd.CombinedOutput()
+	
+	if err != nil {
+		if strings.Contains(string(output), "custom compose file not found") {
+			t.Fatalf("Should have used remembered compose path: %s", string(output))
+		}
+		t.Logf("Expected docker-compose error (second start): %s", string(output))
+	}
+
+	// Flags should still contain the compose path
+	checkFlagsFile(t, true, string(expectedJsonBytes))
+
+	// Stop
+	t.Log("Running: stop")
+	_ = runNigiri(t, "stop")
+
+	// Test 3: Test with non-existent file
+	cmd = exec.Command(nigiriBinaryPath, "--datadir", tmpDatadir, "start", "--compose", "/nonexistent/compose.yml")
+	output, err = cmd.CombinedOutput()
+	
+	if err == nil {
+		t.Fatal("Expected error for non-existent compose file")
+	}
+	
+	if !strings.Contains(string(output), "custom compose file not found") {
+		t.Errorf("Expected 'custom compose file not found' error, got: %s", string(output))
+	}
+
+	// Cleanup
+	_ = runNigiri(t, "forget")
 }
