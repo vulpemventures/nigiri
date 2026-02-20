@@ -289,6 +289,21 @@ services:
     ports:
       - "6060:6060"
 
+  ark-explorer:
+    container_name: ark-explorer
+    image: ghcr.io/arklabshq/arkade-explorer:latest
+    restart: unless-stopped
+    depends_on:
+      - ark
+    command:
+      - sh
+      - -c
+      - |
+        sed -i 's|https://arkade.computer|http://localhost:7070|g' /usr/share/nginx/html/assets/*.js &&
+        nginx -g 'daemon off;'
+    ports:
+      - "7080:80"
+
   ark:
     container_name: ark
     image: ghcr.io/arkade-os/arkd:v0.8.11
