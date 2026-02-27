@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/urfave/cli/v2"
 	"github.com/vulpemventures/nigiri/internal/config"
@@ -26,6 +28,19 @@ var stop = cli.Command{
 }
 
 func stopAction(ctx *cli.Context) error {
+	// Shut down any running proxy servers
+	if len(proxyServers) > 0 {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		for _, srv := range proxyServers {
+			if err := srv.Shutdown(shutdownCtx); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: proxy shutdown error: %v\n", err)
+			}
+		}
+		proxyServers = nil
+		fmt.Println("🔌 Embedded proxy servers stopped")
+	}
+
 	delete := ctx.Bool("delete")
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)

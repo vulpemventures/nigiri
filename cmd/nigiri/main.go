@@ -70,6 +70,9 @@ func main() {
 		&versionCmd,
 		&forget,
 
+		// Proxy server (replaces chopsticks container)
+		&serve,
+
 		// Bitcoin and Elements RPCs
 		&rpc,
 		&faucet,
