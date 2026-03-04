@@ -290,12 +290,12 @@ func waitForArkContainers(client docker.Client) error {
 }
 
 func setupArk(datadir string) error {
-	time.Sleep(8 * time.Second) // wait for ark containers to start before trying to set up the wallet
+	time.Sleep(8 * time.Second) // Wait for ark containers to start before trying to set up the wallet
 
 	bashCmd := exec.Command("docker", "exec", "-t", "ark", "arkd", "wallet", "create", "--password", "secret")
 	output, err := bashCmd.CombinedOutput()
 	if err != nil {
-		// Check if wallet is already initialized - this is not an error
+		// Check if wallet is already initialized; this is not an error
 		if strings.Contains(string(output), "wallet already initialized") {
 			fmt.Println("ℹ wallet already initialized, skipping creation")
 		} else {
