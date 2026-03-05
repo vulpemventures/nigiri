@@ -53,7 +53,7 @@ nigiri start --ark
 
 **That's it.**
 
-Go to http://localhost:5000 for quickly inspect the Bitcoin blockchain.
+Go to http://localhost:5000 to quickly inspect the Bitcoin blockchain
 
 Want more? Add Elements/Liquid, Lightning nodes, or Ark:
 
@@ -318,7 +318,7 @@ make clean
 ### Bitcoin & Liquid
 
 - `POST /faucet` which expects a body `{ "address": <receiving_address> }`
-- `POST /tx` has been extended to automatically mine a block when is called.
+- `POST /tx` has been extended to automatically mine a block when it is called
 
 ### Liquid only
 
