@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"maps"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -110,12 +111,10 @@ func (s *State) GetString(key string) (string, error) {
 	return stateData[key], nil
 }
 
-func merge(maps ...map[string]string) map[string]string {
-	merge := make(map[string]string)
-	for _, m := range maps {
-		for k, v := range m {
-			merge[k] = v
-		}
+func merge(sources ...map[string]string) map[string]string {
+	result := make(map[string]string)
+	for _, m := range sources {
+		maps.Copy(result, m)
 	}
-	return merge
+	return result
 }
