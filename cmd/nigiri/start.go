@@ -143,7 +143,7 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	if effectiveFlags.Ark {
-		services = append(services, "ark", "ark-wallet")
+		services = append(services, "ark", "ark-wallet", "ark-explorer")
 	}
 
 	bashCmd := runDockerCompose(composePath, append([]string{"up", "-d"}, services...)...)
