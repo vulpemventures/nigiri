@@ -294,7 +294,7 @@ services:
     image: ghcr.io/arklabshq/arkade-explorer:latest
     restart: unless-stopped
     depends_on:
-      - ark
+      - arkd
     command:
       - sh
       - -c
