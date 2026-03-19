@@ -37,9 +37,10 @@ var lnFlag = cli.BoolFlag{
 }
 
 var datadirFlag = cli.StringFlag{
-	Name:  "datadir",
-	Usage: "use different data directory",
-	Value: config.DefaultDatadir,
+	Name:    "datadir",
+	Usage:   "use different data directory",
+	Value:   config.DefaultDatadir,
+	EnvVars: []string{"NIGIRI_DATADIR"},
 }
 
 var arkFlag = cli.BoolFlag{
