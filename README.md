@@ -58,8 +58,8 @@ Go to http://localhost:5000 to quickly inspect the Bitcoin blockchain
 Want more? Add Elements/Liquid, Lightning nodes, or Ark:
 
 ```bash
-nigiri start --ark --liquid  # Add Elements/Liquid sidechain
-nigiri start --ark --ln      # Add Lightning Network nodes
+nigiri start --ark --liquid  # Add both Ark and Elements/Liquid sidechain
+nigiri start --ark --ln      # Add both Ark and Lightning Network nodes
 nigiri start --liquid --ln   # Add both Liquid and Lightning
 nigiri start --ark --liquid --ln  # Add all features
 ```
