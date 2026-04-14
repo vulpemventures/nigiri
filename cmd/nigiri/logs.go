@@ -11,7 +11,7 @@ import (
 
 var logs = cli.Command{
 	Name:   "logs",
-	Usage:  "check Service logs",
+	Usage:  "check service logs",
 	Action: logsAction,
 	Flags: []cli.Flag{
 		&liquidFlag,
