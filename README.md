@@ -259,7 +259,8 @@ nigiri update
 ```
 
 Nigiri uses the default directory `~/.nigiri` to store configuration files and docker-compose files.
-To set a custom directory use the `--datadir` flag.
+To set a custom directory use the `--datadir` flag or `NIGIRI_DATADIR` environment variable.
+If both are present, `--datadir` takes precedence.
 
 Run the `help` command to see the full list of available flags.
 
