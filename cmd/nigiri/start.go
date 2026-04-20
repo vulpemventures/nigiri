@@ -257,7 +257,7 @@ func waitForNbxplorerSync(datadir string) error {
 		case <-ticker.C:
 			if _, err := os.Stat(signalFilePath); err == nil {
 				done <- true
-				fmt.Println("✓ nbxplorer synced successfully!")
+				fmt.Println("✓ nbxplorer synched successfully!")
 				return nil
 			}
 		}
