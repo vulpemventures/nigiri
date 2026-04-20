@@ -6,10 +6,11 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/urfave/cli/v2"
-	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/internal/proxy"
 )
 
@@ -92,7 +93,7 @@ func serveAction(ctx *cli.Context) error {
 	// Parse RPC address
 	rpcAddr := ctx.String("rpc-addr")
 	rpcHost, rpcPort := "localhost", "18443"
-	if idx := lastIndex(rpcAddr, ':'); idx != -1 {
+	if idx := strings.LastIndexByte(rpcAddr, ':'); idx != -1 {
 		rpcHost = rpcAddr[:idx]
 		rpcPort = rpcAddr[idx+1:]
 	}
@@ -100,7 +101,7 @@ func serveAction(ctx *cli.Context) error {
 	// Parse RPC cookie
 	rpcCookie := ctx.String("rpc-cookie")
 	rpcUser, rpcPass := "admin1", "123"
-	if idx := lastIndex(rpcCookie, ':'); idx != -1 {
+	if idx := strings.LastIndexByte(rpcCookie, ':'); idx != -1 {
 		rpcUser = rpcCookie[:idx]
 		rpcPass = rpcCookie[idx+1:]
 	}
@@ -161,7 +162,9 @@ func serveAction(ctx *cli.Context) error {
 		}
 	case sig := <-sigChan:
 		fmt.Printf("\nReceived signal %v, shutting down...\n", sig)
-		if err := server.Shutdown(context.Background()); err != nil {
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutdownCancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
 			return fmt.Errorf("shutdown error: %w", err)
 		}
 	}
@@ -169,14 +172,3 @@ func serveAction(ctx *cli.Context) error {
 	return nil
 }
 
-// lastIndex returns the last index of sep in s, or -1 if not found
-func lastIndex(s string, sep byte) int {
-	for i := len(s) - 1; i >= 0; i-- {
-		if s[i] == sep {
-			return i
-		}
-	}
-	return -1
-}
-
-var serveDefaultsFile = filepath.Join(config.DefaultDatadir, "serve-defaults.json")

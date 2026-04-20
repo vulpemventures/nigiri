@@ -23,7 +23,7 @@ func NewServer(config Config) *Server {
 
 	httpServer := &http.Server{
 		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
 		Addr:         config.ListenURL(),
 		Handler:      router,

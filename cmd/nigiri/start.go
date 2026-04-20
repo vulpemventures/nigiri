@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,11 +15,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/vulpemventures/nigiri/internal/config"
 	"github.com/vulpemventures/nigiri/internal/docker"
-	"github.com/vulpemventures/nigiri/internal/proxy"
 )
-
-// proxyServers holds references to running proxy servers so they can be shut down
-var proxyServers []*proxy.Server
 
 var ciFlag = cli.BoolFlag{
 	Name:  "ci",
@@ -159,63 +154,21 @@ func startAction(ctx *cli.Context) error {
 		return err
 	}
 
-	// Start the embedded proxy server(s) to replace chopsticks containers
-	registryPath := filepath.Join(datadir, "registry")
-	if err := os.MkdirAll(registryPath, 0755); err != nil {
-		return fmt.Errorf("failed to create registry directory: %w", err)
+	exe, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to determine executable path: %w", err)
 	}
 
-	// Bitcoin proxy on :3000
-	btcProxyCfg := proxy.NewConfig(
-		proxy.WithListenAddr("0.0.0.0:3000"),
-		proxy.WithElectrsAddr("localhost:30000"),
-		proxy.WithRPCAddr("localhost", "18443"),
-		proxy.WithRPCCredentials("admin1", "123"),
-		proxy.WithChain("bitcoin"),
-		proxy.WithFaucet(true),
-		proxy.WithMining(true),
-		proxy.WithLogger(false),
-		proxy.WithRegistryPath(registryPath),
-	)
-	btcProxy := proxy.NewServer(btcProxyCfg)
-	btcErrChan := btcProxy.StartAsync()
-	proxyServers = append(proxyServers, btcProxy)
-
-	// Check for immediate startup errors
-	select {
-	case err := <-btcErrChan:
-		if err != nil {
-			return fmt.Errorf("failed to start bitcoin proxy: %w", err)
-		}
-	case <-time.After(500 * time.Millisecond):
-		// Server started successfully
+	if err := startProxyProcess(exe, datadir, "bitcoin"); err != nil {
+		return fmt.Errorf("failed to start bitcoin proxy: %w", err)
 	}
-	log.Printf("🔌 Embedded proxy (bitcoin) listening on :3000")
+	fmt.Println("🔌 Embedded proxy (bitcoin) listening on :3000")
 
 	if effectiveFlags.Liquid {
-		liqProxyCfg := proxy.NewConfig(
-			proxy.WithListenAddr("0.0.0.0:3001"),
-			proxy.WithElectrsAddr("localhost:30001"),
-			proxy.WithRPCAddr("localhost", "18884"),
-			proxy.WithRPCCredentials("admin1", "123"),
-			proxy.WithChain("liquid"),
-			proxy.WithFaucet(true),
-			proxy.WithMining(true),
-			proxy.WithLogger(false),
-			proxy.WithRegistryPath(registryPath),
-		)
-		liqProxy := proxy.NewServer(liqProxyCfg)
-		liqErrChan := liqProxy.StartAsync()
-		proxyServers = append(proxyServers, liqProxy)
-
-		select {
-		case err := <-liqErrChan:
-			if err != nil {
-				return fmt.Errorf("failed to start liquid proxy: %w", err)
-			}
-		case <-time.After(500 * time.Millisecond):
+		if err := startProxyProcess(exe, datadir, "liquid"); err != nil {
+			return fmt.Errorf("failed to start liquid proxy: %w", err)
 		}
-		log.Printf("🔌 Embedded proxy (liquid) listening on :3001")
+		fmt.Println("🔌 Embedded proxy (liquid) listening on :3001")
 	}
 
 	fmt.Printf("🍣 nigiri configuration located at %s\n", nigiriState.FilePath())
