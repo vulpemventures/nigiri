@@ -23,7 +23,7 @@ var ark = cli.Command{
 
 var arkd = cli.Command{
 	Name:   "arkd",
-	Usage:  "invoke arkd client commands",
+	Usage:  "invoke arkd daemon commands",
 	Action: arkdAction,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
