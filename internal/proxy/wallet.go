@@ -5,23 +5,34 @@ import (
 	"net/http"
 )
 
-// CreateWalletIfNotExists checks if wallet exists and creates one if needed
-func CreateWalletIfNotExists(client *RPCClient) error {
+// CreateWalletIfNotExists checks if a wallet named walletName is loaded and
+// creates it if not. Bitcoin Core v31+ rejects empty wallet names, so callers
+// must pass a non-empty name.
+func CreateWalletIfNotExists(client *RPCClient, walletName string) error {
 	status, resp, err := HandleRPCRequest(client, "listwallets", []interface{}{})
 	if err != nil {
 		return fmt.Errorf("could not list wallets: %w", err)
 	}
 
-	numOfWallets, ok := resp.([]interface{})
+	loadedWallets, ok := resp.([]interface{})
 	if !ok {
 		return fmt.Errorf("could not list wallets: unexpected response type")
 	}
 
-	if status == http.StatusOK && len(numOfWallets) == 0 {
-		_, _, err = HandleRPCRequest(client, "createwallet", []interface{}{""})
-		if err != nil {
-			return fmt.Errorf("could not create wallet: %w", err)
+	if status != http.StatusOK {
+		return nil
+	}
+
+	// If our wallet is already loaded, nothing to do.
+	for _, w := range loadedWallets {
+		if name, ok := w.(string); ok && name == walletName {
+			return nil
 		}
+	}
+
+	_, _, err = HandleRPCRequest(client, "createwallet", []interface{}{walletName})
+	if err != nil {
+		return fmt.Errorf("could not create wallet %q: %w", walletName, err)
 	}
 
 	return nil

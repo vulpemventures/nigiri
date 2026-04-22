@@ -53,7 +53,7 @@ func NewConfig(opts ...ConfigOption) Config {
 		rpcHost:       "localhost",
 		rpcPort:       "18443",
 		chain:         "bitcoin",
-		walletName:    "",
+		walletName:    "nigiri",
 	}
 
 	// Set default registry path

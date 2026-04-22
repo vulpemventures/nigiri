@@ -67,9 +67,10 @@ func NewRouter(config Config) *Router {
 
 // Initialize performs startup tasks like wallet creation and funding
 func (r *Router) Initialize() error {
-	// From Bitcoin core 0.21 the default wallet "" is not created anymore.
-	// So we check if none is already loaded and create it
-	err := CreateWalletIfNotExists(r.RPCClient)
+	// From Bitcoin core 0.21 the default wallet "" is not created anymore,
+	// and from v31 empty wallet names are rejected outright, so we always
+	// create a named wallet (default: "nigiri") if it isn't already loaded.
+	err := CreateWalletIfNotExists(r.RPCClient, r.Config.WalletName())
 	if err != nil {
 		return err
 	}
