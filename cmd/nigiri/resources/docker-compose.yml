@@ -223,6 +223,9 @@ services:
       - --network=regtest
       - --grpc-host=0.0.0.0
       - --grpc-port=9936
+      - --clnrest-protocol=http
+      - --clnrest-host=0.0.0.0
+      - --clnrest-port=9835
     depends_on:
       - bitcoin
     ports:
