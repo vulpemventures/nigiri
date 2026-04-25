@@ -6,12 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
-	"strings"
 
 	"github.com/urfave/cli/v2"
-	"github.com/vulpemventures/nigiri/internal/config"
-	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
 var push = cli.Command{
@@ -35,22 +31,12 @@ func pushAction(ctx *cli.Context) error {
 	}
 
 	isLiquid := ctx.Bool("liquid")
-	datadir := ctx.String("datadir")
-	composePath := filepath.Join(datadir, config.DefaultCompose)
 
-	var serviceName string = "chopsticks"
+	// The embedded proxy listens on port 3000 (bitcoin) or 3001 (liquid)
+	requestPort := "3000"
 	if isLiquid {
-		serviceName = "chopsticks-liquid"
+		requestPort = "3001"
 	}
-
-	// Get the port for the service
-	dockerClient := docker.NewDefaultClient()
-	portSlice, err := dockerClient.GetPortsForService(composePath, serviceName)
-	if err != nil {
-		return err
-	}
-	mappedPorts := strings.Split(portSlice[0], ":")
-	requestPort := mappedPorts[0]
 	hex := []byte(ctx.Args().First())
 
 	res, err := http.Post("http://127.0.0.1:"+requestPort+"/tx", "application/string", bytes.NewBuffer(hex))

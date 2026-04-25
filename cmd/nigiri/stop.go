@@ -30,6 +30,13 @@ func stopAction(ctx *cli.Context) error {
 	datadir := ctx.String("datadir")
 	composePath := filepath.Join(datadir, config.DefaultCompose)
 
+	if err := killProxyProcess(filepath.Join(datadir, proxyBitcoinPIDFile)); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to stop bitcoin proxy: %v\n", err)
+	}
+	if err := killProxyProcess(filepath.Join(datadir, proxyLiquidPIDFile)); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to stop liquid proxy: %v\n", err)
+	}
+
 	bashCmd := runDockerCompose(composePath, "stop")
 	if delete {
 		cleanupCmd := runDockerCompose(composePath, "run", "-T", "--rm", "--entrypoint", "sh", "bitcoin", "-c", "chown -R $(id -u):$(id -g) /data/.bitcoin")

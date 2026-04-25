@@ -125,16 +125,16 @@ func startAction(ctx *cli.Context) error {
 	var services []string
 
 	if effectiveFlags.Ci {
-		services = []string{"bitcoin", "electrs", "chopsticks"}
+		services = []string{"bitcoin", "electrs"}
 
 		if effectiveFlags.Liquid {
-			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid")
+			services = append(services, "liquid", "electrs-liquid")
 		}
 	} else {
-		services = []string{"bitcoin", "electrs", "chopsticks", "esplora"}
+		services = []string{"bitcoin", "electrs", "esplora"}
 
 		if effectiveFlags.Liquid {
-			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
+			services = append(services, "liquid", "electrs-liquid", "esplora-liquid")
 		}
 	}
 
@@ -152,6 +152,23 @@ func startAction(ctx *cli.Context) error {
 
 	if err := bashCmd.Run(); err != nil {
 		return err
+	}
+
+	exe, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to determine executable path: %w", err)
+	}
+
+	if err := startProxyProcess(exe, datadir, "bitcoin"); err != nil {
+		return fmt.Errorf("failed to start bitcoin proxy: %w", err)
+	}
+	fmt.Println("🔌 Embedded proxy (bitcoin) listening on :3000")
+
+	if effectiveFlags.Liquid {
+		if err := startProxyProcess(exe, datadir, "liquid"); err != nil {
+			return fmt.Errorf("failed to start liquid proxy: %w", err)
+		}
+		fmt.Println("🔌 Embedded proxy (liquid) listening on :3001")
 	}
 
 	fmt.Printf("🍣 nigiri configuration located at %s\n", nigiriState.FilePath())
@@ -185,6 +202,12 @@ func startAction(ctx *cli.Context) error {
 		}
 
 		filteredEndpoints[name] = endpoint
+	}
+
+	// Add proxy endpoints (replacing chopsticks)
+	filteredEndpoints["chopsticks (embedded)"] = "localhost:3000"
+	if effectiveFlags.Liquid {
+		filteredEndpoints["chopsticks-liquid (embedded)"] = "localhost:3001"
 	}
 
 	// Display endpoints
@@ -317,7 +340,7 @@ func setupArk(datadir string) error {
 
 	time.Sleep(10 * time.Second)
 
-	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "init", "--password", "secret", "--server-url", "localhost:7070", "--explorer", "http://chopsticks:3000")
+	bashCmd = exec.Command("docker", "exec", "-t", "ark", "ark", "init", "--password", "secret", "--server-url", "localhost:7070", "--explorer", "http://host.docker.internal:3000")
 	output, err = bashCmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to initialize ark client wallet: %w\nOutput: %s", err, string(output))

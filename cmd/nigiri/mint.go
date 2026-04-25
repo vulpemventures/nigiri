@@ -7,13 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/urfave/cli/v2"
-	"github.com/vulpemventures/nigiri/internal/config"
-	"github.com/vulpemventures/nigiri/internal/docker"
 )
 
 var mint = cli.Command{
@@ -33,18 +29,7 @@ func mintAction(ctx *cli.Context) error {
 		return errors.New("wrong number of arguments")
 	}
 
-	datadir := ctx.String("datadir")
-	composePath := filepath.Join(datadir, config.DefaultCompose)
-
-	serviceName := "chopsticks-liquid"
-
-	// Get the port for the service
-	dockerClient := docker.NewDefaultClient()
-	portSlice, err := dockerClient.GetPortsForService(composePath, serviceName)
-	if err != nil {
-		return err
-	}
-	mappedPorts := strings.Split(portSlice[0], ":")
+	// The embedded proxy for Liquid listens on port 3001
 
 	var request struct {
 		Address  string `json:"address"`
@@ -61,7 +46,7 @@ func mintAction(ctx *cli.Context) error {
 		request.Ticker = ctx.Args().Get(3)
 	}
 
-	requestPort := mappedPorts[0]
+	requestPort := "3001"
 	payload, err := json.Marshal(request)
 	if err != nil {
 		return err

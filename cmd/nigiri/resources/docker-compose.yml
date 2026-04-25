@@ -98,11 +98,13 @@ services:
     restart: unless-stopped
 
   # Block explorer frontend
+  # NOTE: esplora now connects to the embedded proxy (nigiri CLI) on the host
+  # network via host.docker.internal or the docker bridge gateway.
   esplora:
     image: ghcr.io/vulpemventures/esplora:latest
     container_name: esplora
     depends_on:
-      - chopsticks
+      - electrs
     environment:
       API_URL: http://localhost:3000
     ports:
@@ -113,55 +115,16 @@ services:
     image: ghcr.io/vulpemventures/esplora:latest
     container_name: esplora-liquid
     depends_on:
-      - chopsticks-liquid
+      - electrs-liquid
     environment:
       API_URL: http://localhost:3001
     ports:
       - 5001:5000
     restart: unless-stopped
 
-  # Chopsticks
-  chopsticks:
-    image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
-    container_name: chopsticks
-    command:
-      - --use-faucet
-      - --use-mining
-      - --use-logger
-      - --rpc-addr
-      - bitcoin:18443
-      - --electrs-addr
-      - electrs:30000
-      - --addr
-      - 0.0.0.0:3000
-    depends_on:
-      - bitcoin
-      - electrs
-    ports:
-      - 3000:3000
-    restart: unless-stopped
-
-  chopsticks-liquid:
-    image: ghcr.io/vulpemventures/nigiri-chopsticks:latest
-    container_name: chopsticks-liquid
-    command:
-      - --use-faucet
-      - --use-mining
-      - --use-logger
-      - --rpc-addr
-      - liquid:18884
-      - --electrs-addr
-      - electrs-liquid:30001
-      - --addr
-      - 0.0.0.0:3000
-      - --chain
-      - liquid
-    depends_on:
-      - liquid
-      - electrs-liquid
-    ports:
-      - 3001:3000
-    restart: unless-stopped
+  # Chopsticks containers are replaced by the embedded proxy in the nigiri CLI.
+  # The proxy starts automatically with `nigiri start` on ports 3000 (bitcoin)
+  # and 3001 (liquid). See `nigiri serve` for standalone usage.
 
   lnd:
     container_name: lnd
@@ -308,6 +271,8 @@ services:
     container_name: ark
     image: ghcr.io/arkade-os/arkd:v0.9.3
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - bitcoin
       - ark-wallet
@@ -317,7 +282,7 @@ services:
       ARKD_NO_TLS: "true"
       ARKD_NO_MACAROONS: "true"
       ARKD_WALLET_ADDR: "ark-wallet:6060"
-      ARKD_ESPLORA_URL: "http://chopsticks:3000"
+      ARKD_ESPLORA_URL: "http://host.docker.internal:3000"
       ARKD_VTXO_MIN_AMOUNT: "1"
       ARKD_VTXO_TREE_EXPIRY: "1024"
       ARKD_UNILATERAL_EXIT_DELAY: "512"
