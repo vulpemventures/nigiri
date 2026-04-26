@@ -32,36 +32,108 @@ services:
       - ./volumes/elements/:/config
     restart: unless-stopped
 
-  # Block explorer server
-  electrs:
-    image: ghcr.io/vulpemventures/electrs:latest
-    container_name: electrs
-    entrypoint:
-      - /build/electrs
-    command:
-      - -vvvv
-      - --network
-      - regtest
-      - --daemon-dir
-      - /config
-      - --daemon-rpc-addr
-      - bitcoin:18443
-      - --cookie
-      - admin1:123
-      - --http-addr
-      - 0.0.0.0:30000
-      - --electrum-rpc-addr
-      - 0.0.0.0:50000
-      - --cors
-      - "*"
-      - --jsonrpc-import
+  # Bitcoin Electrum protocol server
+  fulcrum:
+    image: cculianu/fulcrum:latest
+    container_name: fulcrum
     depends_on:
       - bitcoin
+    command:
+      - Fulcrum
+      - --datadir
+      - /data
+      - --bitcoind
+      - bitcoin:18443
+      - --rpcuser
+      - admin1
+      - --rpcpassword
+      - "123"
+      - --tcp
+      - 0.0.0.0:50001
+      - --ws
+      - 0.0.0.0:50003
+      - --peering
+      - "0"
+      - --announce
+      - "0"
     ports:
-      - 50000:50000
-      - 30000:30000
+      - 50000:50001
+      - 50003:50003
     volumes:
-      - ./volumes/bitcoin/:/config
+      - ./volumes/fulcrum:/data
+    restart: unless-stopped
+
+  # MariaDB backing store for mempool-api
+  mempool-mariadb:
+    image: mariadb:10.5
+    container_name: mempool-mariadb
+    environment:
+      MYSQL_DATABASE: mempool
+      MYSQL_USER: mempool
+      MYSQL_PASSWORD: mempool
+      MYSQL_ROOT_PASSWORD: moneyprintergobrrr
+    volumes:
+      - ./volumes/mempool-mariadb:/var/lib/mysql
+    restart: unless-stopped
+
+  # mempool API — serves esplora-compatible REST under /api/*
+  mempool-api:
+    image: mempool/backend:v3.2.1
+    container_name: mempool-api
+    user: "${UID:-1000}:${GID:-1000}"
+    init: true
+    depends_on:
+      - mempool-mariadb
+      - fulcrum
+      - bitcoin
+    command: "./wait-for-it.sh mempool-mariadb:3306 --timeout=720 --strict -- ./start.sh"
+    environment:
+      # Bitcoin Core RPC (regtest)
+      CORE_RPC_HOST: "bitcoin"
+      CORE_RPC_PORT: "18443"
+      CORE_RPC_USERNAME: "admin1"
+      CORE_RPC_PASSWORD: "123"
+      CORE_RPC_TIMEOUT: "120000"
+      # Electrum backend (Fulcrum)
+      MEMPOOL_BACKEND: "electrum"
+      ELECTRUM_HOST: "fulcrum"
+      ELECTRUM_PORT: "50001"
+      ELECTRUM_TLS_ENABLED: "false"
+      # Database
+      DATABASE_ENABLED: "true"
+      DATABASE_HOST: "mempool-mariadb"
+      DATABASE_PORT: "3306"
+      DATABASE_DATABASE: "mempool"
+      DATABASE_USERNAME: "mempool"
+      DATABASE_PASSWORD: "mempool"
+      DATABASE_TIMEOUT: "300000"
+      # Mempool core
+      MEMPOOL_NETWORK: "regtest"
+      MEMPOOL_HTTP_PORT: "8999"
+      MEMPOOL_CACHE_DIR: "/backend/cache"
+      MEMPOOL_CACHE_ENABLED: "true"
+      MEMPOOL_INDEXING_BLOCKS_AMOUNT: "-1"
+      MEMPOOL_POLL_RATE_MS: "2000"
+      MEMPOOL_ALLOW_UNREACHABLE: "true"
+      STATISTICS_ENABLED: "false"
+      LIGHTNING_ENABLED: "false"
+    volumes:
+      - ./volumes/mempool-api:/backend/cache
+    ports:
+      - 8999:8999
+    restart: unless-stopped
+
+  # nginx relay: rewrites unprefixed paths to /api/* so chopsticks (and any
+  # legacy esplora-style client) keep working unchanged against mempool-api.
+  esplora-relay:
+    image: nginx:alpine
+    container_name: esplora-relay
+    depends_on:
+      - mempool-api
+    volumes:
+      - ./volumes/esplora-relay/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - 30000:80
     restart: unless-stopped
 
   electrs-liquid:
@@ -97,16 +169,21 @@ services:
       - ./volumes/elements/:/config
     restart: unless-stopped
 
-  # Block explorer frontend
-  esplora:
-    image: ghcr.io/vulpemventures/esplora:latest
-    container_name: esplora
+  # Block explorer frontend (mempool)
+  mempool-web:
+    image: mempool/frontend:v3.2.1
+    container_name: mempool-web
+    user: "${UID:-1000}:${GID:-1000}"
+    init: true
     depends_on:
-      - chopsticks
+      - mempool-api
+    command: "./wait-for mempool-mariadb:3306 --timeout=720 -- nginx -g 'daemon off;'"
     environment:
-      API_URL: http://localhost:3000
+      FRONTEND_HTTP_PORT: "80"
+      BACKEND_MAINNET_HTTP_HOST: "mempool-api"
+      BACKEND_MAINNET_HTTP_PORT: "8999"
     ports:
-      - 5000:5000
+      - 5000:80
     restart: unless-stopped
 
   esplora-liquid:
@@ -131,12 +208,12 @@ services:
       - --rpc-addr
       - bitcoin:18443
       - --electrs-addr
-      - electrs:30000
+      - esplora-relay:80
       - --addr
       - 0.0.0.0:3000
     depends_on:
       - bitcoin
-      - electrs
+      - esplora-relay
     ports:
       - 3000:3000
     restart: unless-stopped

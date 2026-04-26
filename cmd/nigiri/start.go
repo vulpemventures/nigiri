@@ -122,16 +122,26 @@ func startAction(ctx *cli.Context) error {
 		}
 	}
 
+	bitcoinExplorerStack := []string{
+		"bitcoin",
+		"fulcrum",
+		"mempool-mariadb",
+		"mempool-api",
+		"esplora-relay",
+		"chopsticks",
+	}
+
 	var services []string
 
 	if effectiveFlags.Ci {
-		services = []string{"bitcoin", "electrs", "chopsticks"}
+		services = append(services, bitcoinExplorerStack...)
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid")
 		}
 	} else {
-		services = []string{"bitcoin", "electrs", "chopsticks", "esplora"}
+		services = append(services, bitcoinExplorerStack...)
+		services = append(services, "mempool-web")
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
