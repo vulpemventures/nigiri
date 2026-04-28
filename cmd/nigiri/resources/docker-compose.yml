@@ -292,7 +292,7 @@ services:
 
   ark-wallet:
     container_name: ark-wallet
-    image: ghcr.io/arkade-os/arkd-wallet:v0.9.3
+    image: ghcr.io/arkade-os/arkd-wallet:v0.9.4
     restart: unless-stopped
     depends_on:
       - bitcoin
@@ -324,7 +324,7 @@ services:
 
   ark:
     container_name: ark
-    image: ghcr.io/arkade-os/arkd:v0.9.3
+    image: ghcr.io/arkade-os/arkd:v0.9.4
     restart: unless-stopped
     depends_on:
       - bitcoin
