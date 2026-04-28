@@ -195,6 +195,13 @@ func startAction(ctx *cli.Context) error {
 		}
 
 		filteredEndpoints[name] = endpoint
+
+		// fulcrum exposes both TCP Electrum (the auto-derived endpoint above)
+		// and WebSocket Electrum on a second port. Surface the WS URL with an
+		// explicit scheme so users know not to point HTTP clients at it.
+		if name == "fulcrum" {
+			filteredEndpoints["fulcrum (ws)"] = "ws://localhost:50003"
+		}
 	}
 
 	// Display endpoints
