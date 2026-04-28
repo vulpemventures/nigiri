@@ -56,11 +56,12 @@ func (m *MockClient) GetEndpoints(composePath string) (map[string]string, error)
 	}
 	// Default mock endpoints
 	return map[string]string{
-		"bitcoin":    "localhost:18443",
-		"electrs":    "localhost:3002",
-		"esplora":    "localhost:3000",
-		"chopsticks": "localhost:3000",
-		"ark":        "localhost:7070",
+		"bitcoin":     "localhost:18443",
+		"electrs":     "localhost:3002",
+		"electrum-ws": "localhost:50003",
+		"esplora":     "localhost:3000",
+		"chopsticks":  "localhost:3000",
+		"ark":         "localhost:7070",
 	}, nil
 }
 
@@ -74,6 +75,8 @@ func (m *MockClient) GetPortsForService(composePath string, serviceName string) 
 		return []string{"18443"}, nil
 	case "electrs":
 		return []string{"3002"}, nil
+	case "electrum-ws":
+		return []string{"50003"}, nil
 	case "esplora":
 		return []string{"3000"}, nil
 	case "chopsticks":

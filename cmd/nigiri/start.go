@@ -125,13 +125,13 @@ func startAction(ctx *cli.Context) error {
 	var services []string
 
 	if effectiveFlags.Ci {
-		services = []string{"bitcoin", "electrs", "chopsticks"}
+		services = []string{"bitcoin", "electrs", "electrum-ws", "chopsticks"}
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid")
 		}
 	} else {
-		services = []string{"bitcoin", "electrs", "chopsticks", "esplora"}
+		services = []string{"bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora"}
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
