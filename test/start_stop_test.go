@@ -104,6 +104,8 @@ services:
     image: ghcr.io/vulpemventures/elements:latest
   electrs:
     image: vulpemventures/electrs:latest
+  electrum-ws:
+    image: ghcr.io/vi/websocat:latest
   chopsticks:
     image: vulpemventures/nigiri-chopsticks:latest
   esplora:
@@ -199,6 +201,7 @@ func TestDataDirSetup(t *testing.T) {
 	essentialServices := []string{
 		"bitcoin:",
 		"electrs:",
+		"electrum-ws:",
 		"chopsticks:",
 		"esplora:",
 	}
@@ -242,7 +245,7 @@ func TestBasicStartStop(t *testing.T) {
 	mockClient.SetMockCmd(exec.Command("echo", "mock start"))
 
 	// Execute start command
-	mockClient.RunCompose(composePath, "up", "-d", "bitcoin", "electrs", "chopsticks", "esplora")
+	mockClient.RunCompose(composePath, "up", "-d", "bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora")
 
 	// Verify the correct Docker commands were called
 	composePath, args, ok := mockClient.GetLastCommand()
@@ -256,7 +259,7 @@ func TestBasicStartStop(t *testing.T) {
 	}
 
 	// Check that the correct services were started
-	expectedArgs := []string{"up", "-d", "bitcoin", "electrs", "chopsticks", "esplora"}
+	expectedArgs := []string{"up", "-d", "bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora"}
 	if !stringSliceEqual(args, expectedArgs) {
 		t.Errorf("Expected args %v, got %v", expectedArgs, args)
 	}
@@ -339,7 +342,7 @@ func TestServiceCombinations(t *testing.T) {
 			liquid:           false,
 			ln:               false,
 			ark:              false,
-			expectedServices: []string{"bitcoin", "electrs", "chopsticks", "esplora"},
+			expectedServices: []string{"bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora"},
 		},
 		{
 			name:   "With Liquid",
@@ -347,7 +350,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     false,
 			ark:    false,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora",
 				"liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid",
 			},
 		},
@@ -357,7 +360,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     true,
 			ark:    false,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora",
 				"lnd", "tap", "cln",
 			},
 		},
@@ -367,7 +370,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     false,
 			ark:    true,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora",
 				"ark",
 			},
 		},
@@ -377,7 +380,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     true,
 			ark:    true,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora",
 				"liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid",
 				"lnd", "tap", "cln",
 				"ark",

@@ -125,13 +125,13 @@ func startAction(ctx *cli.Context) error {
 	var services []string
 
 	if effectiveFlags.Ci {
-		services = []string{"bitcoin", "electrs", "chopsticks"}
+		services = []string{"bitcoin", "electrs", "electrum-ws", "chopsticks"}
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid")
 		}
 	} else {
-		services = []string{"bitcoin", "electrs", "chopsticks", "esplora"}
+		services = []string{"bitcoin", "electrs", "electrum-ws", "chopsticks", "esplora"}
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
@@ -182,6 +182,12 @@ func startAction(ctx *cli.Context) error {
 		}
 		if !effectiveFlags.Ark && strings.Contains(name, "ark") {
 			continue
+		}
+
+		// WebSocket endpoints need an explicit scheme so users know not to point
+		// HTTP clients at them.
+		if name == "electrum-ws" {
+			endpoint = "ws://" + endpoint
 		}
 
 		filteredEndpoints[name] = endpoint
