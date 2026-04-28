@@ -184,6 +184,12 @@ func startAction(ctx *cli.Context) error {
 			continue
 		}
 
+		// WebSocket endpoints need an explicit scheme so users know not to point
+		// HTTP clients at them.
+		if name == "electrum-ws" {
+			endpoint = "ws://" + endpoint
+		}
+
 		filteredEndpoints[name] = endpoint
 	}
 
