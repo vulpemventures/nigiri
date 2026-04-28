@@ -102,12 +102,18 @@ services:
     container_name: bitcoin
   liquid:
     image: ghcr.io/vulpemventures/elements:latest
-  electrs:
-    image: vulpemventures/electrs:latest
+  fulcrum:
+    image: cculianu/fulcrum:latest
+  mempool-mariadb:
+    image: mariadb:10.5
+  mempool-api:
+    image: mempool/backend:v3.2.1
+  mempool-web:
+    image: mempool/frontend:v3.2.1
+  esplora-relay:
+    image: nginx:alpine
   chopsticks:
     image: vulpemventures/nigiri-chopsticks:latest
-  esplora:
-    image: vulpemventures/esplora:latest
   lnd:
     image: lightninglabs/lnd:latest
   tap:
@@ -198,9 +204,11 @@ func TestDataDirSetup(t *testing.T) {
 	// Verify essential services are defined in docker-compose.yml
 	essentialServices := []string{
 		"bitcoin:",
-		"electrs:",
+		"fulcrum:",
+		"mempool-api:",
+		"esplora-relay:",
 		"chopsticks:",
-		"esplora:",
+		"mempool-web:",
 	}
 
 	for _, service := range essentialServices {
@@ -242,7 +250,7 @@ func TestBasicStartStop(t *testing.T) {
 	mockClient.SetMockCmd(exec.Command("echo", "mock start"))
 
 	// Execute start command
-	mockClient.RunCompose(composePath, "up", "-d", "bitcoin", "electrs", "chopsticks", "esplora")
+	mockClient.RunCompose(composePath, "up", "-d", "bitcoin", "fulcrum", "mempool-mariadb", "mempool-api", "esplora-relay", "chopsticks", "mempool-web")
 
 	// Verify the correct Docker commands were called
 	composePath, args, ok := mockClient.GetLastCommand()
@@ -256,7 +264,7 @@ func TestBasicStartStop(t *testing.T) {
 	}
 
 	// Check that the correct services were started
-	expectedArgs := []string{"up", "-d", "bitcoin", "electrs", "chopsticks", "esplora"}
+	expectedArgs := []string{"up", "-d", "bitcoin", "fulcrum", "mempool-mariadb", "mempool-api", "esplora-relay", "chopsticks", "mempool-web"}
 	if !stringSliceEqual(args, expectedArgs) {
 		t.Errorf("Expected args %v, got %v", expectedArgs, args)
 	}
@@ -339,7 +347,7 @@ func TestServiceCombinations(t *testing.T) {
 			liquid:           false,
 			ln:               false,
 			ark:              false,
-			expectedServices: []string{"bitcoin", "electrs", "chopsticks", "esplora"},
+			expectedServices: []string{"bitcoin", "fulcrum", "mempool-mariadb", "mempool-api", "esplora-relay", "chopsticks", "mempool-web"},
 		},
 		{
 			name:   "With Liquid",
@@ -347,7 +355,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     false,
 			ark:    false,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "fulcrum", "mempool-mariadb", "mempool-api", "esplora-relay", "chopsticks", "mempool-web",
 				"liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid",
 			},
 		},
@@ -357,7 +365,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     true,
 			ark:    false,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "fulcrum", "mempool-mariadb", "mempool-api", "esplora-relay", "chopsticks", "mempool-web",
 				"lnd", "tap", "cln",
 			},
 		},
@@ -367,7 +375,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     false,
 			ark:    true,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "fulcrum", "mempool-mariadb", "mempool-api", "esplora-relay", "chopsticks", "mempool-web",
 				"ark",
 			},
 		},
@@ -377,7 +385,7 @@ func TestServiceCombinations(t *testing.T) {
 			ln:     true,
 			ark:    true,
 			expectedServices: []string{
-				"bitcoin", "electrs", "chopsticks", "esplora",
+				"bitcoin", "fulcrum", "mempool-mariadb", "mempool-api", "esplora-relay", "chopsticks", "mempool-web",
 				"liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid",
 				"lnd", "tap", "cln",
 				"ark",

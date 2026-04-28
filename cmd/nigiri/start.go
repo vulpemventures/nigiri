@@ -122,16 +122,26 @@ func startAction(ctx *cli.Context) error {
 		}
 	}
 
+	bitcoinExplorerStack := []string{
+		"bitcoin",
+		"fulcrum",
+		"mempool-mariadb",
+		"mempool-api",
+		"esplora-relay",
+		"chopsticks",
+	}
+
 	var services []string
 
 	if effectiveFlags.Ci {
-		services = []string{"bitcoin", "electrs", "chopsticks"}
+		services = append(services, bitcoinExplorerStack...)
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid")
 		}
 	} else {
-		services = []string{"bitcoin", "electrs", "chopsticks", "esplora"}
+		services = append(services, bitcoinExplorerStack...)
+		services = append(services, "mempool-web")
 
 		if effectiveFlags.Liquid {
 			services = append(services, "liquid", "electrs-liquid", "chopsticks-liquid", "esplora-liquid")
@@ -185,6 +195,13 @@ func startAction(ctx *cli.Context) error {
 		}
 
 		filteredEndpoints[name] = endpoint
+
+		// fulcrum exposes both TCP Electrum (the auto-derived endpoint above)
+		// and WebSocket Electrum on a second port. Surface the WS URL with an
+		// explicit scheme so users know not to point HTTP clients at it.
+		if name == "fulcrum" {
+			filteredEndpoints["fulcrum (ws)"] = "ws://localhost:50003"
+		}
 	}
 
 	// Display endpoints

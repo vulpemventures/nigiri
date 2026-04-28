@@ -53,6 +53,7 @@ var arkFlag = cli.BoolFlag{
 //go:embed resources/bitcoin.conf
 //go:embed resources/elements.conf
 //go:embed resources/lnd.conf
+//go:embed resources/esplora-relay.conf
 var f embed.FS
 
 func main() {
@@ -152,6 +153,10 @@ func provisionResourcesToDatadir(datadir string) error {
 		filepath.Join(datadir, "volumes", "ark", "wallet"),
 		filepath.Join(datadir, "volumes", "nbxplorer"),
 		filepath.Join(datadir, "volumes", "postgres"),
+		filepath.Join(datadir, "volumes", "fulcrum"),
+		filepath.Join(datadir, "volumes", "mempool-mariadb"),
+		filepath.Join(datadir, "volumes", "mempool-api"),
+		filepath.Join(datadir, "volumes", "esplora-relay"),
 	}
 
 	for _, dir := range volumeDirs {
@@ -194,6 +199,16 @@ func provisionResourcesToDatadir(datadir string) error {
 	if err := copyFromResourcesToDatadir(
 		filepath.Join("resources", "lnd.conf"),
 		filepath.Join(datadir, "volumes", "lnd", "lnd.conf"),
+		uid,
+		gid,
+	); err != nil {
+		return err
+	}
+
+	// copy esplora-relay nginx config so chopsticks can hit mempool-api's /api/* surface
+	if err := copyFromResourcesToDatadir(
+		filepath.Join("resources", "esplora-relay.conf"),
+		filepath.Join(datadir, "volumes", "esplora-relay", "default.conf"),
 		uid,
 		gid,
 	); err != nil {
