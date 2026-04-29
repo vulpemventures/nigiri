@@ -29,6 +29,12 @@ var rememberFlag = cli.BoolFlag{
 	Value: false,
 }
 
+var composeFlag = cli.StringFlag{
+	Name:  "compose",
+	Usage: "use a custom docker-compose file instead of the embedded one",
+	Value: "",
+}
+
 var start = cli.Command{
 	Name:   "start",
 	Usage:  "start nigiri",
@@ -39,16 +45,18 @@ var start = cli.Command{
 		&arkFlag,
 		&ciFlag,
 		&rememberFlag,
+		&composeFlag,
 	},
 }
 
 const savedFlagsFileName = "flags.json"
 
 type savedFlags struct {
-	Liquid bool `json:"liquid"`
-	Ln     bool `json:"ln"`
-	Ark    bool `json:"ark"`
-	Ci     bool `json:"ci"`
+	Liquid  bool   `json:"liquid"`
+	Ln      bool   `json:"ln"`
+	Ark     bool   `json:"ark"`
+	Ci      bool   `json:"ci"`
+	Compose string `json:"compose,omitempty"`
 }
 
 func loadFlags(datadir string) (*savedFlags, error) {
@@ -88,8 +96,7 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	datadir := ctx.String("datadir")
-	composePath := filepath.Join(datadir, config.DefaultCompose)
-
+	
 	loadedFlags, err := loadFlags(datadir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: could not load saved flags: %v\n", err)
@@ -97,10 +104,11 @@ func startAction(ctx *cli.Context) error {
 	}
 
 	effectiveFlags := savedFlags{
-		Liquid: loadedFlags.Liquid,
-		Ln:     loadedFlags.Ln,
-		Ark:    loadedFlags.Ark,
-		Ci:     loadedFlags.Ci,
+		Liquid:  loadedFlags.Liquid,
+		Ln:      loadedFlags.Ln,
+		Ark:     loadedFlags.Ark,
+		Ci:      loadedFlags.Ci,
+		Compose: loadedFlags.Compose,
 	}
 
 	if ctx.IsSet("liquid") {
@@ -114,6 +122,23 @@ func startAction(ctx *cli.Context) error {
 	}
 	if ctx.IsSet("ci") {
 		effectiveFlags.Ci = ctx.Bool("ci")
+	}
+	if ctx.IsSet("compose") {
+		effectiveFlags.Compose = ctx.String("compose")
+	}
+
+	// Use custom compose file if provided (either from CLI or saved flags), otherwise use default
+	composePath := effectiveFlags.Compose
+	if composePath == "" {
+		composePath = filepath.Join(datadir, config.DefaultCompose)
+	} else {
+		// Expand and clean the custom compose path
+		composePath = cleanAndExpandPath(composePath)
+		
+		// Verify the custom compose file exists
+		if _, err := os.Stat(composePath); os.IsNotExist(err) {
+			return fmt.Errorf("custom compose file not found: %s", composePath)
+		}
 	}
 
 	if ctx.Bool("remember") {
