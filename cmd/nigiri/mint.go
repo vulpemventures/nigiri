@@ -81,7 +81,7 @@ func mintAction(ctx *cli.Context) error {
 	var dat map[string]interface{}
 	var resp string
 	if err := json.Unmarshal([]byte(data), &dat); err != nil {
-		return errors.New("internal error try again")
+		return errors.New("internal error, try again")
 	}
 	if dat["txId"] == "" {
 		return errors.New("not successful")
