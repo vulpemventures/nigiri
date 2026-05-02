@@ -195,8 +195,8 @@ services:
     stop_grace_period: 5m30s
     ports:
       - "9735:9735" # p2p
-      - "10009:10009" # grpc"
-      - "18080:18080" # rest"
+      - "10009:10009" # grpc
+      - "18080:18080" # rest
 
   tap:
     container_name: tap
@@ -220,7 +220,7 @@ services:
     stop_grace_period: 5m30s
     ports:
       - "10029:10029" # grpc
-      - "8089:8089" # rest"
+      - "8089:8089" # rest
 
   cln:
     container_name: cln
