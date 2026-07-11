@@ -141,7 +141,7 @@ func provisionResourcesToDatadir(datadir string) error {
 		return fmt.Errorf("parse gid: %w", err)
 	}
 
-	// create folders in volumes/{bitcoin,elements} for node datadirs
+	// Create folders in volumes/{bitcoin,elements} for node datadirs
 	volumeDirs := []string{
 		filepath.Join(datadir, "volumes", "bitcoin"),
 		filepath.Join(datadir, "volumes", "elements"),
