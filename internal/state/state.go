@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -30,7 +29,7 @@ func (s *State) FilePath() string {
 }
 
 func (s *State) Get() (map[string]string, error) {
-	file, err := ioutil.ReadFile(s.filePath)
+	file, err := os.ReadFile(s.filePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
@@ -42,14 +41,22 @@ func (s *State) Get() (map[string]string, error) {
 	}
 
 	data := map[string]string{}
-	json.Unmarshal(file, &data)
+	// Handle empty file case - return empty map
+	if len(file) == 0 {
+		return data, nil
+	}
+	if err := json.Unmarshal(file, &data); err != nil {
+		return nil, err
+	}
 
 	return data, nil
 }
 
 func (s *State) Set(data map[string]string) error {
 	if _, err := os.Stat(s.directory); os.IsNotExist(err) {
-		os.Mkdir(s.directory, os.ModeDir|0755)
+		if err := os.Mkdir(s.directory, os.ModeDir|0755); err != nil {
+			return err
+		}
 	}
 
 	file, err := os.OpenFile(s.filePath, os.O_RDONLY|os.O_CREATE, 0644)
@@ -71,7 +78,7 @@ func (s *State) Set(data map[string]string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(s.filePath, jsonString, 0755)
+	err = os.WriteFile(s.filePath, jsonString, 0755)
 	if err != nil {
 		return fmt.Errorf("writing to file: %w", err)
 	}
